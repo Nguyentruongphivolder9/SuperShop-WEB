@@ -76,7 +76,11 @@ export default function NavHeader() {
           }
         >
           <div className='w-6 h-6 mr-2 flex-shrink-0'>
-            <img src={getAvatarUrl(profile?.avatar)} alt='avatar' className='w-full h-full object-cover rounded-full' />
+            <img
+              src='https://cf.shopee.vn/file/5e43c09b3e295847ff5d41456d032beb'
+              alt='avatar'
+              className='w-full h-full object-cover rounded-full'
+            />
           </div>
           <div>{profile?.email}</div>
         </Popover>

@@ -15,6 +15,8 @@ import UserLayout from 'src/pages/User/layouts/UserLayout'
 import ChangePassword from 'src/pages/User/pages/ChangePassword'
 import HistoryPurchase from 'src/pages/User/pages/HistoryPurchase'
 import Profile from 'src/pages/User/pages/Profile'
+import ShopLayout from 'src/layouts/ShopLayout'
+import ShopChannel from 'src/pages/Shop/page/ShopChannel'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -131,6 +133,14 @@ const ClientRoutes = [
           <NotFound></NotFound>
         </Suspense>
       </MainLayout>
+    )
+  },
+  {
+    path: path.shopChannel,
+    element: (
+      <ShopLayout>
+        <ShopChannel></ShopChannel>
+      </ShopLayout>
     )
   }
 ]

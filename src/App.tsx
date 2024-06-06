@@ -15,10 +15,10 @@ function App() {
   }, [reset])
 
   return (
-    <>
+    <div className='min-w-[1280px]'>
       {routeElement}
       <ToastContainer />
-    </>
+    </div>
   )
 }
 

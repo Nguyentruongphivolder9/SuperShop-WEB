@@ -21,6 +21,36 @@ export default {
           paddingRight: theme('spacing.4')
         }
       })
+    }),
+    plugin(function ({ addUtilities }) {
+      const newUtilities = {
+        '.scrollbar-thin': {
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgb(130 130 130) white'
+        },
+        '.scrollbar-webkit': {
+          '&::-webkit-scrollbar': {
+            width: '8px'
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'white'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '(130 130 130)',
+            borderRadius: '20px',
+            border: '1px solid white'
+          }
+        },
+        '.no-scrollbar::-webkit-scrollbar': {
+          display: 'none'
+        },
+        '.no-scrollbar': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none'
+        }
+      }
+
+      addUtilities(newUtilities)
     })
   ]
 }
