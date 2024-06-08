@@ -17,6 +17,8 @@ import HistoryPurchase from 'src/pages/User/pages/HistoryPurchase'
 import Profile from 'src/pages/User/pages/Profile'
 import ShopLayout from 'src/layouts/ShopLayout'
 import ShopChannel from 'src/pages/Shop/page/ShopChannel'
+import cartRouter from './cartRouter'
+import VoucherShop from 'src/pages/Shop/page/VoucherShop'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -58,16 +60,7 @@ const ClientRoutes = [
     path: '',
     element: <ProtectedRoute />,
     children: [
-      {
-        path: path.cart,
-        element: (
-          <CartLayout>
-            <Suspense>
-              <Cart></Cart>
-            </Suspense>
-          </CartLayout>
-        )
-      },
+      cartRouter,
       {
         path: path.user,
         element: (
@@ -99,6 +92,20 @@ const ClientRoutes = [
                 <HistoryPurchase></HistoryPurchase>
               </Suspense>
             )
+          }
+        ]
+      },
+      {
+        path: path.shopChannel,
+        element: <ShopLayout />,
+        children: [
+          {
+            path: '',
+            element: <ShopChannel></ShopChannel>
+          },
+          {
+            path: path.voucherShop,
+            element: <VoucherShop></VoucherShop>
           }
         ]
       }
@@ -133,14 +140,6 @@ const ClientRoutes = [
           <NotFound></NotFound>
         </Suspense>
       </MainLayout>
-    )
-  },
-  {
-    path: path.shopChannel,
-    element: (
-      <ShopLayout>
-        <ShopChannel></ShopChannel>
-      </ShopLayout>
     )
   }
 ]

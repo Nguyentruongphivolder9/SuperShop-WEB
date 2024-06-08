@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import path from 'src/constants/path'
 
 export default function NavShop() {
   return (
@@ -90,7 +91,7 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>All Products</Link>
+                <Link to={path.shopChannel}>All Products</Link>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
                 <Link to={'#'}>Add Product</Link>
@@ -139,7 +140,7 @@ export default function NavShop() {
                 <Link to={'#'}>Promotion Management</Link>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Coupon Management</Link>
+                <Link to={path.voucherShop}>Coupon Management</Link>
               </li>
             </ul>
           </li>

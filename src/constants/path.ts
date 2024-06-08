@@ -11,7 +11,8 @@ const path = {
   cart: '/cart',
 
   // shop channels
-  shopChannel: '/shopchannel'
+  shopChannel: '/shopchannel',
+  voucherShop: '/shopchannel/marketing/vouchers/list'
 } as const
 
 export default path
