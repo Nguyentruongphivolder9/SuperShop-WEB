@@ -8,7 +8,7 @@ export default {
     container: false
   },
   theme: {
-    extend: { colors: { orange: '#ee4d2d' } }
+    extend: { colors: { blue: '#0099FF' } }
   },
   plugins: [
     plugin(function ({ addComponents, theme }) {
