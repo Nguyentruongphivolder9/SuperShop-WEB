@@ -14,6 +14,8 @@ import {
 import { arrayMove, sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import ImageItem from './ImageItem'
 import CategoryList from './CategoryList'
+import { Link } from 'react-router-dom'
+import Popover from 'src/components/Popover'
 
 interface Image {
   id: string
@@ -85,6 +87,7 @@ export default function ProductAdd() {
   }
 
   const deleteImage = (id: string) => {
+    console.log(id)
     setImages((prevImages) => prevImages.filter((image) => image.id !== id))
   }
 
@@ -108,15 +111,17 @@ export default function ProductAdd() {
       <div className='grid grid-cols-12 gap-4'>
         {/* <FormProvider > */}
         <form className='col-span-9'>
-          <div className='sticky top-14 h-14 flex flex-row rounded-md bg-white items-center shadow mb-4'>
+          <div className='sticky z-10 top-14 h-14 flex flex-row rounded-md bg-white items-center shadow mb-4'>
             <div className='px-4 text-sm font-normal hover:text-blue'>Basic information</div>
             <div className='px-4 text-sm font-normal hover:text-blue'>Specification</div>
             <div className='px-4 text-sm font-normal hover:text-blue'>Sales Information</div>
             <div className='px-4 text-sm font-normal hover:text-blue'>Shipping</div>
             <div className='px-4 text-sm font-normal hover:text-blue'>Others</div>
           </div>
-          <div className='p-6 rounded-md bg-white shadow'>
-            <div className='text-xl text-[#333333] font-bold mb-6'>Basic information</div>
+
+          {/* Basic Information */}
+          <div className='p-6 rounded-md bg-white shadow mb-6'>
+            <div className='text-xl text-[#333333] font-bold mb-6'>Basic Information</div>
             <div className='mb-6'>
               {/* Product Image */}
               <div className='grid grid-cols-12 mb-6'>
@@ -278,6 +283,117 @@ export default function ProductAdd() {
                 </div>
                 <div className='col-span-9'>
                   <FroalaEditor />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Specification */}
+          <div className='p-6 rounded-md bg-white shadow mb-6'>
+            <div className='mb-6'>
+              <h2 className='text-xl text-[#333333] font-bold'>Basic information</h2>
+              <p className='text-sm text-[#999999]'>
+                <span className='text-[#333333]'>Complete: 0 / 9 </span>Fill in more attributes to boost the exposure of
+                your product.
+                <Link to={'#'} className='text-blue'>
+                  How to set attributes
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Sales Information */}
+          <div className='p-6 rounded-md bg-white shadow mb-6'>
+            <div className='text-xl text-[#333333] font-bold mb-6'>Sales Information</div>
+            <div className='mb-6'>
+              <div className='grid grid-cols-12 mb-6'>
+                <div className='col-span-3 flex flex-row justify-end items-center gap-2 mr-5'>
+                  <span className='relative flex h-2 w-2'>
+                    <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-blue opacity-75' />
+                    <span className='relative inline-flex rounded-full h-2 w-2 bg-sky-500' />
+                  </span>
+
+                  <div className='text-sm text-[#333333]'>Variations</div>
+                </div>
+                <div className='col-span-9 px-5 border h-10 rounded-md flex items-center p-1 hover:border-[#999999]'>
+                  <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full'>
+                    <input
+                      type='text'
+                      className='text-sm text-[#333333] w-full border-none outline-none pr-3'
+                      placeholder='Brand Name + Product Type + Key Features (Materials, Colors, Size, Model)'
+                    />
+                    <div className='text-sm text-[#999999]'>0/120</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-12 mb-6'>
+                <div className='col-span-3 flex flex-row justify-end items-center gap-1 mr-5'>
+                  <span className='text-red-600 text-xs'>*</span>
+                  <div className='text-sm text-[#333333]'>Price</div>
+                </div>
+                <div className='col-span-4 px-2 border h-10 rounded-md flex items-center p-1 hover:border-[#999999]'>
+                  <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full'>
+                    <div className='border-r-2 pr-2'>
+                      <span className='text-md text-[#999999]'>₫</span>
+                    </div>
+                    <input
+                      type='text'
+                      className='text-sm text-[#333333] w-full border-none outline-none pl-2'
+                      placeholder='Input'
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-12 mb-6'>
+                <div className='col-span-3 flex flex-row justify-end items-center gap-1 mr-5'>
+                  <span className='text-red-600 text-xs'>*</span>
+                  <div className='text-sm text-[#333333]'>Stock</div>
+                  <Popover
+                    className='flex cursor-pointer items-center z-20 py-1 hover:text-white/70'
+                    placement='bottom'
+                    initialOpen={true}
+                    renderPopover={
+                      <ul className='flex flex-col p-4 w-80 relative rounded-sm border border-gray-200 bg-white shadow-md'>
+                        <li className=''>
+                          Stock refers to the total stock that seller has in their own inventory, including those
+                          reserved for promotions.
+                        </li>
+                        <li className=''>
+                          Reserved refers to stock reserved for promotions, which can only be used during ongoing
+                          promotions.
+                        </li>
+                      </ul>
+                    }
+                  >
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      strokeWidth={1.5}
+                      stroke='currentColor'
+                      className='size-5 text-[#999999]'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        d='M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z'
+                      />
+                    </svg>
+                  </Popover>
+                </div>
+                <div className='col-span-4 px-2 border h-10 rounded-md flex items-center p-1 hover:border-[#999999]'>
+                  <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full'>
+                    <div className='border-r-2 pr-2'>
+                      <span className='text-md text-[#999999]'>₫</span>
+                    </div>
+                    <input
+                      type='text'
+                      className='text-sm text-[#333333] w-full border-none outline-none pl-2'
+                      placeholder='Input'
+                    />
+                  </div>
                 </div>
               </div>
             </div>
