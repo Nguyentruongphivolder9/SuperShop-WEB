@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 export default function NavShop() {
   return (
@@ -22,7 +22,7 @@ export default function NavShop() {
                     d='M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184'
                   />
                 </svg>
-                <div className='text-sm font-semibold'>Order Management</div>
+                <div className='text-sm font-semibold'>Order</div>
               </div>
               <div className=''>
                 <svg
@@ -39,19 +39,19 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>All</Link>
+                <NavLink to={'#'}>My Order</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Bulk Delivery</Link>
+                <NavLink to={'#'}>Mass Ship</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Order Canceled</Link>
+                <NavLink to={'#'}>Cancellation</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Return/Refund</Link>
+                <NavLink to={'#'}>Return/Refund</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Shipping Settings</Link>
+                <NavLink to={'#'}>Shipping Settings</NavLink>
               </li>
             </ul>
           </li>
@@ -73,7 +73,7 @@ export default function NavShop() {
                   />
                 </svg>
 
-                <div className='text-sm font-semibold'>Product Management</div>
+                <div className='text-sm font-semibold'>Product</div>
               </div>
               <div className=''>
                 <svg
@@ -90,10 +90,10 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>All Products</Link>
+                <NavLink to={'/shopchannel/portal/product/list/all'}>My Products</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Add Product</Link>
+                <NavLink to={'/shopchannel/portal/product/new'}>Add New Product</NavLink>
               </li>
             </ul>
           </li>
@@ -116,7 +116,7 @@ export default function NavShop() {
                   <path strokeLinecap='round' strokeLinejoin='round' d='M6 6h.008v.008H6V6Z' />
                 </svg>
 
-                <div className='text-sm font-semibold'>Marketing Channel</div>
+                <div className='text-sm font-semibold'>Marketing Centre</div>
               </div>
               <div className=''>
                 <svg
@@ -133,13 +133,13 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Advertisement Shop</Link>
+                <NavLink to={'#'}>Super Shop Ads</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Promotion Management</Link>
+                <NavLink to={'#'}>My Shop&apos;s Flash Sale</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Coupon Management</Link>
+                <NavLink to={'#'}>Vouchers</NavLink>
               </li>
             </ul>
           </li>
@@ -161,7 +161,7 @@ export default function NavShop() {
                   />
                 </svg>
 
-                <div className='text-sm font-semibold'>Customer Care</div>
+                <div className='text-sm font-semibold'>Customer Service</div>
               </div>
               <div className=''>
                 <svg
@@ -178,10 +178,10 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Chat Management</Link>
+                <NavLink to={'#'}>Chat Management</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Review Management</Link>
+                <NavLink to={'#'}>Review Management</NavLink>
               </li>
             </ul>
           </li>
@@ -219,7 +219,7 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Proceeds</Link>
+                <NavLink to={'#'}>My Income</NavLink>
               </li>
             </ul>
           </li>
@@ -241,7 +241,7 @@ export default function NavShop() {
                   />
                 </svg>
 
-                <div className='text-sm font-semibold'>Shop Management</div>
+                <div className='text-sm font-semibold'>Shop</div>
               </div>
               <div className=''>
                 <svg
@@ -258,7 +258,7 @@ export default function NavShop() {
             </div>
             <ul className='pl-6'>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <Link to={'#'}>Shop Profile</Link>
+                <NavLink to={'#'}>Shop Information</NavLink>
               </li>
             </ul>
           </li>

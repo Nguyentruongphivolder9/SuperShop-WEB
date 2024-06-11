@@ -17,6 +17,11 @@ import HistoryPurchase from 'src/pages/User/pages/HistoryPurchase'
 import Profile from 'src/pages/User/pages/Profile'
 import ShopLayout from 'src/layouts/ShopLayout'
 import ShopChannel from 'src/pages/Shop/page/ShopChannel'
+import ProductManagement from 'src/pages/Shop/page/ProductManagement'
+import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsListActive'
+import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
+import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
+import Home from 'src/pages/Home'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -101,12 +106,39 @@ const ClientRoutes = [
             )
           }
         ]
+      },
+      {
+        path: path.shopChannel,
+        element: <ShopLayout />,
+        children: [
+          {
+            path: '',
+            element: <ShopChannel></ShopChannel>
+          },
+          {
+            path: path.productManagement,
+            element: <ProductManagement></ProductManagement>,
+            children: [
+              {
+                path: path.productManagementAll,
+                element: <ProductAll></ProductAll>
+              },
+              {
+                path: path.productManagementActive,
+                element: <ProductsListActive></ProductsListActive>
+              }
+            ]
+          },
+          {
+            path: path.productAdd,
+            element: <ProductAdd></ProductAdd>
+          }
+        ]
       }
     ]
   },
   {
-    index: true,
-    path: '/',
+    path: path.category,
     element: (
       <MainLayout>
         <Suspense>
@@ -126,6 +158,17 @@ const ClientRoutes = [
     )
   },
   {
+    index: true,
+    path: path.home,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Home></Home>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
     path: '*',
     element: (
       <MainLayout>
@@ -133,14 +176,6 @@ const ClientRoutes = [
           <NotFound></NotFound>
         </Suspense>
       </MainLayout>
-    )
-  },
-  {
-    path: path.shopChannel,
-    element: (
-      <ShopLayout>
-        <ShopChannel></ShopChannel>
-      </ShopLayout>
     )
   }
 ]
