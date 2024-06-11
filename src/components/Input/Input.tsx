@@ -1,11 +1,11 @@
 import { InputHTMLAttributes, useState } from 'react'
 import { RegisterOptions, UseFormRegister } from 'react-hook-form'
-
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string
   classNameInput?: string
   classNameError?: string
   classNameEye?: string
+  classNameInputError?:string,
   register?: UseFormRegister<any>
   rules?: RegisterOptions
 }
@@ -16,28 +16,42 @@ export default function Input({
   name,
   register,
   rules,
-  classNameInput = 'p-3 w-full rounded-sm outline-none border border-gray-300 focus:border-gray-500 focus:shadow-sm',
-  classNameError = 'mt-1 text-red-600 min-h-[1.25rem] text-sm',
+  classNameInputError = '',
+  classNameInput = 'p-3 w-full rounded-sm outline-none border border-gray-300 focus:border-gray-500 focus:shadow-sm transition duration-300',
+  classNameError = 'mt-1 text-red-600 min-h-[1.25rem] text-sm transition-opacity duration-300 ease-in-out',
   classNameEye = 'absolute size-5 top-[8px] right-[5px] cursor-pointer',
   ...rest
 }: Props) {
-  const [openEye, setOpenEye] = useState(false)
-  const registerResult = register && name ? register(name, rules) : null
+  const [openEye, setOpenEye] = useState(false);
+  const registerResult = register && name ? register(name, rules) : null;
 
   const toggleEye = () => {
-    setOpenEye((prev) => !prev)
-  }
+    setOpenEye((prev) => !prev);
+  };
+
+  const handleValidation = () => {
+    if (rest.type === "email") {
+      // validate email here
+    }
+  };
 
   const handleType = () => {
-    if (rest.type == 'password') {
-      return openEye ? 'text' : 'password'
+    if (rest.type === 'password') {
+      return openEye ? 'text' : 'password';
     }
-    return rest.type
-  }
+    return rest.type;
+  };
+
   return (
     <div className={'relative ' + className}>
-      <input className={classNameInput} {...registerResult} {...rest} type={handleType()} />
-      {rest.type == 'password' && openEye && (
+      <input
+        className={classNameInput }
+        {...registerResult}
+        {...rest}
+        type={handleType()}
+        onChange={handleValidation}
+      />
+      {rest.type === 'password' && openEye && (
         <svg
           xmlns='http://www.w3.org/2000/svg'
           fill='none'
@@ -55,7 +69,7 @@ export default function Input({
           <path strokeLinecap='round' strokeLinejoin='round' d='M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z' />
         </svg>
       )}
-      {rest.type == 'password' && !openEye && (
+      {rest.type === 'password' && !openEye && (
         <svg
           xmlns='http://www.w3.org/2000/svg'
           fill='none'
@@ -72,8 +86,8 @@ export default function Input({
           />
         </svg>
       )}
-
-      <div className={classNameError}>{errorMessage}</div>
+      {errorMessage && <div className={classNameError}>{errorMessage}</div>}
     </div>
-  )
+  );
 }
+
