@@ -19,6 +19,11 @@ import ShopLayout from 'src/layouts/ShopLayout'
 import ShopChannel from 'src/pages/Shop/page/ShopChannel'
 import cartRouter from './cartRouter'
 import VoucherShop from 'src/pages/Shop/page/VoucherShop'
+import ProductManagement from 'src/pages/Shop/page/ProductManagement'
+import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsListActive'
+import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
+import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
+import Home from 'src/pages/Home'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -100,6 +105,24 @@ const ClientRoutes = [
             element: <ShopChannel></ShopChannel>
           },
           {
+            path: path.productManagement,
+            element: <ProductManagement></ProductManagement>,
+            children: [
+              {
+                path: path.productManagementAll,
+                element: <ProductAll></ProductAll>
+              },
+              {
+                path: path.productManagementActive,
+                element: <ProductsListActive></ProductsListActive>
+              }
+            ]
+          },
+          {
+            path: path.productAdd,
+            element: <ProductAdd></ProductAdd>
+          },
+          {
             path: path.voucherShop,
             element: <VoucherShop></VoucherShop>
           }
@@ -108,8 +131,7 @@ const ClientRoutes = [
     ]
   },
   {
-    index: true,
-    path: '/',
+    path: path.category,
     element: (
       <MainLayout>
         <Suspense>
@@ -124,6 +146,17 @@ const ClientRoutes = [
       <MainLayout>
         <Suspense>
           <ProductDetail></ProductDetail>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
+    index: true,
+    path: path.home,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Home></Home>
         </Suspense>
       </MainLayout>
     )
