@@ -15,6 +15,7 @@ const voucherTimeTabs = [
 export default function VoucherShop() {
   const queryParams: { status?: string } = useQueryParams()
   const status: string = queryParams.status || 'all'
+
   const voucherTimeTabLinks = voucherTimeTabs.map((tab) => {
     return (
       <Link

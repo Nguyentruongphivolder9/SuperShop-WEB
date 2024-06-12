@@ -12,7 +12,7 @@ const path = {
 
   // shop channels
   shopChannel: '/shopchannel',
-  voucherShop: '/shopchannel/marketing/vouchers/list'
+  voucherShop: '/shopchannel/portal/marketing/vouchers/list'
 } as const
 
 export default path

@@ -62,7 +62,7 @@ const ClientRoutes = [
     children: [
       cartRouter,
       {
-        path: path.user,
+        path: path.user, // localhoas//user
         element: (
           <MainLayout>
             <UserLayout></UserLayout>
@@ -71,11 +71,7 @@ const ClientRoutes = [
         children: [
           {
             path: path.profile,
-            element: (
-              <Suspense>
-                <Profile></Profile>
-              </Suspense>
-            )
+            element: <Profile></Profile>
           },
           {
             path: path.changePassword,
