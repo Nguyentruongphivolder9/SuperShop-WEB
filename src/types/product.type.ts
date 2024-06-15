@@ -39,3 +39,39 @@ export interface ProductListConfig {
   name?: string
   category?: string
 }
+
+export interface ProductRequest {
+  name: string
+  price?: number
+  stockQuantity?: number
+  description?: string
+  condition: string
+  isVariant: boolean
+  productVariantsRequest: ProductVariantsRequest[]
+  variantsGroupRequest: VariantsGroupRequest[]
+}
+
+export interface VariantsGroupRequest {
+  variants?: VariantsRequest[]
+  name: string
+  id: string
+  isPrimary: boolean
+  isActive: boolean
+}
+
+export interface VariantsRequest {
+  id: string
+  imageUrl?: string | null | undefined
+  name: string
+  isActive: boolean
+}
+
+export interface ProductVariantsRequest {
+  id: string
+  price: number
+  stockQuantity: number
+  variantsGroup1: string
+  variant1: string
+  variantsGroup2: string
+  variant2: string
+}

@@ -56,3 +56,7 @@ export const getIdFromNameId = (nameId: string) => {
 export const getAvatarUrl = (avatarName?: string) => {
   return avatarName ? `${config.baseURL}images/${avatarName}` : ''
 }
+
+export const generateUniqueId = () => {
+  return '_' + Math.random().toString(36).substr(2, 9)
+}
