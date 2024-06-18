@@ -1,14 +1,14 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { imageFileConvertToUrl } from 'src/utils/utils'
 
 interface Props {
   id: string
-  name: string
-  url: string
+  imageFile: File
   deleteImage: (id: string) => void
 }
 
-export default function ImageItem({ id, name, url, deleteImage }: Props) {
+export default function ImageItem({ id, imageFile, deleteImage }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id })
 
   const style = {
@@ -22,7 +22,12 @@ export default function ImageItem({ id, name, url, deleteImage }: Props) {
       {...attributes}
       className='group w-24 h-24 relative border-dashed border-2 border-blue rounded-md overflow-hidden flex items-center'
     >
-      <img {...listeners} className='object-cover h-full w-full cursor-move' src={url} alt={name} />
+      <img
+        {...listeners}
+        className='object-cover h-full w-full cursor-move'
+        src={imageFileConvertToUrl(imageFile)}
+        alt={'upload file'}
+      />
       <div className='absolute bottom-0 left-0 w-full h-6 bg-[#333333] hidden group-hover:grid group-hover:grid-cols-2 '>
         <div className='col-span-1'></div>
         <div className='col-span-1 items-center justify-center flex'>

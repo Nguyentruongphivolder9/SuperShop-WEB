@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import {
   DndContext,
   KeyboardSensor,
@@ -12,48 +12,21 @@ import { arrayMove, sortableKeyboardCoordinates, SortableContext, verticalListSo
 import ImageItem from './ImageItem'
 import CategoryList from './CategoryList'
 import { Link } from 'react-router-dom'
-import Popover from 'src/components/Popover'
 import VariationsForm from './VariationsForm'
-import { generateUniqueId } from 'src/utils/utils'
-import { productSchema, ProductSchema } from 'src/utils/validations/productValidation'
-import { FormProvider, useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
+import { generateUniqueId, imageFileConvertToUrl } from 'src/utils/utils'
+import { FormProvider, useFieldArray, useWatch } from 'react-hook-form'
 import Button from 'src/components/Button'
-import { VariantsGroupRequest } from 'src/types/product.type'
-
-interface Image {
-  id: string
-  name: string
-  url: string
-}
-
-type FormData = Pick<ProductSchema, 'name' | 'price' | 'stockQuantity' | 'description' | 'isVariant' | 'variantsGroup'>
-// type FormDataError = Omit<FormData, 'date_of_birth'> & {
-//   date_of_birth?: string
-// }
-
-const createProductSchema = productSchema.pick([
-  'name',
-  'price',
-  'stockQuantity',
-  'description',
-  'isVariant',
-  'variantsGroup'
-])
+import { ProductImagesRequest, ProductVariantsRequest, VariantsRequest } from 'src/types/product.type'
+import { AppContext } from 'src/contexts/app.context'
 
 export default function ProductAdd() {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
-  const [images, setImages] = useState<Image[]>([])
+  const [images, setImages] = useState<ProductImagesRequest[]>([])
   const [isDisplayCateList, setIsDisplayCateList] = useState(false)
   const [isDisplayFormVariations, setIsDisplayFormVariations] = useState(false)
-  const methods = useForm<FormData>({
-    defaultValues: {
-      isVariant: false,
-      variantsGroup: []
-    },
-    mode: 'onChange',
-    resolver: yupResolver(createProductSchema)
-  })
+  const [arraysVariant1, setArraysVariant1] = useState<VariantsRequest[]>([])
+  const [arraysVariant2, setArraysVariant2] = useState<VariantsRequest[]>([])
+  const { productMethods } = useContext(AppContext)
 
   const {
     register,
@@ -62,9 +35,35 @@ export default function ProductAdd() {
     handleSubmit,
     setValue,
     watch,
-    setError,
-    getValues
-  } = methods
+    getValues,
+    clearErrors,
+    setError
+  } = productMethods
+
+  const {
+    fields: arraysVariantsGroup,
+    append: appendVariantsGroup,
+    remove: removeVariantsGroup,
+    update: updateVariantsGroup,
+    replace: replaceVariantsGroup
+  } = useFieldArray({
+    control,
+    name: 'variantsGroup'
+  })
+
+  const { append: appendProductVariants, replace: replaceProductVariants } = useFieldArray({
+    control,
+    name: 'productVariants'
+  })
+
+  const variantsGroupWatch = useWatch({
+    control,
+    name: 'variantsGroup'
+  })
+  const productVariantsWatch = useWatch({
+    control,
+    name: 'productVariants'
+  })
 
   const handleUploadImages = () => {
     fileInputImagesRef.current?.click()
@@ -72,6 +71,7 @@ export default function ProductAdd() {
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
+
     if (!files || files.length === 0) return
 
     const maxImages = 9
@@ -88,17 +88,13 @@ export default function ProductAdd() {
 
       if (files[i].size > 2097152) continue
 
-      if (!images.some((e) => e.name === files[i].name)) {
-        console.log(files[i].name)
-        setImages((prevImages) => [
-          ...prevImages,
-          {
-            id: generateUniqueId(),
-            name: files[i].name,
-            url: URL.createObjectURL(files[i])
-          }
-        ])
+      const newImage = {
+        id: generateUniqueId(),
+        imageFile: files[i]
       }
+
+      setImages((prevImages) => [...prevImages, newImage])
+      setValue('productImages', [...(getValues('productImages') || []), newImage])
     }
   }
 
@@ -122,10 +118,13 @@ export default function ProductAdd() {
 
       return arrayMove(images, originalPos, newPos)
     })
+    setValue('productImages', images)
   }
 
   const deleteImage = (id: string) => {
     setImages((prevImages) => prevImages.filter((image) => image.id !== id))
+
+    setValue('productImages', images)
   }
 
   const handlerShowCategoryList = () => {
@@ -138,49 +137,201 @@ export default function ProductAdd() {
     }
   }
 
-  const handlerRemoveVariations = (id: string) => {
-    const currentVariantsGroup = getValues('variantsGroup') as VariantsGroupRequest[]
-    if (currentVariantsGroup.length === 1) {
+  const handlerRemoveVariations = (id: string, index: number) => {
+    if (
+      variantsGroupWatch === null ||
+      variantsGroupWatch === undefined ||
+      variantsGroupWatch.length === 0 ||
+      variantsGroupWatch.length > 2
+    ) {
+      return
+    } else if (variantsGroupWatch.length === 1) {
       setValue('isVariant', false)
-      setValue('variantsGroup', [])
+      replaceVariantsGroup([])
+      replaceProductVariants([])
+      clearErrors(`variantsGroup`)
       setIsDisplayFormVariations(false)
     } else {
-      const updatedVariantsGroup = currentVariantsGroup.filter((item) => item.id !== id)
-      setValue('variantsGroup', updatedVariantsGroup)
+      const removeItemVariantsGroup = variantsGroupWatch.find((_, idx) => idx === index)
+
+      // nếu xóa variant group có isPrimary là true
+      if (removeItemVariantsGroup?.isPrimary) {
+        const variantsGroup = variantsGroupWatch.find((item, idx) => idx !== index && item.isPrimary === false)
+
+        if (variantsGroup !== undefined) {
+          console.log(variantsGroup)
+          replaceProductVariants([])
+          const newObjectProductVariant: ProductVariantsRequest[] = []
+
+          variantsGroup.variants?.forEach((item) => {
+            const newProductVariant = {
+              id: generateUniqueId(),
+              price: 0,
+              stockQuantity: 0,
+              variantsGroup1Id: variantsGroup.id,
+              variant1Id: item.id,
+              variantsGroup2Id: '',
+              variant2Id: ''
+            }
+            newObjectProductVariant.push(newProductVariant)
+            variantsGroup.isPrimary = true
+            updateVariantsGroup(index + 1, variantsGroup)
+          })
+
+          appendProductVariants(newObjectProductVariant)
+          removeVariantsGroup(index)
+        }
+        // nếu xóa variant group có isPrimary là false
+      } else {
+        const variantsGroup = variantsGroupWatch.find((item, idx) => idx !== index && item.isPrimary === true)
+        replaceProductVariants([])
+        const newObjectProductVariant: ProductVariantsRequest[] = []
+
+        variantsGroup?.variants?.forEach((item) => {
+          const newProductVariant = {
+            id: generateUniqueId(),
+            price: 0,
+            stockQuantity: 0,
+            variantsGroup1Id: variantsGroup.id,
+            variant1Id: item.id,
+            variantsGroup2Id: '',
+            variant2Id: ''
+          }
+          newObjectProductVariant.push(newProductVariant)
+        })
+
+        appendProductVariants(newObjectProductVariant)
+        removeVariantsGroup(index)
+      }
     }
   }
 
   const handlerAddVariations = () => {
-    const currentVariantsGroup = getValues('variantsGroup') as VariantsGroupRequest[]
-    if (currentVariantsGroup === null || currentVariantsGroup.length === 0 || currentVariantsGroup === undefined) {
-      setValue('isVariant', true)
-      setValue('variantsGroup', [
-        {
-          id: generateUniqueId(),
-          name: '',
-          isPrimary: true,
-          isActive: true,
-          variants: []
-        }
-      ])
-      setIsDisplayFormVariations(true)
-    }
+    if (arraysVariantsGroup.length >= 2) {
+      return
+    } else if (arraysVariantsGroup.length === 1) {
+      const newVariant2 = {
+        id: generateUniqueId(),
+        name: '',
+        imageFile: '',
+        isActive: true
+      }
 
-    if (currentVariantsGroup.length === 1) {
-      const newVariant = {
+      const newVariantGroup2 = {
         id: generateUniqueId(),
         name: '',
         isPrimary: false,
         isActive: true,
-        variants: []
+        variants: [newVariant2]
       }
-      const updatedVariantsGroup = [...currentVariantsGroup, newVariant]
-      setValue('variantsGroup', updatedVariantsGroup)
+
+      replaceProductVariants([])
+      arraysVariantsGroup.forEach((itemVariantsGroup) => {
+        if (itemVariantsGroup.isPrimary) {
+          itemVariantsGroup.variants?.forEach((itemVariant1) => {
+            const newProductVariant = {
+              id: generateUniqueId(),
+              price: 0,
+              stockQuantity: 0,
+              variantsGroup1Id: itemVariantsGroup.id,
+              variant1Id: itemVariant1.id,
+              variantsGroup2Id: newVariantGroup2.id,
+              variant2Id: newVariant2.id
+            }
+            appendProductVariants(newProductVariant)
+          })
+        }
+      })
+
+      appendVariantsGroup(newVariantGroup2)
+    } else {
+      const newVariant = {
+        id: generateUniqueId(),
+        name: '',
+        imageFile: '',
+        isActive: true
+      }
+      const newVariantGroup = {
+        id: generateUniqueId(),
+        name: '',
+        isPrimary: true,
+        isActive: true,
+        variants: [newVariant]
+      }
+
+      const newProductVariant = {
+        id: generateUniqueId(),
+        price: 0,
+        stockQuantity: 0,
+        variantsGroup1Id: newVariantGroup.id,
+        variant1Id: newVariant.id,
+        variantsGroup2Id: null,
+        variant2Id: null
+      }
+      appendProductVariants(newProductVariant)
+      appendVariantsGroup(newVariantGroup)
+      setIsDisplayFormVariations(true)
+      setValue('isVariant', true)
     }
   }
 
+  useEffect(() => {
+    setArraysVariant1([])
+    setArraysVariant2([])
+    variantsGroupWatch?.forEach((item) => {
+      if (item.isPrimary) {
+        setArraysVariant1(item.variants as VariantsRequest[])
+      } else {
+        setArraysVariant2(item.variants as VariantsRequest[])
+      }
+
+      variantsGroupWatch?.forEach((variantGroup, index) => {
+        const { name } = variantGroup
+        if (name !== null && name !== undefined && name !== '') {
+          variantsGroupWatch?.forEach((otherVariantGroup, otherIndex) => {
+            if (index !== otherIndex && otherVariantGroup.name === name) {
+              // console.log(index + ': ' + name)
+              setError(`variantsGroup.${index}.name`, {
+                type: 'unique',
+                message: 'Options of variations should be different.'
+              })
+            }
+          })
+        }
+      })
+    })
+  }, [variantsGroupWatch, setError])
+
   const onSubmit = handleSubmit(async (data) => {
     try {
+      // const arraysVariantsGroupTest = getValues('variantsGroup')
+      // arraysVariantsGroupTest?.forEach((variantGroup, index) => {
+      //   const { name } = variantGroup
+      //   console.log(name)
+      //   if (name !== null && name !== undefined && name !== '') {
+      //     arraysVariantsGroupTest?.forEach((otherVariantGroup, otherIndex) => {
+      //       if (index !== otherIndex && otherVariantGroup.name === name) {
+      //         setError(`variantsGroup.${index}.name`, {
+      //           type: 'unique',
+      //           message: 'Options of variations should be different.'
+      //         })
+      //       }
+      //     })
+      //   }
+
+      // if (name !== null && name !== undefined && name !== '') {
+      //   clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
+      //   arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
+      //     console.log(otherIndex + ': ' + otherVariant.name)
+      //     if (index !== otherIndex && otherVariant.name === name) {
+      //       setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
+      //         type: 'unique',
+      //         message: 'Options of variations should be different.'
+      //       })
+      //     }
+      //   })
+      // }
+      // })
       console.log(data)
     } catch (error) {
       console.log(error)
@@ -191,7 +342,7 @@ export default function ProductAdd() {
     <div>
       {isDisplayCateList && <CategoryList handlerShowCategoryList={handlerShowCategoryList} />}
       <div className='grid grid-cols-12 gap-4'>
-        <FormProvider {...methods}>
+        <FormProvider {...productMethods}>
           <form className='col-span-9'>
             <div className='sticky z-10 top-14 h-14 flex flex-row rounded-md bg-white items-center shadow mb-4'>
               <div className='px-4 text-sm font-normal hover:text-blue'>Basic information</div>
@@ -206,8 +357,8 @@ export default function ProductAdd() {
               <div className='text-xl text-[#333333] font-bold mb-6'>Basic Information</div>
               <div className='mb-6'>
                 {/* Product Image */}
-                <div className='grid grid-cols-12 mb-6'>
-                  <div className='col-span-3 flex flex-row justify-end items-start gap-1 mr-5'>
+                <div className='grid grid-cols-11 mb-6'>
+                  <div className='col-span-2 flex flex-row justify-end items-start gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Product Images</div>
                   </div>
@@ -219,8 +370,7 @@ export default function ProductAdd() {
                             <ImageItem
                               key={image.id}
                               id={image.id as string}
-                              name={image.name as string}
-                              url={image.url as string}
+                              imageFile={image.imageFile as File}
                               deleteImage={deleteImage}
                             />
                           ))}
@@ -262,8 +412,8 @@ export default function ProductAdd() {
                 </div>
 
                 {/* Promotion Name */}
-                <div className='grid grid-cols-12 mb-6'>
-                  <div className='col-span-3 flex flex-row justify-end items-center gap-1 mr-5'>
+                <div className='grid grid-cols-11 mb-6'>
+                  <div className='col-span-2 flex flex-row justify-end items-center gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Promotion Name</div>
                   </div>
@@ -271,7 +421,11 @@ export default function ProductAdd() {
                     <div className='bg-white rounded-sm p-1 flex items-center flex-row gap-3 w-full'>
                       {images.length !== 0 ? (
                         <div className='group w-24 h-24 relative border-dashed border-2 border-blue rounded-md overflow-hidden flex items-center'>
-                          <img className='object-cover h-full w-full' src={images[0].url} alt={images[0].name} />
+                          <img
+                            className='object-cover h-full w-full'
+                            src={imageFileConvertToUrl(images[0].imageFile)}
+                            alt={'upload file'}
+                          />
                         </div>
                       ) : (
                         <div className='w-24 h-24 border-dashed border-2 border-blue rounded-md flex items-center justify-center'>
@@ -304,8 +458,8 @@ export default function ProductAdd() {
                   </div>
                 </div>
 
-                <div className='grid grid-cols-12 mb-3 items-start'>
-                  <div className='col-span-3 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
+                <div className='grid grid-cols-11 mb-3 items-start'>
+                  <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Product Name</div>
                   </div>
@@ -321,7 +475,7 @@ export default function ProductAdd() {
                           className='text-sm text-[#333333] w-full border-none outline-none pr-3'
                           placeholder='Brand Name + Product Type + Key Features (Materials, Colors, Size, Model)'
                         />
-                        <div className='text-sm text-[#999999]'>0/120</div>
+                        <div className='text-sm text-[#999999]'>{watch().name?.length}/120</div>
                       </div>
                     </div>
                     <div
@@ -332,8 +486,8 @@ export default function ProductAdd() {
                   </div>
                 </div>
 
-                <div className='grid grid-cols-12 mb-6'>
-                  <div className='col-span-3 flex flex-row justify-end items-center gap-1 mr-5'>
+                <div className='grid grid-cols-11 mb-6'>
+                  <div className='col-span-2 flex flex-row justify-end items-center gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Category</div>
                   </div>
@@ -369,8 +523,8 @@ export default function ProductAdd() {
                   </div>
                 </div>
 
-                <div className='grid grid-cols-12 mb-6'>
-                  <div className='col-span-3 flex flex-row justify-end gap-1 mr-5'>
+                <div className='grid grid-cols-11 mb-6'>
+                  <div className='col-span-2 flex flex-row justify-end gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Product Description</div>
                   </div>
@@ -404,8 +558,8 @@ export default function ProductAdd() {
             <div className='p-6 rounded-md bg-white shadow mb-6'>
               <div className='text-xl text-[#333333] font-bold mb-6'>Sales Information</div>
               <div className='mb-6'>
-                <div className='grid grid-cols-12 mb-6 items-start'>
-                  <div className='col-span-3 h-10 flex flex-row justify-end items-center gap-2 mr-5'>
+                <div className='grid grid-cols-11 mb-6 items-start'>
+                  <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-2 mr-5'>
                     <span className='relative flex h-2 w-2'>
                       <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-blue opacity-75' />
                       <span className='relative inline-flex rounded-full h-2 w-2 bg-sky-500' />
@@ -416,7 +570,7 @@ export default function ProductAdd() {
 
                   {isDisplayFormVariations ? (
                     <VariationsForm
-                      variantsGroup={getValues('variantsGroup')}
+                      variantsGroup={arraysVariantsGroup}
                       handlerAddVariations={handlerAddVariations}
                       handlerRemoveVariations={handlerRemoveVariations}
                     />
@@ -442,10 +596,167 @@ export default function ProductAdd() {
                     </div>
                   )}
                 </div>
+                {isDisplayFormVariations && (
+                  <div className='grid grid-cols-11 mb-6 items-start'>
+                    <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-2 mr-5'>
+                      <span className='relative flex h-2 w-2'>
+                        <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-blue opacity-75' />
+                        <span className='relative inline-flex rounded-full h-2 w-2 bg-sky-500' />
+                      </span>
+
+                      <div className='text-sm text-[#333333]'>Variation List</div>
+                    </div>
+                    <div className='col-span-9 flex flex-col gap-1'>
+                      <div className='mb-4 h-10 flex items-center'>
+                        <div className='h-8'>
+                          <div className=''></div>
+                          <div className=''></div>
+                        </div>
+                      </div>
+                      <div className='w-full flex'>
+                        <div className='rounded-md overflow-hidden w-full flex flex-col border-separate border-[1px] border-gray-300'>
+                          <div className='flex w-full'>
+                            <div className='relative'>
+                              <div className='flex'>
+                                {variantsGroupWatch &&
+                                  variantsGroupWatch.map((item) => {
+                                    if (item.isPrimary) {
+                                      return (
+                                        <div key={item.id} className='min-h-16 w-[115px] bg-[#F5F5F5F5]'>
+                                          <div className='w-full h-full flex p-3 items-center justify-center gap-2 border-[1px] border-gray-300'>
+                                            <span className='relative flex h-2 w-2'>
+                                              <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-blue opacity-75' />
+                                              <span className='relative inline-flex rounded-full h-2 w-2 bg-sky-500' />
+                                            </span>
+                                            <div className='text-sm text-[#333333]'>
+                                              {item.name ? item.name : 'Variation 1'}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+
+                                    if (!item.isPrimary) {
+                                      return (
+                                        <div
+                                          key={item.id}
+                                          className='min-h-16 w-[115px] bg-[#F5F5F5F5] border-[1px] border-gray-300'
+                                        >
+                                          <div className='w-full h-full flex p-3 items-center justify-center gap-2'>
+                                            <div className='text-sm text-[#333333]'>
+                                              {item.name ? item.name : 'Variation 2'}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+                                  })}
+                              </div>
+                              {arraysVariant1 &&
+                                arraysVariant1.map((itemPrimary) => {
+                                  return (
+                                    <div key={itemPrimary.id} className='flex'>
+                                      <div className='min-h-16 w-[115px] px-3 py-5 text-sm flex items-center justify-center border-[1px] border-gray-300'>
+                                        {itemPrimary.name}
+                                      </div>
+                                      <div className='flex flex-col'>
+                                        {arraysVariant2 &&
+                                          arraysVariant2.map((item: VariantsRequest) => (
+                                            <div
+                                              key={item.id}
+                                              className='px-3 min-h-16 w-[115px] py-5 text-sm text-center border-[1px] border-gray-300'
+                                            >
+                                              {item.name}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                            </div>
+                            <div className='relative  flex-1'>
+                              <div className='grid grid-cols-2'>
+                                <div className='bg-[#F5F5F5F5] border-[1px] border-gray-300 col-span-1 min-h-16 p-3 flex flex-row gap-1 justify-center items-center'>
+                                  <span className='text-red-600 text-xs'>*</span>
+                                  <div className='text-sm text-[#333333]'>Price</div>
+                                </div>
+                                <div className='border-[1px] border-gray-300 bg-[#F5F5F5F5] col-span-1 min-h-16 p-3 flex flex-row gap-1 justify-center items-center'>
+                                  <span className='text-red-600 text-xs'>*</span>
+                                  <div className='text-sm text-[#333333]'>Stock</div>
+                                </div>
+                              </div>
+                              <div className='h-full w-full flex'>
+                                <div className='relative h-full w-full'>
+                                  {arraysVariant1 &&
+                                    arraysVariant1.map((itemVariant1: VariantsRequest) => {
+                                      if (arraysVariant2 && arraysVariant2.length > 0) {
+                                        return arraysVariant2.map((itemVariant2: VariantsRequest) => {
+                                          return productVariantsWatch?.map((itemProductVariant) => {
+                                            if (
+                                              itemProductVariant.variant1Id === itemVariant1.id &&
+                                              itemProductVariant.variant2Id === itemVariant2.id
+                                            ) {
+                                              return (
+                                                <div key={itemProductVariant.id} className='grid grid-cols-2 relative'>
+                                                  <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
+                                                    <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                      <div className='border-r-2 pr-2'>
+                                                        <span className='text-md text-[#999999]'>₫</span>
+                                                      </div>
+                                                      <input
+                                                        type='number'
+                                                        className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                                                        placeholder='Input'
+                                                      />
+                                                    </div>
+                                                    <div className='absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1'>
+                                                      Price has exceeded maximum value: 120000000
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              )
+                                            }
+                                          })
+                                        })
+                                      } else {
+                                        return productVariantsWatch?.map((itemProductVariant) => {
+                                          if (itemProductVariant.variant1Id === itemVariant1.id) {
+                                            return (
+                                              <div key={itemProductVariant.id} className='grid grid-cols-2 relative'>
+                                                <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
+                                                  <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                    <div className='border-r-2 pr-2'>
+                                                      <span className='text-md text-[#999999]'>₫</span>
+                                                    </div>
+                                                    <input
+                                                      type='number'
+                                                      className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                                                      placeholder='Input'
+                                                    />
+                                                  </div>
+                                                  <div className='absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1'>
+                                                    Price has exceeded maximum value: 120000000
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            )
+                                          }
+                                        })
+                                      }
+                                    })}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {getValues('isVariant') === false && (
-                  <div className='grid grid-cols-12 mb-3 items-start'>
-                    <div className='col-span-3 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
+                  <div className='grid grid-cols-11 mb-3 items-start'>
+                    <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
                       <span className='text-red-600 text-xs'>*</span>
                       <div className='text-sm text-[#333333]'>Price</div>
                     </div>
@@ -461,7 +772,7 @@ export default function ProductAdd() {
                           <input
                             type='number'
                             {...register('price')}
-                            className='text-sm text-[#333333] w-full border-none outline-none pl-2'
+                            className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
                             placeholder='Input'
                           />
                         </div>
@@ -476,8 +787,8 @@ export default function ProductAdd() {
                 )}
 
                 {getValues('isVariant') === false && (
-                  <div className='grid grid-cols-12 mb-3 items-start'>
-                    <div className='col-span-3 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
+                  <div className='grid grid-cols-11 mb-3 items-start'>
+                    <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
                       <span className='text-red-600 text-xs'>*</span>
                       <div className='text-sm text-[#333333]'>Stock</div>
                       {/* <Popover
@@ -522,7 +833,7 @@ export default function ProductAdd() {
                           <input
                             type='number'
                             {...register('stockQuantity')}
-                            className='text-sm text-[#333333] w-full border-none outline-none pl-2'
+                            className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
                             placeholder='Input'
                           />
                         </div>

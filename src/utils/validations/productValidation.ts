@@ -18,7 +18,7 @@ const handlePriceProductYup = (refBoolean: string) => {
         schema
           .required('This field cannot be empty')
           .max(MAX_PRICE_VALUE, 'Price has exceeded maximum value: ' + MAX_PRICE_VALUE)
-          .min(MIN_PRICE_VALUE, 'The value should be at least ' + MIN_PRICE_VALUE)
+          .min(MIN_PRICE_VALUE, 'The value should be at least: ' + MIN_PRICE_VALUE)
     })
 }
 const handleStockQuantityProductYup = (refString: string) => {
@@ -33,13 +33,17 @@ const handleStockQuantityProductYup = (refString: string) => {
       otherwise: (schema) =>
         schema
           .required('This field cannot be empty')
-          .max(MAX_STOCK_VALUE, 'Stock should be more than 0 and less than ' + MAX_STOCK_VALUE)
-          .min(MIN_STOCK_VALUE, 'The value should be at least ' + MIN_STOCK_VALUE)
+          .max(MAX_STOCK_VALUE, 'Stock has exceeded maximum value: ' + MAX_STOCK_VALUE)
+          .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE)
     })
 }
 
 export const productSchema = yup.object({
-  name: yup.string().trim().required('This field cannot be empty'),
+  name: yup
+    .string()
+    .trim()
+    .required('This field cannot be empty')
+    .min(10, 'Your product title is too short. Please input at least 10 characters.'),
   price: handlePriceProductYup('isVariant') as yup.NumberSchema<number | undefined, yup.AnyObject, undefined, ''>,
   stockQuantity: handleStockQuantityProductYup('isVariant') as yup.NumberSchema<
     number | undefined,
@@ -52,23 +56,32 @@ export const productSchema = yup.object({
     .max(3000)
     .min(100, 'Your product description is too short. Please input at least 100 characters.'),
   isVariant: yup.boolean().required('This field cannot be empty'),
+  productImages: yup
+    .array()
+    .of(
+      yup.object({
+        id: yup.string().required('This field cannot be empty'),
+        imageFile: yup.mixed().nullable()
+      })
+    )
+    .min(3, 'Product images must have at least 3 images.'),
   productVariants: yup.array().of(
     yup.object({
       id: yup.string().required('This field cannot be empty'),
       price: yup
         .number()
         .required('This field cannot be empty')
-        .max(MAX_STOCK_VALUE, 'Stock should be more than 0 and less than ' + MAX_STOCK_VALUE)
-        .min(MIN_STOCK_VALUE, 'The value should be at least ' + MIN_STOCK_VALUE),
+        .max(MAX_STOCK_VALUE, 'Price has exceeded maximum value: ' + MAX_STOCK_VALUE)
+        .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE),
       stockQuantity: yup
         .number()
         .required('This field cannot be empty')
-        .max(MAX_STOCK_VALUE, 'Stock should be more than 0 and less than ' + MAX_STOCK_VALUE)
-        .min(MIN_STOCK_VALUE, 'The value should be at least ' + MIN_STOCK_VALUE),
-      variantsGroup1: yup.string().required('This field cannot be empty'),
-      variant1: yup.string().required('This field cannot be empty'),
-      variantsGroup2: yup.string().required('This field cannot be empty'),
-      variant2: yup.string().required('This field cannot be empty')
+        .max(MAX_STOCK_VALUE, 'Stock has exceeded maximum value: ' + MAX_STOCK_VALUE)
+        .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE),
+      variantsGroup1Id: yup.string().required('This field cannot be empty'),
+      variant1Id: yup.string().required('This field cannot be empty'),
+      variantsGroup2Id: yup.string().nullable(),
+      variant2Id: yup.string().nullable()
     })
   ),
   variantsGroup: yup
@@ -76,38 +89,69 @@ export const productSchema = yup.object({
     .of(
       yup.object({
         id: yup.string().required('This field cannot be empty'),
-        name: yup.string().required('This field cannot be empty'),
+        name: yup.string().trim().required('This field cannot be empty'),
         isPrimary: yup.boolean().required('This field cannot be empty'),
         isActive: yup.boolean().required('This field cannot be empty'),
-        variants: yup.array().of(
-          yup.object({
-            id: yup.string().required('This field cannot be empty'),
-            isActive: yup.boolean().required('This field cannot be empty'),
-            name: yup.string().required('This field cannot be empty'),
-            imageUrl: yup.string().url('Invalid URL format').nullable()
+        variants: yup
+          .array()
+          .of(
+            yup.object({
+              id: yup.string().required('This field cannot be empty'),
+              isActive: yup.boolean().required('This field cannot be empty'),
+              name: yup.string().trim().required('This field cannot be empty'),
+              imageUrl: yup.mixed().nullable()
+            })
+          )
+          .max(50, 'Variations List has exceeded maximum value: 50')
+          .test('uniqueVariantName', 'Options of variations should be different.', function (values) {
+            if (!values) return false
+
+            const errors: Record<string, Record<string, string>> = {}
+
+            values.forEach((variant, index) => {
+              const { name } = variant
+
+              if (name !== null && name !== undefined && name !== '') {
+                values.forEach((otherVariant, otherIndex) => {
+                  if (index !== otherIndex && otherVariant.name === name) {
+                    errors[`variants[${index}].name`] = {
+                      message: 'Options of variations should be different.',
+                      type: 'unique',
+                      ref: ''
+                    }
+                  }
+                })
+              }
+            })
+
+            return errors ? true : false
           })
-        )
       })
     )
-    .test({
-      name: 'unique-variantsGroup-names',
-      message: 'Variant group names must be unique',
-      test: function (value) {
-        if (!value) return true
+    .max(2, 'Variations has exceeded maximum value: 2')
+    .test('uniqueVariantGroupName', 'Options of variations should be different.', function (values) {
+      if (!values) return false
 
-        const seenNames = new Set()
-        let isValid = true
+      const errors: Record<string, Record<string, string>> = {}
 
-        value.forEach((group) => {
-          if (seenNames.has(group.name)) {
-            isValid = false
-          } else {
-            seenNames.add(group.name)
-          }
-        })
+      values.forEach((variant, index) => {
+        const { name } = variant
 
-        return isValid
-      }
+        if (name !== null && name !== undefined && name !== '') {
+          values.forEach((otherVariant, otherIndex) => {
+            if (index !== otherIndex && otherVariant.name === name) {
+              errors[`${index}`] = {
+                message: 'Options of variations should be different.',
+                type: 'unique',
+                ref: ''
+              }
+            }
+          })
+        }
+      })
+
+      return errors ? true : false
     })
 })
+
 export type ProductSchema = yup.InferType<typeof productSchema>

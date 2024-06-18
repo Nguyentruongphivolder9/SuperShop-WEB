@@ -47,6 +47,7 @@ export interface ProductRequest {
   description?: string
   condition: string
   isVariant: boolean
+  productImagesRequest: ProductImagesRequest[]
   productVariantsRequest: ProductVariantsRequest[]
   variantsGroupRequest: VariantsGroupRequest[]
 }
@@ -59,9 +60,14 @@ export interface VariantsGroupRequest {
   isActive: boolean
 }
 
+export interface ProductImagesRequest {
+  id: string
+  imageFile: File
+}
+
 export interface VariantsRequest {
   id: string
-  imageUrl?: string | null | undefined
+  imageUrl?: any | null | undefined
   name: string
   isActive: boolean
 }
@@ -70,8 +76,8 @@ export interface ProductVariantsRequest {
   id: string
   price: number
   stockQuantity: number
-  variantsGroup1: string
-  variant1: string
-  variantsGroup2: string
-  variant2: string
+  variantsGroup1Id: string
+  variant1Id: string
+  variantsGroup2Id: string
+  variant2Id: string
 }
