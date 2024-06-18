@@ -70,11 +70,13 @@ export const productSchema = yup.object({
       id: yup.string().required('This field cannot be empty'),
       price: yup
         .number()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
         .required('This field cannot be empty')
-        .max(MAX_STOCK_VALUE, 'Price has exceeded maximum value: ' + MAX_STOCK_VALUE)
-        .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE),
+        .max(MAX_PRICE_VALUE, 'Price has exceeded maximum value: ' + MAX_PRICE_VALUE)
+        .min(MIN_PRICE_VALUE, 'The value should be at least: ' + MIN_PRICE_VALUE),
       stockQuantity: yup
         .number()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
         .required('This field cannot be empty')
         .max(MAX_STOCK_VALUE, 'Stock has exceeded maximum value: ' + MAX_STOCK_VALUE)
         .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE),
