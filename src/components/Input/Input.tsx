@@ -1,5 +1,6 @@
 import { InputHTMLAttributes, useState } from 'react'
 import { RegisterOptions, UseFormRegister } from 'react-hook-form'
+
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string
   classNameInput?: string
@@ -50,6 +51,7 @@ export default function Input({
         {...rest}
         type={handleType()}
         onChange={handleValidation}
+        
       />
       {rest.type === 'password' && openEye && (
         <svg
