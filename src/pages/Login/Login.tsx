@@ -1,5 +1,4 @@
 
-
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import { useContext } from 'react'
@@ -12,6 +11,7 @@ import { AppContext } from 'src/contexts/app.context'
 import { ErrorResponse } from 'src/types/utils.type'
 import { schema, Schema } from 'src/utils/rules'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
+import { parseJwt } from 'src/utils/auth'
 
 type FormData = Pick<Schema, 'email' | 'password'>
 const loginShema = schema.pick(['email', 'password'])
@@ -34,12 +34,14 @@ export default function Login() {
   const onSubmit = handleSubmit((data) => {
     loginMutation.mutate(data, {
       onSuccess: (data) => {
-        setIsAuthenticated(true)
-        setProfile(data?.data?.data?.user)
-        navigate('/')
+        // setIsAuthenticated(true)
+        // parseJwt();
+        console.log(data.data.body.accessToken);
+        console.log(parseJwt(data.data.body.accessToken))
+        // setProfile(data?.data?.data?.user)
+        // navigate('/')
       },
       onError: (error) => {
-        console.log("Error: ", error)
         if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {
           const formError = error.response?.data.data
           console.log(formError)
