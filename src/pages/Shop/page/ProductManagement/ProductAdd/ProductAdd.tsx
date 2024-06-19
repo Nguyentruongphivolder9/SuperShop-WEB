@@ -18,6 +18,8 @@ import { FormProvider, useFieldArray, useWatch } from 'react-hook-form'
 import Button from 'src/components/Button'
 import { ProductImagesRequest, ProductVariantsRequest, VariantsRequest } from 'src/types/product.type'
 import { AppContext } from 'src/contexts/app.context'
+import productApi from 'src/apis/product.api'
+import { useMutation } from '@tanstack/react-query'
 
 export default function ProductAdd() {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
@@ -51,6 +53,15 @@ export default function ProductAdd() {
     name: 'variantsGroup'
   })
 
+  const {
+    append: appendProductImages,
+    remove: removeProductImages,
+    move: moveProductImages
+  } = useFieldArray({
+    control,
+    name: 'productImages'
+  })
+
   const { append: appendProductVariants, replace: replaceProductVariants } = useFieldArray({
     control,
     name: 'productVariants'
@@ -64,6 +75,14 @@ export default function ProductAdd() {
     control,
     name: 'productVariants'
   })
+  const productImagesWatch = useWatch({
+    control,
+    name: 'productImages'
+  })
+
+  useEffect(() => {
+    setImages(productImagesWatch as ProductImagesRequest[])
+  }, [productImagesWatch])
 
   const handleUploadImages = () => {
     fileInputImagesRef.current?.click()
@@ -71,6 +90,7 @@ export default function ProductAdd() {
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
+    const arraysImage: ProductImagesRequest[] = []
 
     if (!files || files.length === 0) return
 
@@ -92,10 +112,9 @@ export default function ProductAdd() {
         id: generateUniqueId(),
         imageFile: files[i]
       }
-
-      setImages((prevImages) => [...prevImages, newImage])
-      setValue('productImages', [...(getValues('productImages') || []), newImage])
+      arraysImage.push(newImage)
     }
+    appendProductImages(arraysImage)
   }
 
   const sensors = useSensors(
@@ -112,19 +131,14 @@ export default function ProductAdd() {
 
     if (active.id === over?.id) return
 
-    setImages((images) => {
-      const originalPos = getTaskPos(active.id as string)
-      const newPos = getTaskPos(over?.id as string)
+    const originalPos = getTaskPos(active.id as string)
+    const newPos = getTaskPos(over?.id as string) as number
 
-      return arrayMove(images, originalPos, newPos)
-    })
-    setValue('productImages', images)
+    moveProductImages(originalPos, newPos)
   }
 
-  const deleteImage = (id: string) => {
-    setImages((prevImages) => prevImages.filter((image) => image.id !== id))
-
-    setValue('productImages', images)
+  const deleteImage = (index: number) => {
+    removeProductImages(index)
   }
 
   const handlerShowCategoryList = () => {
@@ -302,7 +316,49 @@ export default function ProductAdd() {
     })
   }, [variantsGroupWatch, setError])
 
-  const onSubmit = handleSubmit(async (data) => {
+  const productCreateMutation = useMutation({
+    mutationFn: productApi.productCreate
+  })
+
+  const onSubmitIsActiveTrue = handleSubmit(async (data) => {
+    data.isActive = true
+    try {
+      // const arraysVariantsGroupTest = getValues('variantsGroup')
+      // arraysVariantsGroupTest?.forEach((variantGroup, index) => {
+      //   const { name } = variantGroup
+      //   console.log(name)
+      //   if (name !== null && name !== undefined && name !== '') {
+      //     arraysVariantsGroupTest?.forEach((otherVariantGroup, otherIndex) => {
+      //       if (index !== otherIndex && otherVariantGroup.name === name) {
+      //         setError(`variantsGroup.${index}.name`, {
+      //           type: 'unique',
+      //           message: 'Options of variations should be different.'
+      //         })
+      //       }
+      //     })
+      //   }
+
+      // if (name !== null && name !== undefined && name !== '') {
+      //   clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
+      //   arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
+      //     console.log(otherIndex + ': ' + otherVariant.name)
+      //     if (index !== otherIndex && otherVariant.name === name) {
+      //       setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
+      //         type: 'unique',
+      //         message: 'Options of variations should be different.'
+      //       })
+      //     }
+      //   })
+      // }
+      // })
+      console.log(data)
+    } catch (error) {
+      console.log(error)
+    }
+  })
+
+  const onSubmitIsActiveFalse = handleSubmit(async (data) => {
+    data.isActive = false
     try {
       // const arraysVariantsGroupTest = getValues('variantsGroup')
       // arraysVariantsGroupTest?.forEach((variantGroup, index) => {
@@ -362,14 +418,15 @@ export default function ProductAdd() {
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Product Images</div>
                   </div>
-                  <div className='col-span-9 flex items-center'>
+                  <div className='col-span-9 flex flex-col justify-center'>
                     <div className='bg-white rounded-sm p-1 flex-wrap flex items-center flex-row gap-3 w-full'>
                       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleImageDragEnd}>
                         <SortableContext items={images} strategy={verticalListSortingStrategy}>
-                          {images.map((image) => (
+                          {images.map((image, index) => (
                             <ImageItem
                               key={image.id}
                               id={image.id as string}
+                              index={index}
                               imageFile={image.imageFile as File}
                               deleteImage={deleteImage}
                             />
@@ -407,6 +464,11 @@ export default function ProductAdd() {
                           </button>
                         </div>
                       )}
+                    </div>
+                    <div
+                      className={`${errors.productImages?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
+                    >
+                      {errors.productImages?.message}
                     </div>
                   </div>
                 </div>
@@ -691,35 +753,66 @@ export default function ProductAdd() {
                                     arraysVariant1.map((itemVariant1: VariantsRequest) => {
                                       if (arraysVariant2 && arraysVariant2.length > 0) {
                                         return arraysVariant2.map((itemVariant2: VariantsRequest) => {
-                                          return productVariantsWatch?.map((itemProductVariant) => {
-                                            if (
-                                              itemProductVariant.variant1Id === itemVariant1.id &&
-                                              itemProductVariant.variant2Id === itemVariant2.id
-                                            ) {
-                                              return (
-                                                <div key={itemProductVariant.id} className='grid grid-cols-2 relative'>
-                                                  <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
-                                                    <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
-                                                      <div className='border-r-2 pr-2'>
-                                                        <span className='text-md text-[#999999]'>₫</span>
+                                          return productVariantsWatch?.map(
+                                            (itemProductVariant, indexProductVariant) => {
+                                              if (
+                                                itemProductVariant.variant1Id === itemVariant1.id &&
+                                                itemProductVariant.variant2Id === itemVariant2.id
+                                              ) {
+                                                return (
+                                                  <div
+                                                    key={itemProductVariant.id}
+                                                    className='grid grid-cols-2 relative'
+                                                  >
+                                                    <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
+                                                      <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                        <div className='border-r-2 pr-2'>
+                                                          <span className='text-md text-[#999999]'>₫</span>
+                                                        </div>
+                                                        <input
+                                                          {...register(`productVariants.${indexProductVariant}.price`)}
+                                                          type='number'
+                                                          className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                                                          placeholder='Input'
+                                                        />
                                                       </div>
-                                                      <input
-                                                        type='number'
-                                                        className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
-                                                        placeholder='Input'
-                                                      />
+                                                      <div
+                                                        className={`${errors.productVariants?.[indexProductVariant]?.price?.message ? 'visible' : 'invisible'} absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1`}
+                                                      >
+                                                        {errors.productVariants?.[indexProductVariant]?.price?.message}
+                                                      </div>
                                                     </div>
-                                                    <div className='absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1'>
-                                                      Price has exceeded maximum value: 120000000
+                                                    <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
+                                                      <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                        <div className='border-r-2 pr-2'>
+                                                          <span className='text-md text-[#999999]'>₫</span>
+                                                        </div>
+                                                        <input
+                                                          type='number'
+                                                          {...register(
+                                                            `productVariants.${indexProductVariant}.stockQuantity`
+                                                          )}
+                                                          className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                                                          placeholder='Input'
+                                                        />
+                                                      </div>
+                                                      <div
+                                                        className={`${errors.productVariants?.[indexProductVariant]?.stockQuantity?.message ? 'visible' : 'invisible'} absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1`}
+                                                      >
+                                                        {
+                                                          errors.productVariants?.[indexProductVariant]?.stockQuantity
+                                                            ?.message
+                                                        }
+                                                      </div>
                                                     </div>
                                                   </div>
-                                                </div>
-                                              )
+                                                )
+                                              }
                                             }
-                                          })
+                                          )
                                         })
                                       } else {
-                                        return productVariantsWatch?.map((itemProductVariant) => {
+                                        return productVariantsWatch?.map((itemProductVariant, indexProductVariant) => {
                                           if (itemProductVariant.variant1Id === itemVariant1.id) {
                                             return (
                                               <div key={itemProductVariant.id} className='grid grid-cols-2 relative'>
@@ -730,12 +823,38 @@ export default function ProductAdd() {
                                                     </div>
                                                     <input
                                                       type='number'
+                                                      {...register(`productVariants.${indexProductVariant}.price`)}
                                                       className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
                                                       placeholder='Input'
                                                     />
                                                   </div>
-                                                  <div className='absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1'>
-                                                    Price has exceeded maximum value: 120000000
+                                                  <div
+                                                    className={`${errors.productVariants?.[indexProductVariant]?.price?.message ? 'visible' : 'invisible'} absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1`}
+                                                  >
+                                                    {errors.productVariants?.[indexProductVariant]?.price?.message}
+                                                  </div>
+                                                </div>
+                                                <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
+                                                  <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                    <div className='border-r-2 pr-2'>
+                                                      <span className='text-md text-[#999999]'>₫</span>
+                                                    </div>
+                                                    <input
+                                                      type='number'
+                                                      {...register(
+                                                        `productVariants.${indexProductVariant}.stockQuantity`
+                                                      )}
+                                                      className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                                                      placeholder='Input'
+                                                    />
+                                                  </div>
+                                                  <div
+                                                    className={`${errors.productVariants?.[indexProductVariant]?.stockQuantity?.message ? 'visible' : 'invisible'} absolute w-full bottom-0 left-0 text-center mt-1 px-1 h-4 text-[10px] text-[#ff4742] line-clamp-1`}
+                                                  >
+                                                    {
+                                                      errors.productVariants?.[indexProductVariant]?.stockQuantity
+                                                        ?.message
+                                                    }
                                                   </div>
                                                 </div>
                                               </div>
@@ -849,6 +968,38 @@ export default function ProductAdd() {
               </div>
             </div>
 
+            {/* Other */}
+            <div className='p-6 rounded-md bg-white shadow mb-6'>
+              <div className='text-xl text-[#333333] font-bold mb-6'>Others</div>
+              <div className='mb-6'>
+                <div className='grid grid-cols-11 mb-3 items-start'>
+                  <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
+                    <div className='text-sm text-[#333333]'>Condition</div>
+                  </div>
+
+                  <div className='col-span-9'>
+                    <div
+                      className={`w-80 px-2 border h-10 rounded-md flex items-center p-1 ${errors.condition?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
+                    >
+                      <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full'>
+                        <input
+                          type='text'
+                          {...register('condition')}
+                          className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                          placeholder='Input'
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className={`${errors.condition?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
+                    >
+                      {errors.condition?.message}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* submit */}
             <div className='px-6 py-4 shadow-inner flex justify-end sticky bg-[#fff] bottom-0  z-10'>
               <div className='flex flex-row gap-4'>
@@ -861,13 +1012,14 @@ export default function ProductAdd() {
                 <Button
                   className='text-[#999999] bg-white text-sm h-8 w-36 flex items-center justify-center  rounded-md border border-solid border-[#999999]'
                   type='button'
-                  onClick={onSubmit}
+                  onClick={onSubmitIsActiveTrue}
                 >
                   Save and Delist
                 </Button>
                 <Button
                   className='text-white bg-blue text-sm h-8 w-36 flex items-center justify-center  rounded-md'
                   type='button'
+                  onClick={onSubmitIsActiveFalse}
                 >
                   Save and Publish
                 </Button>

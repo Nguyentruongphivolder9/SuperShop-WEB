@@ -11,6 +11,11 @@ const productApi = {
   },
   getProductDetail(id: string) {
     return http.get<SuccessResponse<Product>>(`${URL}/${id}`)
+  },
+  productCreate(body: FormData) {
+    return http.post<SuccessResponse<string>>('products', body, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
   }
 }
 

@@ -51,11 +51,11 @@ export const productSchema = yup.object({
     undefined,
     ''
   >,
-  description: yup
-    .string()
-    .max(3000)
-    .min(100, 'Your product description is too short. Please input at least 100 characters.'),
+  description: yup.string().max(3000).nullable(),
+  // .min(100, 'Your product description is too short. Please input at least 100 characters.'),
+  condition: yup.string().required('This field cannot be empty').max(10),
   isVariant: yup.boolean().required('This field cannot be empty'),
+  isActive: yup.boolean().nullable(),
   productImages: yup
     .array()
     .of(
@@ -70,11 +70,13 @@ export const productSchema = yup.object({
       id: yup.string().required('This field cannot be empty'),
       price: yup
         .number()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
         .required('This field cannot be empty')
-        .max(MAX_STOCK_VALUE, 'Price has exceeded maximum value: ' + MAX_STOCK_VALUE)
-        .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE),
+        .max(MAX_PRICE_VALUE, 'Price has exceeded maximum value: ' + MAX_PRICE_VALUE)
+        .min(MIN_PRICE_VALUE, 'The value should be at least: ' + MIN_PRICE_VALUE),
       stockQuantity: yup
         .number()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
         .required('This field cannot be empty')
         .max(MAX_STOCK_VALUE, 'Stock has exceeded maximum value: ' + MAX_STOCK_VALUE)
         .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE),

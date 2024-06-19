@@ -5,10 +5,11 @@ import { imageFileConvertToUrl } from 'src/utils/utils'
 interface Props {
   id: string
   imageFile: File
-  deleteImage: (id: string) => void
+  index: number
+  deleteImage: (index: number) => void
 }
 
-export default function ImageItem({ id, imageFile, deleteImage }: Props) {
+export default function ImageItem({ id, imageFile, index, deleteImage }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id })
 
   const style = {
@@ -34,7 +35,7 @@ export default function ImageItem({ id, imageFile, deleteImage }: Props) {
           <button
             type='button'
             onClick={() => {
-              deleteImage(id)
+              deleteImage(index)
             }}
             className='w-fit h-fit'
           >

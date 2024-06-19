@@ -47,6 +47,7 @@ export interface ProductRequest {
   description?: string
   condition: string
   isVariant: boolean
+  isActive: boolean
   productImagesRequest: ProductImagesRequest[]
   productVariantsRequest: ProductVariantsRequest[]
   variantsGroupRequest: VariantsGroupRequest[]
