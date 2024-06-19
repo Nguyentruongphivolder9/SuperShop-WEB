@@ -28,6 +28,8 @@ type FormDataProduct = Pick<
   | 'stockQuantity'
   | 'description'
   | 'isVariant'
+  | 'isActive'
+  | 'condition'
   | 'variantsGroup'
   | 'productImages'
   | 'productVariants'
@@ -39,6 +41,8 @@ const createProductSchema = productSchema.pick([
   'stockQuantity',
   'description',
   'isVariant',
+  'isActive',
+  'condition',
   'variantsGroup',
   'productImages',
   'productVariants'
