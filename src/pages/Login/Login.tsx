@@ -12,7 +12,8 @@ import { ErrorResponse } from 'src/types/utils.type'
 import { schema, Schema } from 'src/utils/rules'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
 import { parseJwt } from 'src/utils/auth'
-
+import facebookSvg from "../../assets/logoSvg/Facebook.svg"
+import googleSvg from "../../assets/logoSvg/Google.svg"
 type FormData = Pick<Schema, 'email' | 'password'>
 const loginShema = schema.pick(['email', 'password'])
 export default function Login() {
@@ -70,7 +71,7 @@ export default function Login() {
     })
   })
   return (
-    <div className='bg-orange'>
+    <div className='bg-blue'>
       <div className='container'>
         <div className='grid grid-cols lg:grid-cols-5 py-12 lg:py-32 lg:pr-10'>
           <div className='lg:col-span-2 lg:col-start-4'>
@@ -93,6 +94,16 @@ export default function Login() {
                 placeholder='Password'
                 autoComplete='on'
               />
+                <div className="flex space-x-2 mt-2">
+                <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
+                  <img src={facebookSvg} className="w-4 h-6" alt="Facebook" />
+                  <span className="ml-1 text-gray-700 text-xs">Facebook</span>
+                </button>
+                <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
+                  <img src={googleSvg} className="w-4 h-6" alt="Google" />
+                  <span className="ml-1 text-gray-700 text-xs">Google</span>
+                </button>
+              </div>
               <div className='mt-3'>
                 <Button
                   type='submit'

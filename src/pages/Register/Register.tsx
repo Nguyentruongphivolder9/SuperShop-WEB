@@ -21,10 +21,9 @@ const registerSchema = schema.pick(['email', 'password', 'confirm_password']);
 export default function Register() {
   const navigate = useNavigate();
 
-  //Các biến cho Component Stepper.tsx;
-  const step: number = 3;
-  const messages = ['Enter your email', 'Create a password', 'Confirm your password'];
-  const [currentStep, setCurrentStep] = useState<Number>(1);
+  const step: number = 7;
+  const messages = ['Xác nhận email của bạn', 'Nhập mật khẩu', 'Xác nhận mật khẩu', 'Chơi bóng rổ', 'Dạy Robot', 'Chơi minecraft', 'Final step'];
+  const [currentStep, setCurrentStep] = useState<number>(1);
 
   const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
     resolver: yupResolver(registerSchema)
@@ -56,91 +55,63 @@ export default function Register() {
     });
   });
 
-  const handleGoNextStep = () => {
-
-    console.log('Moving to the next step');
-  };
-
-
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto p-4 bg-blue">
       <Stepper
-        //Step hiej tai
-        current_step={1}
-        // Setup tổng số step mà stepper dùng.
-        steps={3}
-        // Setup các message cho các step.
-        messages={['Enter your email', 'Create a password', 'Confirm your password']}
-        // Step đã complete chưa.
+        current_step={currentStep}
+        steps={step}
+        messages={messages}
         is_complete={registerAccountMutation.isSuccess}
-        //Go to next step 
-        goToNextStep={() => { console.log("Next step") }}
-        //Go to prev step
-        goToPrevStep={() => { console.log("Go to prev step") }}
+        goToNextStep={() => { setCurrentStep(prev => prev + 1) }}
+        goToPrevStep={() => { setCurrentStep(prev => prev - 1) }}
       >
-        <div className="bg-cyan-300 p-8 rounded shadow-md border-r-black">
-          <div className="max-w-md mx-auto">
-            <form className="bg-white p-6 rounded shadow-sm" onSubmit={onSubmit} noValidate>
-              <h2 className="text-2xl mb-6">Đăng ký</h2>
+        <div className="p-2">
+          <div className="max-w-md mx-auto"> 
+            <form className="bg-white p-4 rounded shadow-sm" onSubmit={onSubmit} noValidate>
+              <h2 className="text-xl mb-4">Đăng ký</h2>
               <Input
                 name='email'
                 register={register}
                 type='email'
-                className='mt-8'
+                className='mt-4'
                 errorMessage={errors.email?.message}
                 placeholder='Email'
               />
-              <Input
-                name='password'
-                register={register}
-                type='password'
-                className='mt-8'
-                errorMessage={errors.password?.message}
-                placeholder='Password'
-                autoComplete='on'
-              />
-              <Input
-                name='confirm_password'
-                register={register}
-                type='password'
-                className='mt-8'
-                errorMessage={errors.confirm_password?.message}
-                placeholder='Confirm_password'
-                autoComplete='on'
-              />
+            
               <div className='mt-3'>
                 <Button
                   type='submit'
-                  className='flex items-center justify-center w-full text-center py-4 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600'
+                  className='flex items-center justify-center w-full text-center py-2 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600'
                   isLoading={registerAccountMutation.isPending}
-                  disabled={registerAccountMutation.isPending}                  >
-                  Đăng ký
+                  disabled={registerAccountMutation.isPending}                  
+                >
+                 Tiếp theo
                 </Button>
               </div>
-              <div className="flex items-center justify-between mt-6">
-                <hr className="w-5/12 border-gray-300" />
-                <span className="text-gray-500">Hoặc</span>
-                <hr className="w-5/12 border-gray-300" />
+              <div className="flex items-center justify-between mt-4">
+                <hr className="w-4/12 border-gray-300" />
+                <span className="text-gray-500 text-xs">Hoặc</span>
+                <hr className="w-4/12 border-gray-300" />
               </div>
-              <div className="flex space-x-4 mt-4">
-                <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={facebookSvg} className="w-6 h-6" alt="Facebook" />
-                  <span className="ml-2 text-gray-700">Facebook</span>
+              <div className="flex space-x-2 mt-2">
+                <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
+                  <img src={facebookSvg} className="w-4 h-6" alt="Facebook" />
+                  <span className="ml-1 text-gray-700 text-xs">Facebook</span>
                 </button>
-                <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={googleSvg} className="w-6 h-6" alt="Google" />
-                  <span className="ml-2 text-gray-700">Google</span>
+                <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
+                  <img src={googleSvg} className="w-4 h-6" alt="Google" />
+                  <span className="ml-1 text-gray-700 text-xs">Google</span>
                 </button>
               </div>
-              <div className="mt-4 text-center">
-                <span className="text-gray-500">Bạn đã có tài khoản?</span>
-                <Link to={'/login'} className="text-red-500 ml-1">Đăng nhập</Link>
+              <div className="mt-2 text-center">
+                <span className="text-gray-500 text-xs">Bạn đã có tài khoản?</span>
+                <Link to={'/login'} className="text-red-500 ml-1 text-xs">Đăng nhập</Link>
               </div>
             </form>
             <button
-              className="mt-4 px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600"
-              onClick={handleGoNextStep} // Thêm sự kiện nhấp vào nút Next Step
+              className="mt-2 px-2 py-1 bg-blue-500 text-black rounded hover:bg-blue-600 text-xs"
+              onClick={() => {setCurrentStep(prev => prev + 1)}}
             >
               Next Step
             </button>
@@ -150,4 +121,3 @@ export default function Register() {
     </div >
   );
 }
-

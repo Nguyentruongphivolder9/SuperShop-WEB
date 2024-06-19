@@ -9,3 +9,9 @@ export type StepperProps = {
     goToPrevStep: () => void;
     goToNextStep: () => void;
 }
+
+export type StepperIcons = {
+    is_active : boolean;
+    is_complete: boolean;
+    step_number: number;
+}
