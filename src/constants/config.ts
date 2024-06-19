@@ -1,5 +1,5 @@
 const config = {
-  baseURL: '',
+  baseURL: 'http://localhost:8080',
   maxSizeUploadAvatar: 1048576 // bytes
 }
 

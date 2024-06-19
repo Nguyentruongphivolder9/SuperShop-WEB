@@ -1,4 +1,4 @@
-type Role = 'User' | 'Admin'
+type Role = 'USER' | 'ADMIN'
 export interface User {
   _id: string
   roles: Role[]

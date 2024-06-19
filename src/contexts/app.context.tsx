@@ -45,7 +45,7 @@ const createProductSchema = productSchema.pick([
 ])
 
 const initialAppContext: AppContextInterface = {
-  isAuthenticated: Boolean(true), // getAccessTokenFromCookies(),
+  isAuthenticated: Boolean(false), // getAccessTokenFromCookies(),
   setIsAuthenticated: () => null,
   profile: getProfileFromLs(),
   setProfile: () => null,
