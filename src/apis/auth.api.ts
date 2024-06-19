@@ -2,8 +2,8 @@ import { AuthResponse } from 'src/types/auth.type'
 import http from 'src/utils/http'
 import config from 'src/constants/config'
 
-export const URL_LOGIN = 'api/v1/auth/login'
-export const URl_REGISTER = 'register'
+export const URL_LOGIN = 'auth/login'
+export const URl_REGISTER = 'auth/register'
 export const URL_LOGOUT = 'logout'
 export const URL_REFRESH_TOKEN = 'refresh-access-token'
 
@@ -17,6 +17,9 @@ const authApi = {
   logout() {
     return http.post(URL_LOGOUT)
   }
+
+  
 }
 
 export default authApi
+

@@ -89,18 +89,18 @@ export default function Register() {
                  Tiếp theo
                 </Button>
               </div>
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-6 mb-6">
                 <hr className="w-4/12 border-gray-300" />
                 <span className="text-gray-500 text-xs">Hoặc</span>
                 <hr className="w-4/12 border-gray-300" />
               </div>
               <div className="flex space-x-2 mt-2">
                 <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={facebookSvg} className="w-4 h-6" alt="Facebook" />
+                  <img src={facebookSvg} className="w-7 h-8" alt="Facebook" />
                   <span className="ml-1 text-gray-700 text-xs">Facebook</span>
                 </button>
                 <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={googleSvg} className="w-4 h-6" alt="Google" />
+                  <img src={googleSvg} className="w-7 h-8" alt="Google" />
                   <span className="ml-1 text-gray-700 text-xs">Google</span>
                 </button>
               </div>
