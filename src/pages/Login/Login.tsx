@@ -1,75 +1,64 @@
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useMutation } from '@tanstack/react-query';
+import { useContext } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import authApi from 'src/apis/auth.api';
+import Button from 'src/components/Button';
+import Input from 'src/components/Input';
+import { AppContext } from 'src/contexts/app.context';
+import { ErrorResponse } from 'src/types/utils.type';
+import { schema, Schema } from 'src/utils/rules';
+import { isAxiosUnprocessableEntityError } from 'src/utils/utils';
+import { parseJwt } from 'src/utils/auth';
+import facebookSvg from '../../assets/logoSvg/Facebook.svg';
+import googleSvg from '../../assets/logoSvg/Google.svg';
+import { profile } from 'console';
 
-import { yupResolver } from '@hookform/resolvers/yup'
-import { useMutation } from '@tanstack/react-query'
-import { useContext } from 'react'
-import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
-import authApi from 'src/apis/auth.api'
-import Button from 'src/components/Button'
-import Input from 'src/components/Input'
-import { AppContext } from 'src/contexts/app.context'
-import { ErrorResponse } from 'src/types/utils.type'
-import { schema, Schema } from 'src/utils/rules'
-import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
-import { parseJwt } from 'src/utils/auth'
-import facebookSvg from "../../assets/logoSvg/Facebook.svg"
-import googleSvg from "../../assets/logoSvg/Google.svg"
-type FormData = Pick<Schema, 'email' | 'password'>
-const loginShema = schema.pick(['email', 'password'])
+type FormData = Pick<Schema, 'email' | 'password'>;
+
+const loginSchema = schema.pick(['email', 'password']);
+
 export default function Login() {
-  const { setIsAuthenticated, setProfile } = useContext(AppContext)
-  const navigate = useNavigate()
+  const { setIsAuthenticated, setProfile } = useContext(AppContext);
+  const navigate = useNavigate();
+  
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors }
   } = useForm<FormData>({
-    resolver: yupResolver(loginShema)
-  })
+    resolver: yupResolver(loginSchema)
+  });
 
   const loginMutation = useMutation({
     mutationFn: (body: Omit<FormData, 'confirm_password'>) => authApi.login(body)
-  })
+  });
 
   const onSubmit = handleSubmit((data) => {
     loginMutation.mutate(data, {
       onSuccess: (data) => {
-        // setIsAuthenticated(true)
-        // parseJwt();
-        console.log(data.data.body.accessToken);
-        console.log(parseJwt(data.data.body.accessToken))
-        // setProfile(data?.data?.data?.user)
-        // navigate('/')
+        setIsAuthenticated(true);
+        setProfile(parseJwt(data.data.data.accessToken))
+        navigate('/');
       },
       onError: (error) => {
         if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {
-          const formError = error.response?.data.data
-          console.log(formError)
+          const formError = error.response?.data.data;
           if (formError) {
             Object.keys(formError).forEach((key) => {
               setError(key as keyof FormData, {
                 message: formError[key as keyof FormData],
                 type: 'Server'
-              })
-            })
+              });
+            });
           }
-          // if (formError?.email) {
-          //   setError('email', {
-          //     message: formError.email,
-          //     type: 'Server'
-          //   })
-          // }
-          // if (formError?.password) {
-          //   setError('email', {
-          //     message: formError.password,
-          //     type: 'Server'
-          //   })
-          // }
         }
       }
-    })
-  })
+    });
+  });
+
   return (
     <div className='bg-blue'>
       <div className='container'>
@@ -94,13 +83,18 @@ export default function Login() {
                 placeholder='Password'
                 autoComplete='on'
               />
-                <div className="flex space-x-2 mt-2">
-                <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={facebookSvg} className="w-4 h-6" alt="Facebook" />
+              <div className="flex items-center justify-between mt-6 mb-6">
+                <hr className="w-4/12 border-gray-300" />
+                <span className="text-gray-500 text-xs">Hoặc</span>
+                <hr className="w-4/12 border-gray-300" />
+              </div>
+              <div className="flex space-x-2 mt-2">
+                <button type="button" className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
+                  <img src={facebookSvg} className="w-7 h-8" alt="Facebook" />
                   <span className="ml-1 text-gray-700 text-xs">Facebook</span>
                 </button>
-                <button className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={googleSvg} className="w-4 h-6" alt="Google" />
+                <button type="button" className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
+                  <img src={googleSvg} className="w-7 h-8" alt="Google" />
                   <span className="ml-1 text-gray-700 text-xs">Google</span>
                 </button>
               </div>
@@ -109,12 +103,11 @@ export default function Login() {
                   type='submit'
                   className='flex items-center justify-center w-full text-center py-4 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600'
                   isLoading={loginMutation.isPending}
-                  disabled={loginMutation.isPending}
+                  disabled={loginMutation.isPaused}
                 >
                   Đăng nhập
                 </Button>
               </div>
-
               <div className='mt-8 text-center'>
                 <div className='flex items-center justify-center'>
                   <span className='text-gray-400'>Bạn chưa có tài khoản?</span>
@@ -128,5 +121,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }
