@@ -1,6 +1,5 @@
-import { useContext, useEffect, useRef } from 'react'
-import { useWatch } from 'react-hook-form'
-import { AppContext } from 'src/contexts/app.context'
+import { useContext, useRef } from 'react'
+import { ProductAddContext } from 'src/contexts/productAdd.context'
 
 interface Props {
   indexVariants: number
@@ -18,40 +17,31 @@ export default function InputValueOfVariation({
   sizeVariants
 }: Props) {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
-  const { productMethods } = useContext(AppContext)
+  const { productMethods } = useContext(ProductAddContext)
 
   const {
     register,
     watch,
-    setError,
-    clearErrors,
-    control,
     formState: { errors }
   } = productMethods
 
-  const arraysVariantsGroupTest = useWatch({
-    control,
-    name: 'variantsGroup'
-  })
+  // useEffect(() => {
+  //   arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((variant, index) => {
+  //     const { name } = variant
 
-  useEffect(() => {
-    arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((variant, index) => {
-      const { name } = variant
-
-      if (name !== null && name !== undefined && name !== '') {
-        clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
-        arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
-          console.log(otherIndex + ': ' + otherVariant.name)
-          if (index !== otherIndex && otherVariant.name === name) {
-            setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
-              type: 'unique',
-              message: 'Options of variations should be different.'
-            })
-          }
-        })
-      }
-    })
-  }, [arraysVariantsGroupTest, setError, indexVariantsGroup, clearErrors])
+  //     if (name !== null && name !== undefined && name !== '') {
+  //       clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
+  //       arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
+  //         if (index !== otherIndex && otherVariant.name === name) {
+  //           setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
+  //             type: 'unique',
+  //             message: 'Options of variations should be different.'
+  //           })
+  //         }
+  //       })
+  //     }
+  //   })
+  // }, [arraysVariantsGroupTest, setError, indexVariantsGroup, clearErrors])
 
   const handleUploadImage = () => {
     fileInputImagesRef.current?.click()

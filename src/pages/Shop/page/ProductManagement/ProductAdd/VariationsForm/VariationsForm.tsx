@@ -1,9 +1,9 @@
-import VariantGroup from 'src/pages/Shop/components/VariantGroup'
+import VariantGroup from 'src/pages/Shop/page/ProductManagement/ProductAdd/VariantGroup'
 import { VariantsGroupRequest } from 'src/types/product.type'
 
 interface Props {
   handlerAddVariations: () => void
-  handlerRemoveVariations: (id: string, index: number) => void
+  handlerRemoveVariations: (index: number) => void
   variantsGroup?: VariantsGroupRequest[]
 }
 

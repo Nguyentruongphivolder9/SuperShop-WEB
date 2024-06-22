@@ -49,28 +49,26 @@ export interface ProductRequest {
   isVariant: boolean
   isActive: boolean
   productImagesRequest: ProductImagesRequest[]
-  productVariantsRequest: ProductVariantsRequest[]
-  variantsGroupRequest: VariantsGroupRequest[]
+  productVariantsRequest?: ProductVariantsRequest[]
+  variantsGroupRequest?: VariantsGroupRequest[]
 }
 
 export interface VariantsGroupRequest {
-  variants?: VariantsRequest[]
-  name: string
   id: string
+  name: string
   isPrimary: boolean
-  isActive: boolean
+  variants: VariantsRequest[]
 }
 
 export interface ProductImagesRequest {
   id: string
-  imageFile: File
+  imageUrl: string
 }
 
 export interface VariantsRequest {
   id: string
-  imageUrl?: any | null | undefined
+  imageUrl?: string | null | undefined
   name: string
-  isActive: boolean
 }
 
 export interface ProductVariantsRequest {
@@ -79,6 +77,10 @@ export interface ProductVariantsRequest {
   stockQuantity: number
   variantsGroup1Id: string
   variant1Id: string
-  variantsGroup2Id: string
-  variant2Id: string
+  variantsGroup2Id?: string
+  variant2Id?: string
+}
+export interface PreviewImagesResponse {
+  id: string
+  preImageUrl: string
 }

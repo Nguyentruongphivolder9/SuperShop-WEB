@@ -1,15 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { imageFileConvertToUrl } from 'src/utils/utils'
 
+const S3_BUCKET_URL = 'https://super-shop.s3.ap-south-1.amazonaws.com/products'
 interface Props {
   id: string
-  imageFile: File
+  imageUrl: string
   index: number
-  deleteImage: (index: number) => void
+  deleteImage: (id: string, index: number) => void
 }
 
-export default function ImageItem({ id, imageFile, index, deleteImage }: Props) {
+export default function ImageItem({ id, imageUrl, index, deleteImage }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id })
 
   const style = {
@@ -26,7 +26,7 @@ export default function ImageItem({ id, imageFile, index, deleteImage }: Props) 
       <img
         {...listeners}
         className='object-cover h-full w-full cursor-move'
-        src={imageFileConvertToUrl(imageFile)}
+        src={`${S3_BUCKET_URL}/${imageUrl}`}
         alt={'upload file'}
       />
       <div className='absolute bottom-0 left-0 w-full h-6 bg-[#333333] hidden group-hover:grid group-hover:grid-cols-2 '>
@@ -35,7 +35,7 @@ export default function ImageItem({ id, imageFile, index, deleteImage }: Props) 
           <button
             type='button'
             onClick={() => {
-              deleteImage(index)
+              deleteImage(id, index)
             }}
             className='w-fit h-fit'
           >

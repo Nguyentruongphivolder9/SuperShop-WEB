@@ -8,18 +8,26 @@ import {
   closestCorners,
   DragEndEvent
 } from '@dnd-kit/core'
-import { arrayMove, sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import ImageItem from './ImageItem'
 import CategoryList from './CategoryList'
 import { Link } from 'react-router-dom'
 import VariationsForm from './VariationsForm'
-import { generateUniqueId, imageFileConvertToUrl } from 'src/utils/utils'
+import { generateUniqueId } from 'src/utils/utils'
 import { FormProvider, useFieldArray, useWatch } from 'react-hook-form'
 import Button from 'src/components/Button'
-import { ProductImagesRequest, ProductVariantsRequest, VariantsRequest } from 'src/types/product.type'
-import { AppContext } from 'src/contexts/app.context'
+import {
+  ProductImagesRequest,
+  ProductVariantsRequest,
+  VariantsGroupRequest,
+  VariantsRequest
+} from 'src/types/product.type'
 import productApi from 'src/apis/product.api'
 import { useMutation } from '@tanstack/react-query'
+import TipTapEditor from './TipTapEditor'
+import { ProductAddContext } from 'src/contexts/productAdd.context'
+
+const S3_BUCKET_URL = 'https://super-shop.s3.ap-south-1.amazonaws.com/products'
 
 export default function ProductAdd() {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
@@ -28,7 +36,7 @@ export default function ProductAdd() {
   const [isDisplayFormVariations, setIsDisplayFormVariations] = useState(false)
   const [arraysVariant1, setArraysVariant1] = useState<VariantsRequest[]>([])
   const [arraysVariant2, setArraysVariant2] = useState<VariantsRequest[]>([])
-  const { productMethods } = useContext(AppContext)
+  const { productMethods } = useContext(ProductAddContext)
 
   const {
     register,
@@ -43,7 +51,7 @@ export default function ProductAdd() {
   } = productMethods
 
   const {
-    fields: arraysVariantsGroup,
+    fields: fieldsVariantsGroup,
     append: appendVariantsGroup,
     remove: removeVariantsGroup,
     update: updateVariantsGroup,
@@ -80,6 +88,17 @@ export default function ProductAdd() {
     name: 'productImages'
   })
 
+  const productCreateMutation = useMutation({
+    mutationFn: productApi.productCreate
+  })
+
+  const preCheckImageCreateMutation = useMutation({
+    mutationFn: productApi.preCheckImageInfoProCreate
+  })
+  const preCheckImageDeleteMutation = useMutation({
+    mutationFn: productApi.preCheckImageInfoProRemove
+  })
+
   useEffect(() => {
     setImages(productImagesWatch as ProductImagesRequest[])
   }, [productImagesWatch])
@@ -88,9 +107,9 @@ export default function ProductAdd() {
     fileInputImagesRef.current?.click()
   }
 
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
-    const arraysImage: ProductImagesRequest[] = []
+    const formData = new FormData()
 
     if (!files || files.length === 0) return
 
@@ -108,13 +127,24 @@ export default function ProductAdd() {
 
       if (files[i].size > 2097152) continue
 
-      const newImage = {
-        id: generateUniqueId(),
-        imageFile: files[i]
-      }
-      arraysImage.push(newImage)
+      formData.append('imageFiles', files[i])
     }
-    appendProductImages(arraysImage)
+
+    try {
+      const arraysImage: ProductImagesRequest[] = []
+      const responsePreCheckImage = await preCheckImageCreateMutation.mutateAsync(formData)
+      const resultPreCheckImage = responsePreCheckImage.data.body
+      resultPreCheckImage?.forEach((item) => {
+        const newImage = {
+          id: item.id,
+          imageUrl: item.preImageUrl
+        }
+        arraysImage.push(newImage)
+      })
+      appendProductImages(arraysImage)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const sensors = useSensors(
@@ -137,8 +167,13 @@ export default function ProductAdd() {
     moveProductImages(originalPos, newPos)
   }
 
-  const deleteImage = (index: number) => {
-    removeProductImages(index)
+  const deleteImage = async (id: string, index: number) => {
+    try {
+      await preCheckImageDeleteMutation.mutateAsync(id)
+      removeProductImages(index)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const handlerShowCategoryList = () => {
@@ -151,7 +186,7 @@ export default function ProductAdd() {
     }
   }
 
-  const handlerRemoveVariations = (id: string, index: number) => {
+  const handlerRemoveVariations = (index: number) => {
     if (
       variantsGroupWatch === null ||
       variantsGroupWatch === undefined ||
@@ -173,7 +208,6 @@ export default function ProductAdd() {
         const variantsGroup = variantsGroupWatch.find((item, idx) => idx !== index && item.isPrimary === false)
 
         if (variantsGroup !== undefined) {
-          console.log(variantsGroup)
           replaceProductVariants([])
           const newObjectProductVariant: ProductVariantsRequest[] = []
 
@@ -221,13 +255,13 @@ export default function ProductAdd() {
   }
 
   const handlerAddVariations = () => {
-    if (arraysVariantsGroup.length >= 2) {
+    if (fieldsVariantsGroup.length >= 2) {
       return
-    } else if (arraysVariantsGroup.length === 1) {
+    } else if (fieldsVariantsGroup.length === 1) {
       const newVariant2 = {
         id: generateUniqueId(),
         name: '',
-        imageFile: '',
+        imageUrl: '',
         isActive: true
       }
 
@@ -240,7 +274,7 @@ export default function ProductAdd() {
       }
 
       replaceProductVariants([])
-      arraysVariantsGroup.forEach((itemVariantsGroup) => {
+      variantsGroupWatch?.forEach((itemVariantsGroup) => {
         if (itemVariantsGroup.isPrimary) {
           itemVariantsGroup.variants?.forEach((itemVariant1) => {
             const newProductVariant = {
@@ -252,17 +286,17 @@ export default function ProductAdd() {
               variantsGroup2Id: newVariantGroup2.id,
               variant2Id: newVariant2.id
             }
-            appendProductVariants(newProductVariant)
+            appendProductVariants([newProductVariant])
           })
         }
       })
 
-      appendVariantsGroup(newVariantGroup2)
+      appendVariantsGroup([newVariantGroup2])
     } else {
       const newVariant = {
         id: generateUniqueId(),
         name: '',
-        imageFile: '',
+        imageUrl: '',
         isActive: true
       }
       const newVariantGroup = {
@@ -282,8 +316,8 @@ export default function ProductAdd() {
         variantsGroup2Id: null,
         variant2Id: null
       }
-      appendProductVariants(newProductVariant)
-      appendVariantsGroup(newVariantGroup)
+      appendProductVariants([newProductVariant])
+      appendVariantsGroup([newVariantGroup])
       setIsDisplayFormVariations(true)
       setValue('isVariant', true)
     }
@@ -298,60 +332,14 @@ export default function ProductAdd() {
       } else {
         setArraysVariant2(item.variants as VariantsRequest[])
       }
-
-      variantsGroupWatch?.forEach((variantGroup, index) => {
-        const { name } = variantGroup
-        if (name !== null && name !== undefined && name !== '') {
-          variantsGroupWatch?.forEach((otherVariantGroup, otherIndex) => {
-            if (index !== otherIndex && otherVariantGroup.name === name) {
-              // console.log(index + ': ' + name)
-              setError(`variantsGroup.${index}.name`, {
-                type: 'unique',
-                message: 'Options of variations should be different.'
-              })
-            }
-          })
-        }
-      })
     })
   }, [variantsGroupWatch, setError])
 
-  const productCreateMutation = useMutation({
-    mutationFn: productApi.productCreate
-  })
-
   const onSubmitIsActiveTrue = handleSubmit(async (data) => {
-    data.isActive = true
     try {
-      // const arraysVariantsGroupTest = getValues('variantsGroup')
-      // arraysVariantsGroupTest?.forEach((variantGroup, index) => {
-      //   const { name } = variantGroup
-      //   console.log(name)
-      //   if (name !== null && name !== undefined && name !== '') {
-      //     arraysVariantsGroupTest?.forEach((otherVariantGroup, otherIndex) => {
-      //       if (index !== otherIndex && otherVariantGroup.name === name) {
-      //         setError(`variantsGroup.${index}.name`, {
-      //           type: 'unique',
-      //           message: 'Options of variations should be different.'
-      //         })
-      //       }
-      //     })
-      //   }
-
-      // if (name !== null && name !== undefined && name !== '') {
-      //   clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
-      //   arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
-      //     console.log(otherIndex + ': ' + otherVariant.name)
-      //     if (index !== otherIndex && otherVariant.name === name) {
-      //       setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
-      //         type: 'unique',
-      //         message: 'Options of variations should be different.'
-      //       })
-      //     }
-      //   })
-      // }
-      // })
       console.log(data)
+      // const createProRes = await productCreateMutation.mutateAsync(data as FormDataProduct)
+      // console.log(createProRes)
     } catch (error) {
       console.log(error)
     }
@@ -427,7 +415,7 @@ export default function ProductAdd() {
                               key={image.id}
                               id={image.id as string}
                               index={index}
-                              imageFile={image.imageFile as File}
+                              imageUrl={image.imageUrl}
                               deleteImage={deleteImage}
                             />
                           ))}
@@ -485,7 +473,7 @@ export default function ProductAdd() {
                         <div className='group w-24 h-24 relative border-dashed border-2 border-blue rounded-md overflow-hidden flex items-center'>
                           <img
                             className='object-cover h-full w-full'
-                            src={imageFileConvertToUrl(images[0].imageFile)}
+                            src={`${S3_BUCKET_URL}/${images[0].imageUrl}`}
                             alt={'upload file'}
                           />
                         </div>
@@ -591,12 +579,12 @@ export default function ProductAdd() {
                     <div className='text-sm text-[#333333]'>Product Description</div>
                   </div>
                   <div className='col-span-9 relative'>
-                    {/* <Editor /> */}
-                    {/* <div
-                      className={`${errors.name?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
+                    <TipTapEditor control={control} />
+                    <div
+                      className={`${errors.description?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
                     >
-                      {errors.name?.message}
-                    </div> */}
+                      {errors.description?.message}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -632,7 +620,7 @@ export default function ProductAdd() {
 
                   {isDisplayFormVariations ? (
                     <VariationsForm
-                      variantsGroup={arraysVariantsGroup}
+                      variantsGroup={fieldsVariantsGroup as VariantsGroupRequest[]}
                       handlerAddVariations={handlerAddVariations}
                       handlerRemoveVariations={handlerRemoveVariations}
                     />

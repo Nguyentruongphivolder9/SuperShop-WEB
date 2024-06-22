@@ -22,6 +22,7 @@ import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsLi
 import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
 import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
+import { ProductAddProvider } from 'src/contexts/productAdd.context'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -131,7 +132,11 @@ const ClientRoutes = [
           },
           {
             path: path.productAdd,
-            element: <ProductAdd></ProductAdd>
+            element: (
+              <ProductAddProvider>
+                <ProductAdd></ProductAdd>
+              </ProductAddProvider>
+            )
           }
         ]
       }
