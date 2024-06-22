@@ -11,13 +11,11 @@ import { ErrorResponse } from 'src/types/utils.type';
 import { schema, Schema } from 'src/utils/rules';
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils';
 import { parseJwt } from 'src/utils/auth';
-import facebookSvg from '../../assets/logoSvg/Facebook.svg';
-import googleSvg from '../../assets/logoSvg/Google.svg';
-import { profile } from 'console';
+import facebookSvg from '../../assets/logoSvg/faceBookSvg.svg';
+import googleSvg from '../../assets/logoSvg/googleSvg.svg';
+type FormData = Pick<Schema, 'email' | 'password'| 'confirm_password'>;
 
-type FormData = Pick<Schema, 'email' | 'password'>;
-
-const loginSchema = schema.pick(['email', 'password']);
+const loginSchema = schema.pick(['email', 'password','confirm_password']);
 
 export default function Login() {
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
@@ -72,7 +70,7 @@ export default function Login() {
                 type='email'
                 className='mt-8'
                 errorMessage={errors.email?.message}
-                placeholder='Email'
+                placeholder='Nhập Email của bạn'
               />
               <Input
                 name='password'
@@ -80,24 +78,33 @@ export default function Login() {
                 type='password'
                 className='mt-8'
                 errorMessage={errors.password?.message}
-                placeholder='Password'
+                placeholder='Nhập mật khẩu của bạn'
+                autoComplete='on'
+              />
+               <Input
+                name='confirm_password'
+                register={register}
+                type='password'
+                className='mt-8'
+                errorMessage={errors.password?.message}
+                placeholder='Nhập lại mật khẩu của bạn'
                 autoComplete='on'
               />
               <div className="flex items-center justify-between mt-6 mb-6">
                 <hr className="w-4/12 border-gray-300" />
-                <span className="text-gray-500 text-xs">Hoặc</span>
+                <span className="text-gray-500 text-md">Hoặc</span>
                 <hr className="w-4/12 border-gray-300" />
               </div>
               <div className="flex space-x-2 mt-2">
-                <button type="button" className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={facebookSvg} className="w-7 h-8" alt="Facebook" />
-                  <span className="ml-1 text-gray-700 text-xs">Facebook</span>
+                <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
+                    <img src={facebookSvg} alt="Facebook" className="w-7 h-7" />
+                    <span className="ml-1 text-gray-700 text-md">Facebook</span>
                 </button>
-                <button type="button" className="flex items-center justify-center w-full py-1 border border-gray-300 rounded hover:bg-gray-100">
-                  <img src={googleSvg} className="w-7 h-8" alt="Google" />
-                  <span className="ml-1 text-gray-700 text-xs">Google</span>
+                <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
+                    <img src={googleSvg} alt="Google" className="w-7 h-7" />
+                    <span className="ml-1 text-gray-700 text-md">Google</span>
                 </button>
-              </div>
+            </div>
               <div className='mt-3'>
                 <Button
                   type='submit'
