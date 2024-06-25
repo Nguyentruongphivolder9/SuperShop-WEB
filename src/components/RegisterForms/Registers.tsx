@@ -59,22 +59,34 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
             <form className="bg-white pb-4 rounded-2" onSubmit={onSubmit} noValidate>
                 {current_step === 1 && (
                     isWaitingForVerification ? (
-                        <div className="verification-container bg-gray-100 p-6 shadow-lg  max-w-md mx-auto mt-10">
+                        <div className="verification-container bg-gray-100 p-6 shadow-lg max-w-md mx-auto mt-10">
                             <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Kiểm tra hòm thư của bạn</h2>
-                            <ul className="text-center text-gray-700 bg-green-100 rounded-lg p-6">
+                            <div className="flex items-center justify-center mb-6">
+                                <button
+                                    type='button'
+                                    className='inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow text-white bg-red-500 hover:bg-red-400 transition ease-in-out duration-150 cursor-not-allowed'
+                                >
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Chờ đợi xác thực từ bạn...
+                                </button>
+                            </div>
+                            <ul className="text-center list-disc text-gray-700 bg-green-100 rounded-lg p-6">
                                 <li className="mb-4">
-                                    Hãy vào Gmail <a href={`https://mail.google.com/mail/u/0/#inbox`} className='underline font-bold' target="_blank" >{yourEmail}</a> của bạn và ấn vào nút xác nhận được đính kèm bên trong thư.
+                                    Hãy vào Gmail <a href={`https://mail.google.com/mail/u/0/#inbox`} className='underline font-semibold text-indigo-700' target="_blank" >{yourEmail}</a> của bạn và ấn vào nút xác nhận được đính kèm bên trong thư.
                                 </li>
                                 <li className="mb-4">
                                     Nếu bạn không thấy email xác nhận, hãy nhấn vào nút
                                 </li>
-                                <li>
-                                    <a
-                                        className='py-2 px-4 uppercase bg-blue text-white text-sm font-medium rounded-md hover:bg-cyan-400 inline-block'
-                                        href='/anhtien'>
-                                        Gửi lại
-                                    </a>
-                                </li>
+
+                                <a
+                                    className='py-2 px-4 uppercase bg-blue text-white text-sm font-medium hover:bg-cyan-400 inline-block'
+                                    href='/anhtien'>
+                                    Gửi lại
+                                </a>
+
                             </ul>
                             <div className="flex justify-between pt-7">
                                 <Button
@@ -92,6 +104,8 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                                 </Button>
                             </div>
                         </div>
+
+
                     ) : (
                         <>
                             <Input
