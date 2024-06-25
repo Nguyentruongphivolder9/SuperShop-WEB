@@ -134,6 +134,8 @@ export default function ProductAdd() {
       const arraysImage: ProductImagesRequest[] = []
       const responsePreCheckImage = await preCheckImageCreateMutation.mutateAsync(formData)
       const resultPreCheckImage = responsePreCheckImage.data.body
+      console.log(resultPreCheckImage)
+
       resultPreCheckImage?.forEach((item) => {
         const newImage = {
           id: item.id,
@@ -336,6 +338,7 @@ export default function ProductAdd() {
   }, [variantsGroupWatch, setError])
 
   const onSubmitIsActiveTrue = handleSubmit(async (data) => {
+    data.isActive = true
     try {
       console.log(data)
       // const createProRes = await productCreateMutation.mutateAsync(data as FormDataProduct)
@@ -348,34 +351,6 @@ export default function ProductAdd() {
   const onSubmitIsActiveFalse = handleSubmit(async (data) => {
     data.isActive = false
     try {
-      // const arraysVariantsGroupTest = getValues('variantsGroup')
-      // arraysVariantsGroupTest?.forEach((variantGroup, index) => {
-      //   const { name } = variantGroup
-      //   console.log(name)
-      //   if (name !== null && name !== undefined && name !== '') {
-      //     arraysVariantsGroupTest?.forEach((otherVariantGroup, otherIndex) => {
-      //       if (index !== otherIndex && otherVariantGroup.name === name) {
-      //         setError(`variantsGroup.${index}.name`, {
-      //           type: 'unique',
-      //           message: 'Options of variations should be different.'
-      //         })
-      //       }
-      //     })
-      //   }
-
-      // if (name !== null && name !== undefined && name !== '') {
-      //   clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
-      //   arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
-      //     console.log(otherIndex + ': ' + otherVariant.name)
-      //     if (index !== otherIndex && otherVariant.name === name) {
-      //       setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
-      //         type: 'unique',
-      //         message: 'Options of variations should be different.'
-      //       })
-      //     }
-      //   })
-      // }
-      // })
       console.log(data)
     } catch (error) {
       console.log(error)
@@ -753,7 +728,9 @@ export default function ProductAdd() {
                                                     className='grid grid-cols-2 relative'
                                                   >
                                                     <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
-                                                      <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                      <div
+                                                        className={`${errors.productVariants?.[indexProductVariant]?.price?.message ? 'border-[#ff4742]' : 'hover:border-[#999999] border-gray-300'} bg-white rounded-sm border-[1px] p-1 flex items-center flex-row justify-between w-full`}
+                                                      >
                                                         <div className='border-r-2 pr-2'>
                                                           <span className='text-md text-[#999999]'>₫</span>
                                                         </div>
@@ -771,7 +748,9 @@ export default function ProductAdd() {
                                                       </div>
                                                     </div>
                                                     <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
-                                                      <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                      <div
+                                                        className={`${errors.productVariants?.[indexProductVariant]?.stockQuantity?.message ? 'border-[#ff4742]' : 'hover:border-[#999999] border-gray-300'} bg-white rounded-sm border-[1px] p-1 flex items-center flex-row justify-between w-full`}
+                                                      >
                                                         <div className='border-r-2 pr-2'>
                                                           <span className='text-md text-[#999999]'>₫</span>
                                                         </div>
@@ -805,7 +784,9 @@ export default function ProductAdd() {
                                             return (
                                               <div key={itemProductVariant.id} className='grid grid-cols-2 relative'>
                                                 <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
-                                                  <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                  <div
+                                                    className={`${errors.productVariants?.[indexProductVariant]?.price?.message ? 'border-[#ff4742]' : 'hover:border-[#999999] border-gray-300'} bg-white rounded-sm border-[1px] p-1 flex items-center flex-row justify-between w-full`}
+                                                  >
                                                     <div className='border-r-2 pr-2'>
                                                       <span className='text-md text-[#999999]'>₫</span>
                                                     </div>
@@ -823,7 +804,9 @@ export default function ProductAdd() {
                                                   </div>
                                                 </div>
                                                 <div className='px-5 relative min-h-16 col-span-1 py-3 flex flex-col justify-center items-start text-sm text-center border-[1px] border-gray-300'>
-                                                  <div className='bg-white rounded-sm border-[1px] border-gray-300 p-1 flex items-center flex-row justify-between w-full'>
+                                                  <div
+                                                    className={`${errors.productVariants?.[indexProductVariant]?.stockQuantity?.message ? 'border-[#ff4742]' : 'hover:border-[#999999] border-gray-300'} bg-white rounded-sm border-[1px] p-1 flex items-center flex-row justify-between w-full`}
+                                                  >
                                                     <div className='border-r-2 pr-2'>
                                                       <span className='text-md text-[#999999]'>₫</span>
                                                     </div>
@@ -967,21 +950,21 @@ export default function ProductAdd() {
 
                   <div className='col-span-9'>
                     <div
-                      className={`w-80 px-2 border h-10 rounded-md flex items-center p-1 ${errors.condition?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
+                      className={`w-80 px-2 border h-10 rounded-md flex items-center p-1 ${errors.conditionProduct?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
                     >
                       <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full'>
                         <input
                           type='text'
-                          {...register('condition')}
+                          {...register('conditionProduct')}
                           className='text-sm text-[#333333] w-full border-none outline-none pl-2 appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
                           placeholder='Input'
                         />
                       </div>
                     </div>
                     <div
-                      className={`${errors.condition?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
+                      className={`${errors.conditionProduct?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
                     >
-                      {errors.condition?.message}
+                      {errors.conditionProduct?.message}
                     </div>
                   </div>
                 </div>

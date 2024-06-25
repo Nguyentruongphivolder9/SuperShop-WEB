@@ -45,12 +45,12 @@ export interface ProductRequest {
   price?: number
   stockQuantity?: number
   description?: string
-  condition: string
+  conditionProduct: string
   isVariant: boolean
   isActive: boolean
-  productImagesRequest: ProductImagesRequest[]
-  productVariantsRequest?: ProductVariantsRequest[]
-  variantsGroupRequest?: VariantsGroupRequest[]
+  productImages: ProductImagesRequest[]
+  productVariants?: ProductVariantsRequest[]
+  variantsGroup?: VariantsGroupRequest[]
 }
 
 export interface VariantsGroupRequest {
