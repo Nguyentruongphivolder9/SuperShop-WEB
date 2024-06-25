@@ -14,7 +14,7 @@ export type FormDataProduct = Pick<
   | 'description'
   | 'isVariant'
   | 'isActive'
-  | 'condition'
+  | 'conditionProduct'
   | 'variantsGroup'
   | 'productImages'
   | 'productVariants'
@@ -27,7 +27,7 @@ const createProductSchema = productSchema.pick([
   'description',
   'isVariant',
   'isActive',
-  'condition',
+  'conditionProduct',
   'variantsGroup',
   'productImages',
   'productVariants'
