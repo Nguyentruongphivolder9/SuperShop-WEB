@@ -22,6 +22,8 @@ import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsLi
 import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
 import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
+import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
+import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
 import { ProductAddProvider } from 'src/contexts/productAdd.context'
 
 function ProtectedRoute() {
@@ -137,6 +139,14 @@ const ClientRoutes = [
                 <ProductAdd></ProductAdd>
               </ProductAddProvider>
             )
+          },
+          {
+            path: path.advertiseAdd,
+            element: <AdvertiseAdd></AdvertiseAdd>
+          },
+          {
+            path: path.advertiseManagement,
+            element: <AdvertiseManagement></AdvertiseManagement>
           }
         ]
       }
