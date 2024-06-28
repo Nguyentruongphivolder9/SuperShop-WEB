@@ -6,7 +6,7 @@ export const URL_LOGIN = 'auth/login'
 export const URl_REGISTER = 'auth/register'
 export const URL_LOGOUT = 'logout'
 export const URL_REFRESH_TOKEN = 'refresh-access-token'
-export const URL_EMAILVERIFICATION = 'auth/emailVerification'
+export const URL_EMAILVERIFICATION = 'auth/send-email'
 
 const authApi = {
   verifyEmail(body: {email:string}) {

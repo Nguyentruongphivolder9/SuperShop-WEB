@@ -51,11 +51,11 @@ export class Http {
         const { url } = response.config;
         if (url === URL_LOGIN || url === URl_REGISTER) {
           const data = response.data as AuthResponse;
-          this.accessToken = data.body.accessToken;
-          this.refreshToken = data.body.refreshToken;
+          this.accessToken = data.data.accessToken;
+          this.refreshToken = data.data.refreshToken;
           setAccessTokenToLS(this.accessToken);
           setRefreshTokenToLS(this.refreshToken);
-          setProfileToLS(data.body.user);
+          setProfileToLS(data.data.user);
         } else if (url === URL_LOGOUT) {
           this.accessToken = '';
           this.refreshToken = '';
@@ -110,10 +110,10 @@ export class Http {
         refresh_token: this.refreshToken
       })
       .then((res) => {
-        const { access_token } = res.data.data;
-        setAccessTokenToLS(access_token);
-        this.accessToken = access_token;
-        return access_token;
+        const { accessToken } = res.data.data;
+        setAccessTokenToLS(accessToken);
+        this.accessToken = accessToken;
+        return accessToken;
       })
       .catch((error) => {
         clearLS();

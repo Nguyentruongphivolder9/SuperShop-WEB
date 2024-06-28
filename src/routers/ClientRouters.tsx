@@ -22,6 +22,7 @@ import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsLi
 import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
 import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
+import EmailVerfication from 'src/pages/EmailVerfication'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -136,6 +137,15 @@ const ClientRoutes = [
         ]
       }
     ]
+  },
+  {
+    path: path.emailVerify,
+    element:
+      <MainLayout>
+        <Suspense>
+          <EmailVerfication></EmailVerfication>
+        </Suspense>
+      </MainLayout>
   },
   {
     path: path.category,

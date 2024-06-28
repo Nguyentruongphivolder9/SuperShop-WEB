@@ -5,17 +5,19 @@ import { useMutation } from '@tanstack/react-query';
 import omit from 'lodash/omit';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
-import { userSchema, schema, Schema } from '../../utils/rules';
+import { userSchema, schema, Schema, UserSchema } from '../../utils/rules';
 import authApi from '../../apis/auth.api';
 import google from "../../assets/logoSvg/googleSvg.svg";
 import facebook from "../../assets/logoSvg/faceBookSvg.svg";
 import { Link } from 'react-router-dom';
 
-type FormData = Pick<Schema, 'email'>;
+
 //Schema cho việc Xác nhận Email : Chỉ cần input là Email dạng String.
+type FormData = Pick<Schema, 'email'>;
 const emailVerification = schema.pick(['email']);
 //Schema cho việc đăng ký tài khoản : có các fields bắc buộc để đăng kí.
-const registerSchema = userSchema.pick(['name', 'phone', 'address', 'avatar', 'date_of_birth', 'password', 'new_password', 'confirm_password']);
+type FormDataRegister = Pick<UserSchema, 'name' | 'phone' | 'email' | 'address' | 'avatar' | 'date_of_birth' | 'password' | 'confirm_password'>;
+const registerSchema = userSchema.pick(['name', 'phone', 'email', 'address', 'avatar', 'date_of_birth', 'password', 'confirm_password']);
 
 type SubRegisterProps = {
     current_step: number;
@@ -34,14 +36,14 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
     const [isWaitingForVerification, setIsWaitingForVerification] = useState(false);
     const [yourEmail, setYourEmail] = useState('');
 
-    const registerAccountMutation = useMutation({
+    const emailVerfication = useMutation({
         mutationFn: async (body: FormData) => await authApi.verifyEmail(body)
     });
     const onSubmit = handleSubmit((data) => {
         console.log("Email: ", data.email);
         setYourEmail(data.email);
         setIsWaitingForVerification(true);
-        registerAccountMutation.mutate(data);
+        emailVerfication.mutate(data);
     });
 
     const handleGoNextStep = () => {
@@ -57,7 +59,7 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
         <>
             <h2 className="text-2xl mb-4">Đăng ký</h2>
             <form className="bg-white pb-4 rounded-2" onSubmit={onSubmit} noValidate>
-                {current_step === 1 && (
+                {current_step === 4 && (
                     isWaitingForVerification ? (
                         <div className="verification-container bg-gray-100 p-6 shadow-lg max-w-md mx-auto mt-10">
                             <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Kiểm tra hòm thư của bạn</h2>
@@ -134,7 +136,7 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                 {current_step === 3 && (
                     <WaitingForVerifying goToNextStep={goToNextStep} goToPrevStep={goToPrevStep} current_step={0} is_complete={false} steps={0} />
                 )}
-                {current_step === 4 && (
+                {current_step === 1 && (
                     <UserInformation goToNextStep={goToNextStep} goToPrevStep={goToPrevStep} current_step={0} is_complete={false} steps={0} />
                 )}
                 {current_step === 5 && (
@@ -205,9 +207,84 @@ const WaitingForVerifying = ({ goToNextStep, goToPrevStep }: SubRegisterProps) =
 }
 
 const UserInformation = ({ goToNextStep, goToPrevStep }: SubRegisterProps) => {
+    const { register, handleSubmit, formState: { errors } } = useForm<FormDataRegister>({
+        resolver: yupResolver(registerSchema)
+    });
+
+    const onSubmit = handleSubmit((data: FormData) => {
+
+    });
+
+    const handleGoNextStep = () => {
+        goToNextStep();
+    };
+
+    const handleGoPrevStep = () => {
+
+    };
     return (
         <div>
-            Typing user info.
+            <div className='flex justify-between'>
+                <Input
+                    name='full_name'
+                    register={register}
+                    type='text'
+                    className='mt-6 pr-2'
+                    errorMessage={errors.full_name?.message}
+                    placeholder='Nhập họ tên đầy đủ'
+                />
+                <Input
+                    name='user_name'
+                    register={register}
+                    type='text'
+                    className='mt-6 pl-2'
+                    errorMessage={errors.user_name?.message}
+                    placeholder='Nhập tên tài khoản'
+                />
+            </div>
+            <Input
+                name='phone'
+                register={register}
+                type='number'
+                className='mt-6'
+                errorMessage={errors.phone?.message}
+                placeholder='Nhập số điện thoại của bạn'
+            />
+            <Input
+                name='password'
+                register={register}
+                type='text'
+                className='mt-6'
+                errorMessage={errors.password?.message}
+                placeholder='Nhập mật khẩu của bạn'
+            />
+            <Input
+                name='confirm_password'
+                register={register}
+                type='text'
+                className='mt-6'
+                errorMessage={errors.confirm_password?.message}
+                placeholder='Nhập lại mật khẩu của bạn'
+            />
+            <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Ngày sinh nhật : </label>
+            <Input
+                name='date_of_birth'
+                register={register}
+                type='datetime-local'
+                className='mt-6'
+                errorMessage={errors.date_of_birth?.message}
+                placeholder='Nhập ngày sinh của bạn'
+            />
+            <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Giới tính : </label>
+            <Input
+                name=''
+                register={register}
+                type='radio'
+                className='mt-6'
+                errorMessage={errors.date_of_birth?.message}
+                placeholder='Nhập ngày sinh của bạn'
+            />
+
             <div className='flex justify-between'>
                 <Button
                     onClick={goToNextStep}

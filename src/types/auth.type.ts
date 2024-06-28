@@ -12,3 +12,15 @@ export type AuthResponse = {
     };
 }
 
+export type RefreshTokenResponse = {
+  statusCode: number
+  message: string
+    data: {
+      accessToken: string
+      refreshToken: string
+      expireRefreshToken: number
+      expires: number
+      user: User
+    };
+}
+
