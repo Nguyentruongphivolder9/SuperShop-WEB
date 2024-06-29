@@ -1,3 +1,5 @@
+import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
+
 const path = {
   home: '/',
   user: '/user',
@@ -20,7 +22,9 @@ const path = {
   productManagementActive: '/shopchannel/portal/product/list/live/all',
   productAdd: '/shopchannel/portal/product/new',
   voucherShop: '/shopchannel/portal/marketing/vouchers/list',
-  voucherShopAdd: '/shopchannel/portal/marketing/vouchers/new'
+  voucherShopAdd: '/shopchannel/portal/marketing/vouchers/new',
+  advertiseManagement: '/shopchannel/portal/advertise',
+  advertiseAdd: '/shopchannel/portal/advertise/new'
 } as const
 
 export default path

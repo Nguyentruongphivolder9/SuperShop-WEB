@@ -26,6 +26,9 @@ import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
 import VoucherWallet from 'src/pages/User/pages/VoucherWallet'
 import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
+import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
+import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
+import { ProductAddProvider } from 'src/contexts/productAdd.context'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -130,7 +133,19 @@ const ClientRoutes = [
           },
           {
             path: path.productAdd,
-            element: <ProductAdd></ProductAdd>
+            element: (
+              <ProductAddProvider>
+                <ProductAdd></ProductAdd>
+              </ProductAddProvider>
+            )
+          },
+          {
+            path: path.advertiseAdd,
+            element: <AdvertiseAdd></AdvertiseAdd>
+          },
+          {
+            path: path.advertiseManagement,
+            element: <AdvertiseManagement></AdvertiseManagement>
           },
           {
             path: path.voucherShop,
