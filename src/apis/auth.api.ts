@@ -10,13 +10,13 @@ export const URL_EMAILVERIFICATION = 'auth/send-email'
 
 const authApi = {
   verifyEmail(body: {email:string}) {
-    return http.post<AuthResponse>(`${config.baseURL}/${URL_EMAILVERIFICATION}`, body)
+    return http.post<AuthResponse>(`${URL_EMAILVERIFICATION}`, body)
   },
   registerAccount(body: { email: string; password: string }) {
-    return http.post<AuthResponse>(`${config.baseURL}/${URl_REGISTER}`, body)
+    return http.post<AuthResponse>(`${URl_REGISTER}`, body)
   },
   login(body: { email: string; password: string }) {
-    return http.post<AuthResponse>(`${config.baseURL}/${URL_LOGIN}`, body)
+    return http.post<AuthResponse>(`${URL_LOGIN}`, body)
   },
   logout() {
     return http.post(URL_LOGOUT)

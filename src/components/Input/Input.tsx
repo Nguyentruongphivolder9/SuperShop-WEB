@@ -41,7 +41,8 @@ export default function Input({
     }
     return rest.type;
   };
-  //Tạo 1 mảng chứa các năm trẻ nhất là 2024 già nhất là 1900
+
+  // Generate array of years from current year to 1900
   const generateYears = () => {
     const currentYear = new Date().getFullYear();
     const years = [];
@@ -50,11 +51,13 @@ export default function Input({
     }
     return years;
   };
-  //Tạo 1 mảng chứa các tháng 1 -> 12
+
+  // Generate array of months (1 -> 12)
   const generateMonths = () => {
     return Array.from({ length: 12 }, (_, i) => i + 1);
   };
-  //Tạo 1 mảnh chứa các nagsy 1 -> 31
+
+  // Generate array of days (1 -> 31)
   const generateDays = () => {
     return Array.from({ length: 31 }, (_, i) => i + 1);
   };
@@ -62,13 +65,25 @@ export default function Input({
   useEffect(() => {
     if (day && month && year) {
       const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      if (date.getFullYear() !== parseInt(year) || date.getMonth() !== parseInt(month) - 1 || date.getDate() !== parseInt(day)) {
-        setDateError('Ngày không hợp lệ');//Bắt lỗi ngày không hợp lệ, chưa bắt năm nhuận
+      if (
+        date.getFullYear() !== parseInt(year) ||
+        date.getMonth() !== parseInt(month) - 1 ||
+        date.getDate() !== parseInt(day)
+      ) {
+        setDateError('Ngày không hợp lệ');
       } else {
         setDateError('');
+        if (registerResult) {
+          const dateObject = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0);
+          registerResult.onChange({
+            target: {
+              value: dateObject,
+            }
+          });
+        }
       }
     }
-  }, [day, month, year]);
+  }, [day, month, year, registerResult]);
 
   return (
     <div className={'relative ' + className}>
@@ -80,6 +95,7 @@ export default function Input({
           type={handleType()}
         />
       )}
+
       {rest.type === 'datetime-local' && (
         <div className="flex space-x-2">
           <select

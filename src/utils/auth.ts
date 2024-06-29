@@ -2,14 +2,14 @@ import { User } from 'src/types/user.type'
 
 export const localStorageEventTarget = new EventTarget()
 
-export const setAccessTokenToLS = (acccess_token: string) => localStorage.setItem('acccess_token', acccess_token)
-export const setRefreshTokenToLS = (refresh_token: string) => localStorage.setItem('refresh_token', refresh_token)
+export const setAccessTokenToLS = (acccess_token: string) => localStorage.setItem('acccessToken', acccess_token)
+export const setRefreshTokenToLS = (refresh_token: string) => localStorage.setItem('refreshToken', refresh_token)
 
-export const getAccessTokenFromLS = () => localStorage.getItem('acccess_token') || ''
-export const getRefreshTokenFromLS = () => localStorage.getItem('refresh_token') || ''
+export const getAccessTokenFromLS = () => localStorage.getItem('acccessToken') || ''
+export const getRefreshTokenFromLS = () => localStorage.getItem('refreshToken') || ''
 export const clearLS = () => {
-  localStorage.removeItem('acccess_token')
-  localStorage.removeItem('refresh_token')
+  localStorage.removeItem('acccessToken')
+  localStorage.removeItem('refreshToken')
   localStorage.removeItem('profile')
 
   const clearLSEvent = new Event('clearLS')
@@ -17,7 +17,8 @@ export const clearLS = () => {
 }
 export const getProfileFromLs = () => {
   const result = localStorage.getItem('profile')
-  return result ? JSON.parse(result) : null
+    console.log(JSON.parse(result? result : "") as User);
+  return result ? JSON.parse(result) as User : null
 }
 export const setProfileToLS = (profile: User) => {
   localStorage.setItem('profile', JSON.stringify(profile))
@@ -35,5 +36,5 @@ export const parseJwt = (JwtToken: string) => {
       .join('')
   );
 
-  return JSON.parse(jsonPayload);
+  return JSON.parse(jsonPayload) as User;
 };

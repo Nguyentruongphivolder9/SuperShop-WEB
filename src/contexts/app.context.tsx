@@ -3,9 +3,8 @@ import { createContext, useState } from 'react'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { ExtendedPurchase } from 'src/types/purchase.type'
 import { User } from 'src/types/user.type'
-import { getProfileFromLs } from 'src/utils/auth'
+import { getAccessTokenFromLS, getProfileFromLs } from 'src/utils/auth'
 import { productSchema, ProductSchema } from 'src/utils/validations/productValidation'
-
 interface AppContextInterface {
   isAuthenticated: boolean
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
@@ -49,9 +48,9 @@ const createProductSchema = productSchema.pick([
 ])
 
 const initialAppContext: AppContextInterface = {
-  isAuthenticated: Boolean(false), // getAccessTokenFromCookies(),
+  isAuthenticated: Boolean(getAccessTokenFromLS()), // getAccessTokenFromCookies(),
   setIsAuthenticated: () => null,
-  profile: getProfileFromLs(),
+  profile: getProfileFromLs() as User,
   setProfile: () => null,
   extendedPurchase: [],
   setExtendedPurchase: () => null,
