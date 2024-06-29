@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { Link, NavLink, createSearchParams } from 'react-router-dom'
 import Button from 'src/components/Button'
 import VoucherBoxType from './components/VoucherBoxType'
@@ -16,26 +17,6 @@ export default function VoucherShop() {
   const queryParams: { status?: string } = useQueryParams()
   const status: string = queryParams.status || 'all'
 
-  const voucherTimeTabLinks = voucherTimeTabs.map((tab) => {
-    return (
-      <Link
-        key={tab.status}
-        to={{
-          pathname: path.voucherShop,
-          search: createSearchParams({
-            status: String(tab.status)
-          }).toString()
-        }}
-        className={classNames('flex items-center justify-center h-14 px-4 border-b-2 text-center', {
-          'border-b-blue text-blue': status === tab.status,
-          'border-b-black/10 text-gray-900': status !== tab.status
-        })}
-      >
-        {tab.name}
-      </Link>
-    )
-  })
-
   return (
     <>
       <div className='bg-white p-5 mb-5'>
@@ -52,6 +33,7 @@ export default function VoucherShop() {
           <h2 className='text-[18px] leading-[24px] text-[#333333] mb-4'>Improve conversion rates</h2>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4'>
             <VoucherBoxType
+              linkURL={path.voucherShopAdd}
               title='Shop-wide vouchers'
               content='Voucher applies to all products in your Shop'
               icon={
@@ -65,6 +47,7 @@ export default function VoucherShop() {
               }
             />
             <VoucherBoxType
+              linkURL='#'
               title='Product Voucher'
               content='Vouchers applicable for selected products to run specific promotions'
               icon={
@@ -79,10 +62,11 @@ export default function VoucherShop() {
             />
           </div>
         </div>
-        <div className='pb-5'>
+        {/* <div className='pb-5'>
           <h2 className='text-[18px] leading-[24px] text-[#333333] mb-4'>Target Specific Buyer Groups</h2>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4'>
             <VoucherBoxType
+              linkURL='#'
               title='New Buyer Voucher'
               content='Shop vouchers to attract new and potential buyersShop vouchers to attract new and potential buyers'
               icon={
@@ -96,6 +80,7 @@ export default function VoucherShop() {
               }
             />
             <VoucherBoxType
+              linkURL='#'
               title='Repeat Buyer Groups'
               content='Shop vouchers targeting buyers with recent purchase from the shop'
               icon={
@@ -110,7 +95,7 @@ export default function VoucherShop() {
               }
             />
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className='bg-white'>
@@ -183,7 +168,46 @@ export default function VoucherShop() {
 
         <div className='p-5'>
           <h2 className='text-[18px] leading-[24px] text-[#333333] mb-4'>Voucher List</h2>
-          <div className='flex border-b border-b-gray-300'>{voucherTimeTabLinks}</div>
+          <div className='flex border-b border-b-gray-300'>
+            {voucherTimeTabs.map((tab) => {
+              return (
+                <Link
+                  key={tab.status}
+                  to={{
+                    pathname: path.voucherShop,
+                    search: createSearchParams({
+                      status: String(tab.status)
+                    }).toString()
+                  }}
+                  className={classNames('flex items-center justify-center h-14 px-4 text-sm text-center', {
+                    'border-b-2 border-b-blue text-blue': status === tab.status,
+                    'border-b-black/10 text-gray-900': status !== tab.status
+                  })}
+                >
+                  {tab.name}
+                </Link>
+              )
+            })}
+          </div>
+          <div className='mt-6'>
+            <div className='flex items-center'>
+              <label className='text-sm mr-4 '>Search</label>
+              <div className='border border-gray-300 h-[1.875rem] mr-6 rounded-sm'>
+                <select name='' className='h-full w-[140px] px-3 text-sm hover:border-gray-500 focus:outline-none'>
+                  <option value='name'>Voucher Name</option>
+                  <option value='code'>Voucher Code</option>
+                </select>
+                <input
+                  type='text'
+                  placeholder='Input'
+                  className='h-full px-3 text-sm border-l border-l-gray-300 hover:border-gray-500 focus:outline-none '
+                />
+              </div>
+              <Button className='border border-blue text-blue hover:bg-[#f4fbff] text-sm py-1 px-4 min-w-[76px] min-h-[32px] rounded-[4px]'>
+                Search
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </>

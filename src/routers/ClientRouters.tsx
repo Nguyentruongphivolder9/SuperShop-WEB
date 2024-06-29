@@ -24,6 +24,8 @@ import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsLi
 import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
 import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
+import VoucherWallet from 'src/pages/User/pages/VoucherWallet'
+import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
@@ -93,6 +95,14 @@ const ClientRoutes = [
                 <HistoryPurchase></HistoryPurchase>
               </Suspense>
             )
+          },
+          {
+            path: path.voucher,
+            element: (
+              <Suspense>
+                <VoucherWallet></VoucherWallet>
+              </Suspense>
+            )
           }
         ]
       },
@@ -125,6 +135,10 @@ const ClientRoutes = [
           {
             path: path.voucherShop,
             element: <VoucherShop></VoucherShop>
+          },
+          {
+            path: path.voucherShopAdd,
+            element: <VoucherAdd></VoucherAdd>
           }
         ]
       }
