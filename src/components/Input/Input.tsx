@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, useState } from 'react';
+import { InputHTMLAttributes, useState, useEffect } from 'react';
 import { RegisterOptions, UseFormRegister } from 'react-hook-form';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
@@ -18,12 +18,17 @@ export default function Input({
   register,
   rules,
   classNameInputError = '',
-  classNameInput = 'p-3 w-full rounded-sm outline-none border border-gray-300 focus:border-gray-500 focus:shadow-sm transition duration-300',
+  classNameInput = 'p-3 w-full outline-none border border-gray-300 focus:border-blue-500 focus:shadow-md transition duration-300',
   classNameError = 'mt-1 text-red-600 min-h-[1.25rem] text-sm transition-opacity duration-300 ease-in-out',
   classNameEye = 'absolute size-5 top-[8px] right-[5px] cursor-pointer',
   ...rest
 }: Props) {
   const [openEye, setOpenEye] = useState(false);
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
+  const [dateError, setDateError] = useState('');
+
   const registerResult = register && name ? register(name, rules) : null;
 
   const toggleEye = () => {
@@ -37,14 +42,104 @@ export default function Input({
     return rest.type;
   };
 
+  // Generate array of years from current year to 1900
+  const generateYears = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i >= 1900; i--) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  // Generate array of months (1 -> 12)
+  const generateMonths = () => {
+    return Array.from({ length: 12 }, (_, i) => i + 1);
+  };
+
+  // Generate array of days (1 -> 31)
+  const generateDays = () => {
+    return Array.from({ length: 31 }, (_, i) => i + 1);
+  };
+
+  useEffect(() => {
+    if (day && month && year) {
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      if (
+        date.getFullYear() !== parseInt(year) ||
+        date.getMonth() !== parseInt(month) - 1 ||
+        date.getDate() !== parseInt(day)
+      ) {
+        setDateError('Ngày không hợp lệ');
+      } else {
+        setDateError('');
+        if (registerResult) {
+          const dateObject = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0);
+          registerResult.onChange({
+            target: {
+              value: dateObject,
+            }
+          });
+        }
+      }
+    }
+  }, [day, month, year, registerResult]);
+
   return (
     <div className={'relative ' + className}>
-      <input
-        className={`${classNameInput} ${errorMessage ? classNameInputError : ''}`}
-        {...registerResult}
-        {...rest}
-        type={handleType()}
-      />
+      {rest.type !== 'datetime-local' && (
+        <input
+          className={`${classNameInput} ${errorMessage ? classNameInputError : ''}`}
+          {...registerResult}
+          {...rest}
+          type={handleType()}
+        />
+      )}
+
+      {rest.type === 'datetime-local' && (
+        <div className="flex space-x-2">
+          <select
+            className={`${classNameInput} ${day ? '' : 'text-gray-400'}`}
+            value={day}
+            onChange={(e) => setDay(e.target.value)}
+            name={`${name}-day`}
+          >
+            <option value="">Ngày</option>
+            {generateDays().map((d) => (
+              <option key={d} value={d}>
+                Ngày {d}
+              </option>
+            ))}
+          </select>
+          <select
+            className={`${classNameInput} ${month ? '' : 'text-gray-400'}`}
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            name={`${name}-month`}
+          >
+            <option value="">Tháng</option>
+            {generateMonths().map((m) => (
+              <option key={m} value={m}>
+                Tháng {m}
+              </option>
+            ))}
+          </select>
+          <select
+            className={`${classNameInput} ${year ? '' : 'text-gray-400'}`}
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            name={`${name}-year`}
+          >
+            <option value="">Năm</option>
+            {generateYears().map((y) => (
+              <option key={y} value={y}>
+                Năm {y}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {dateError && <div className={classNameError}>{dateError}</div>}
       {rest.type === 'password' && (
         <svg
           xmlns='http://www.w3.org/2000/svg'

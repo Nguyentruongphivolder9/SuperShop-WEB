@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 const StepperIcon = ({ is_active, is_complete, step_number }: StepperIcons) => {
     return (
-        <span
+        <div
             className={classNames(
                 'flex items-center justify-center w-8 h-8 border rounded-full shrink-0 transition-colors duration-500',
                 {
@@ -17,20 +17,18 @@ const StepperIcon = ({ is_active, is_complete, step_number }: StepperIcons) => {
         >
             {!is_active ? (
                 is_active || is_complete ? (
-                    <li>
-                        <span className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full lg:h-12 lg:w-12 dark:bg-blue-800 shrink-0">
-                            <svg className="w-3.5 h-3.5 text-blue-600 lg:w-4 lg:h-4 dark:text-blue-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5.917 5.724 10.5 15 1.5" />
-                            </svg>
-                        </span>
-                    </li>
+                    <span className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full lg:h-12 lg:w-12 dark:bg-blue-800 shrink-0">
+                        <svg className="w-3.5 h-3.5 text-blue-600 lg:w-4 lg:h-4 dark:text-blue-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5.917 5.724 10.5 15 1.5" />
+                        </svg>
+                    </span>
                 ) : (
-                    step_number
+                    step_number.toString() // Ensure step_number is rendered as string
                 )
             ) : (
-                step_number
+                step_number.toString() // Ensure step_number is rendered as string
             )}
-        </span>
+        </div>
     );
 };
 
@@ -60,7 +58,7 @@ const Stepper = ({ steps, current_step, messages, is_complete, children, goToNex
                         const isActive = current_step === stepNumber;
                         const isCompleted = current_step > stepNumber;
                         return (
-                            <li
+                            <div
                                 key={i}
                                 className={classNames(
                                     'z-0 p-5 flex items-center space-x-2.5 rtl:space-x-reverse transition-colors duration-500',
@@ -75,10 +73,10 @@ const Stepper = ({ steps, current_step, messages, is_complete, children, goToNex
                                     <span className="text-blue-600 font-semibold">Step {i + 1}</span>
                                 ) : (
                                     <span>
-                                        <h3 className="font-semibold  leading-tight">{message}</h3>
+                                        <h3 className="font-semibold leading-tight">{message}</h3>
                                     </span>
                                 )}
-                            </li>
+                            </div>
                         );
                     })}
                 </ol>

@@ -3,8 +3,8 @@ import Registers from 'src/components/RegisterForms/Registers';
 import Stepper from 'src/components/Stepper';
 
 export default function Register() {
-    const steps = 6; // Số bước của bạn
-    const messages = ['Xác nhận email của bạn', 'Nhập mật khẩu', 'Xác nhận mật khẩu', 'Chơi bóng rổ', 'Chơi minecraft', 'Final step'];
+    const messages = ['Nhập Email', 'Xác thực Email', 'Thông tin cá nhân', 'Tạo tài khoản'];
+    const steps = messages.length;
     const [currentStep, setCurrentStep] = useState(1);
     const [isCompleted, setIsCompleted] = useState(false);
 

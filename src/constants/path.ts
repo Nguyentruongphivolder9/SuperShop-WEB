@@ -23,6 +23,10 @@ const path = {
   productAdd: '/shopchannel/portal/product/new',
   voucherShop: '/shopchannel/portal/marketing/vouchers/list',
   voucherShopAdd: '/shopchannel/portal/marketing/vouchers/new',
+
+  //Email verification.
+  emailVerify: '/emailVerify',
+
   advertiseManagement: '/shopchannel/portal/advertise',
   advertiseAdd: '/shopchannel/portal/advertise/new'
 } as const
