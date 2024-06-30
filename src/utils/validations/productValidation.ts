@@ -51,9 +51,12 @@ export const productSchema = yup.object({
     undefined,
     ''
   >,
-  description: yup.string().max(3000).nullable(),
-  // .min(100, 'Your product description is too short. Please input at least 100 characters.'),
-  condition: yup.string().required('This field cannot be empty').max(10),
+  description: yup
+    .string()
+    .required('This field cannot be empty')
+    .max(3000)
+    .min(100, 'Your product description is too short. Please input at least 100 characters.'),
+  conditionProduct: yup.string().required('This field cannot be empty').max(10),
   isVariant: yup.boolean().required('This field cannot be empty'),
   isActive: yup.boolean().nullable(),
   productImages: yup
@@ -61,7 +64,7 @@ export const productSchema = yup.object({
     .of(
       yup.object({
         id: yup.string().required('This field cannot be empty'),
-        imageFile: yup.mixed().nullable()
+        imageUrl: yup.string().required('This field cannot be empty')
       })
     )
     .min(3, 'Product images must have at least 3 images.'),
@@ -93,66 +96,80 @@ export const productSchema = yup.object({
         id: yup.string().required('This field cannot be empty'),
         name: yup.string().trim().required('This field cannot be empty'),
         isPrimary: yup.boolean().required('This field cannot be empty'),
-        isActive: yup.boolean().required('This field cannot be empty'),
         variants: yup
           .array()
           .of(
             yup.object({
               id: yup.string().required('This field cannot be empty'),
-              isActive: yup.boolean().required('This field cannot be empty'),
               name: yup.string().trim().required('This field cannot be empty'),
-              imageUrl: yup.mixed().nullable()
+              imageUrl: yup.string().nullable()
             })
           )
           .max(50, 'Variations List has exceeded maximum value: 50')
-          .test('uniqueVariantName', 'Options of variations should be different.', function (values) {
-            if (!values) return false
+          .test({
+            test: function (this: yup.TestContext<yup.AnyObject>, values) {
+              // const { fixedAmount, percentageAmount, discountType, maximumDiscount } = this.parent
+              if (!values) return true
+              let isValid = false
 
-            const errors: Record<string, Record<string, string>> = {}
+              const errors: yup.CreateErrorOptions[] = []
 
-            values.forEach((variant, index) => {
-              const { name } = variant
+              values.forEach((variant, index) => {
+                const { name } = variant
 
-              if (name !== null && name !== undefined && name !== '') {
-                values.forEach((otherVariant, otherIndex) => {
-                  if (index !== otherIndex && otherVariant.name === name) {
-                    errors[`variants[${index}].name`] = {
-                      message: 'Options of variations should be different.',
-                      type: 'unique',
-                      ref: ''
+                if (name !== null && name !== undefined && name !== '') {
+                  values.forEach((otherVariant, otherIndex) => {
+                    if (index !== otherIndex && otherVariant.name === name) {
+                      isValid = true
+                      errors.push({
+                        path: `${this.path}.${index}.name`,
+                        message: 'Options of variations should be different.'
+                      })
                     }
-                  }
-                })
-              }
-            })
+                  })
+                }
+              })
 
-            return errors ? true : false
+              if (isValid) {
+                return this.createError(errors as yup.AnyObject)
+              } else {
+                return true
+              }
+            }
           })
       })
     )
     .max(2, 'Variations has exceeded maximum value: 2')
-    .test('uniqueVariantGroupName', 'Options of variations should be different.', function (values) {
-      if (!values) return false
+    .test({
+      test: function (this: yup.TestContext<yup.AnyObject>, values) {
+        if (!values) return true
+        let isValid = false
 
-      const errors: Record<string, Record<string, string>> = {}
+        const errors: yup.CreateErrorOptions[] = []
 
-      values.forEach((variant, index) => {
-        const { name } = variant
+        values.forEach((variant, index) => {
+          const { name } = variant
 
-        if (name !== null && name !== undefined && name !== '') {
-          values.forEach((otherVariant, otherIndex) => {
-            if (index !== otherIndex && otherVariant.name === name) {
-              errors[`${index}`] = {
-                message: 'Options of variations should be different.',
-                type: 'unique',
-                ref: ''
+          if (name !== null && name !== undefined && name !== '') {
+            values.forEach((otherVariant, otherIndex) => {
+              if (index !== otherIndex && otherVariant.name === name) {
+                console.log(`${this.path}.${index}.name`)
+                isValid = true
+                errors.push({
+                  path: `${this.path}.${index}.name`,
+                  message: 'Names of variations should be different.'
+                })
               }
-            }
-          })
-        }
-      })
+            })
+          }
+        })
 
-      return errors ? true : false
+        if (isValid) {
+          return this.createError(errors as yup.AnyObject)
+        } else {
+          return true
+        }
+      }
     })
 })
 
