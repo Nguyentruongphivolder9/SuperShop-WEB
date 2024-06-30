@@ -6,6 +6,7 @@ import {
   clearLS,
   getAccessTokenFromLS,
   getRefreshTokenFromLS,
+  parseJwt,
   setAccessTokenToLS,
   setProfileToLS,
   setRefreshTokenToLS
@@ -55,7 +56,7 @@ export class Http {
           this.refreshToken = data.body.refreshToken;
           setAccessTokenToLS(this.accessToken);
           setRefreshTokenToLS(this.refreshToken);
-          setProfileToLS(data.body.user);
+          setProfileToLS(parseJwt(data.body.accessToken));
         } else if (url === URL_LOGOUT) {
           this.accessToken = '';
           this.refreshToken = '';
@@ -110,10 +111,10 @@ export class Http {
         refresh_token: this.refreshToken
       })
       .then((res) => {
-        const { access_token } = res.data.data;
-        setAccessTokenToLS(access_token);
-        this.accessToken = access_token;
-        return access_token;
+        const { accessToken } = res.data.data;
+        setAccessTokenToLS(accessToken);
+        this.accessToken = accessToken;
+        return accessToken;
       })
       .catch((error) => {
         clearLS();

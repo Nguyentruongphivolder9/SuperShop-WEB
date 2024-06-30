@@ -20,8 +20,12 @@ const path = {
   productManagementActive: '/shopchannel/portal/product/list/live/all',
   productAdd: '/shopchannel/portal/product/new',
 
+  //Email verification.
+  emailVerify: '/emailVerify'
+
   advertiseManagement: '/shopchannel/portal/advertise',
   advertiseAdd: '/shopchannel/portal/advertise/new'
+
 } as const
 
 export default path
