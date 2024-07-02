@@ -7,7 +7,7 @@ import useQueryParams from 'src/hooks/useQueryParams'
 import { ProductListConfig } from 'src/types/product.type'
 import AsideFilter from './components/AsideFilter'
 import SortProductList from './components/SortProductList'
-import Product from './components/Product'
+import Product from '../../components/Product'
 
 const productsData = [
   {
@@ -188,7 +188,7 @@ export default function ProductList() {
               {/* {productsData.data.data.products.map((product, index) => ( */}
               {productsData.map((product, index) => (
                 <div key={index} className='col-span-1'>
-                  <Product product={product} />
+                  {/* <Product product={product} /> */}
                 </div>
               ))}
             </div>
