@@ -10,17 +10,16 @@ import { AppContext } from 'src/contexts/app.context';
 import { ErrorResponse } from 'src/types/utils.type';
 import { schema, Schema } from 'src/utils/rules';
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils';
-import { parseJwt } from 'src/utils/auth';
+import { parseJwt, setProfileToLS } from 'src/utils/auth';
 import facebookSvg from '../../assets/logoSvg/faceBookSvg.svg';
 import googleSvg from '../../assets/logoSvg/googleSvg.svg';
-type FormData = Pick<Schema, 'email' | 'password'| 'confirm_password'>;
-
-const loginSchema = schema.pick(['email', 'password','confirm_password']);
+type FormData = Pick<Schema, 'email' | 'password'>;
+const loginSchema = schema.pick(['email', 'password']);
 
 export default function Login() {
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
   const navigate = useNavigate();
-  
+
   const {
     register,
     handleSubmit,
@@ -38,7 +37,8 @@ export default function Login() {
     loginMutation.mutate(data, {
       onSuccess: (data) => {
         setIsAuthenticated(true);
-        setProfile(parseJwt(data.data.data.accessToken))
+        setProfile(parseJwt(data.data.body.accessToken))
+        setProfileToLS(parseJwt(data.data.body.accessToken));
         navigate('/');
       },
       onError: (error) => {
@@ -81,15 +81,6 @@ export default function Login() {
                 placeholder='Nhập mật khẩu của bạn'
                 autoComplete='on'
               />
-               <Input
-                name='confirm_password'
-                register={register}
-                type='password'
-                className='mt-8'
-                errorMessage={errors.password?.message}
-                placeholder='Nhập lại mật khẩu của bạn'
-                autoComplete='on'
-              />
               <div className="flex items-center justify-between mt-6 mb-6">
                 <hr className="w-4/12 border-gray-300" />
                 <span className="text-gray-500 text-md">Hoặc</span>
@@ -97,14 +88,14 @@ export default function Login() {
               </div>
               <div className="flex space-x-2 mt-2">
                 <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
-                    <img src={facebookSvg} alt="Facebook" className="w-7 h-7" />
-                    <span className="ml-1 text-gray-700 text-md">Facebook</span>
+                  <img src={facebookSvg} alt="Facebook" className="w-7 h-7" />
+                  <span className="ml-1 text-gray-700 text-md">Facebook</span>
                 </button>
                 <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
-                    <img src={googleSvg} alt="Google" className="w-7 h-7" />
-                    <span className="ml-1 text-gray-700 text-md">Google</span>
+                  <img src={googleSvg} alt="Google" className="w-7 h-7" />
+                  <span className="ml-1 text-gray-700 text-md">Google</span>
                 </button>
-            </div>
+              </div>
               <div className='mt-3'>
                 <Button
                   type='submit'

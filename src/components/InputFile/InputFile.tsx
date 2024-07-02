@@ -1,51 +1,49 @@
-export default function InputFile() {
-  return <div>InputFile</div>
+import { useRef } from 'react';
+import { toast } from 'react-toastify';
+import config from 'src/constants/config';
+
+interface Props {
+  onChange?: (file?: File) => void;
 }
 
-// import { useRef } from 'react'
-// import { toast } from 'react-toastify'
-// import config from 'src/constants/config'
+const InputFile = ({ onChange }: Props) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-// interface Props {
-//   onChange?: (file?: File) => void
-// }
+  const handleUploadAvatar = () => {
+    fileInputRef.current?.click();
+  };
 
-// export default function InputFile({ onChange }: Props) {
-//   const fileInputRef = useRef<HTMLInputElement>(null)
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileFromLocal = e.target.files?.[0];
 
-//   const handleUploadAvatar = () => {
-//     fileInputRef.current?.click()
-//   }
+    if (fileFromLocal) {
+      if (fileFromLocal.size >= config.maxSizeUploadAvatar || !fileFromLocal.type.includes('image')) {
+        toast.error('Dung lượng file tối đa 1 MB. Định dạng: jpg, jpeg, png');
+      } else {
+        onChange && onChange(fileFromLocal);
+      }
+    }
+  };
 
-//   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const fileFromLocal = e.target.files?.[0]
+  return (
+    <>
+      <input
+        className="hidden"
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        ref={fileInputRef}
+        onChange={onFileChange}
+        style={{ display: 'none' }}
+      />
+      <button
+        className="flex py-2 px-7 items-center justify-end rounded-sm border bg-white text-sm text-gray-600 shadow-sm"
+        type="button"
+        onClick={handleUploadAvatar}
+      >
+        Chọn ảnh
+      </button>
+    </>
+  );
+};
 
-//     if (fileFromLocal && (fileFromLocal.size >= config.maxSizeUploadAvatar || !fileFromLocal.type.includes('image'))) {
-//       toast.error('Dung lượng file tối đa 1 MB. Định dạng: jpg, jpeg, png')
-//     } else {
-//       onChange && onChange(fileFromLocal)
-//     }
-//   }
-
-//   return (
-//     <>
-//       <input
-//         className='hidden'
-//         type='file'
-//         accept='.jpg,.jpeg,.png'
-//         ref={fileInputRef}
-//         onChange={onFileChange}
-//         onClick={(event) => {
-//           ;(event.target as any).value = null
-//         }}
-//       />
-//       <button
-//         className='flex py-2 px-7 items-center justify-end rounded-sm border bg-white  text-sm text-gray-600 shadow-sm'
-//         type='button'
-//         onClick={handleUploadAvatar}
-//       >
-//         Chọn ảnh
-//       </button>
-//     </>
-//   )
-// }
+export default InputFile;
