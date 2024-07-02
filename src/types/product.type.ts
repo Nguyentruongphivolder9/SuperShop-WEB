@@ -84,3 +84,8 @@ export interface PreviewImagesResponse {
   id: string
   preImageUrl: string
 }
+export interface ProductImagesResponse {
+  id: string
+  imageUrl: string
+  isPrimary: boolean
+}

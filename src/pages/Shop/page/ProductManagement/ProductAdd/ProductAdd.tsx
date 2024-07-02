@@ -25,7 +25,8 @@ import {
 import productApi from 'src/apis/product.api'
 import { useMutation } from '@tanstack/react-query'
 import TipTapEditor from './TipTapEditor'
-import { ProductAddContext } from 'src/contexts/productAdd.context'
+import { FormDataProduct, ProductAddContext } from 'src/contexts/productAdd.context'
+import { toast } from 'react-toastify'
 
 const S3_BUCKET_URL = 'https://super-shop.s3.ap-south-1.amazonaws.com/products'
 
@@ -341,8 +342,9 @@ export default function ProductAdd() {
     data.isActive = true
     try {
       console.log(data)
-      // const createProRes = await productCreateMutation.mutateAsync(data as FormDataProduct)
-      // console.log(createProRes)
+      const createProRes = await productCreateMutation.mutateAsync(data as FormDataProduct)
+      console.log(createProRes)
+      toast.success('Create Product successfully')
     } catch (error) {
       console.log(error)
     }
