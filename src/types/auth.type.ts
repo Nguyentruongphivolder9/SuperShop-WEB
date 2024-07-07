@@ -11,6 +11,12 @@ export type AuthResponse = {
       user: User
     };
 }
+export type WaitingForEmailResponse = {
+  timeStamp: string;
+  body: boolean;
+  message: string;
+  status: number;
+};
 
 export type RefreshTokenResponse = {
   statusCode: number

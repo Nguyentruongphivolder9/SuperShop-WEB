@@ -117,7 +117,12 @@ export const userSchema = yup.object({
     .required('Password là bắt buộc')
     .min(6, 'Độ dài từ 6 - 160 ký tự')
     .max(160, 'Độ dài từ 6 - 160 ký tự'),
-  confirm_password: handleConfirmPasswordYup('password')
+  confirm_password: yup
+    .string()
+    .required('Nhập lại password là bắt buộc')
+    .min(6, 'Độ dài từ 6 - 160 ký tự')
+    .max(160, 'Độ dài từ 6 - 160 ký tự')
+    .oneOf([yup.ref('password')], 'Nhập lại password không khớp')
 })
 
 export type UserSchema = yup.InferType<typeof userSchema>

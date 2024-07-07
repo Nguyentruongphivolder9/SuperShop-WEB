@@ -13,11 +13,13 @@ import { isAxiosUnprocessableEntityError } from 'src/utils/utils';
 import { parseJwt, setProfileToLS } from 'src/utils/auth';
 import facebookSvg from '../../assets/logoSvg/faceBookSvg.svg';
 import googleSvg from '../../assets/logoSvg/googleSvg.svg';
+import { toast } from 'react-toastify';
+
 type FormData = Pick<Schema, 'email' | 'password'>;
 const loginSchema = schema.pick(['email', 'password']);
 
 export default function Login() {
-  const { setIsAuthenticated, setProfile } = useContext(AppContext);
+  const { setIsAuthenticated, setProfile, profile } = useContext(AppContext);
   const navigate = useNavigate();
 
   const {
@@ -39,6 +41,8 @@ export default function Login() {
         setIsAuthenticated(true);
         setProfile(parseJwt(data.data.body.accessToken))
         setProfileToLS(parseJwt(data.data.body.accessToken));
+        console.log(data);
+        toast.success(`Logged in successfully. Welcome ${profile?.fullName}`);
         navigate('/');
       },
       onError: (error) => {

@@ -7,7 +7,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import authApi from 'src/apis/auth.api';
 import { getAvatarUrl } from 'src/utils/utils';
 import { useTranslation } from 'react-i18next';
-import { locales } from 'src/i18n/i18n';
+import { Schema, schema } from 'src/utils/rules';
+import { toast } from 'react-toastify';
+
+type FormDataLogout = {
+  email: string;
+};
+
 
 export default function NavHeader() {
   const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext);
@@ -15,16 +21,31 @@ export default function NavHeader() {
   const { i18n } = useTranslation();
 
   const logoutMutation = useMutation({
-    mutationFn: authApi.logout,
-    onSuccess: () => {
-      setIsAuthenticated(false);
-      setProfile(null);
-      queryClient.clear();
-    },
+    mutationFn: (body: FormDataLogout) => authApi.logout(body),
+    
   });
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    const token = localStorage.getItem("accessToken") || "";
+    const email = profile?.email || "";
+
+    if (token && email) {
+      logoutMutation.mutate(
+        {email},
+          { 
+          onSuccess: () => {
+            setIsAuthenticated(false);
+            setProfile(null);
+            queryClient.clear();
+            localStorage.removeItem("accessToken");
+          },
+          onError: (e) => {
+            toast.error("Logged out failed, please try again later.");
+            console.log(e);
+          }
+        }
+      );
+    }
   };
 
   const handleLanguageChange = (language: string) => {
