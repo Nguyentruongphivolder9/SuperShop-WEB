@@ -2,6 +2,7 @@ import axios, { AxiosError } from 'axios'
 import config from 'src/constants/config'
 import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ErrorResponse } from 'src/types/utils.type'
+import { format } from 'date-fns'
 
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   // eslint-disable-next-line import/no-named-as-default-member
@@ -63,4 +64,9 @@ export const generateUniqueId = () => {
 
 export const imageFileConvertToUrl = (file: File) => {
   return URL.createObjectURL(file)
+}
+
+export const formatDateTime = (date: string) => {
+  const convertDate = new Date(date)
+  return format(convertDate, 'yyyy-MM-dd kk:mm')
 }

@@ -28,7 +28,11 @@ import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
 import { ProductAddProvider } from 'src/contexts/productAdd.context'
 
 function ProtectedRoute() {
-  const { isAuthenticated } = useContext(AppContext)
+  const { isAuthenticated } = useContext(AppContext) //
+  // getcookies -> roles
+  //if user -> <Outlet >
+  // shop -> <Outlet context={[role]} />"
+  // admin -> <Outlet context="admin" />"
   return isAuthenticated ? <Outlet /> : <Navigate to='/login' />
 }
 function RejectedRoute() {

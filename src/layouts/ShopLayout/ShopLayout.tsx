@@ -1,8 +1,9 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useOutletContext } from 'react-router-dom'
 import HeaderShop from 'src/pages/Shop/components/HeaderShop'
 import NavShop from 'src/pages/Shop/components/NavShop'
 
 export default function ShopLayout() {
+  // const [role, setRole] = useOutletContext<[]>()
   return (
     <div>
       <HeaderShop />
