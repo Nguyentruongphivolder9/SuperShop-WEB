@@ -23,4 +23,3 @@ export type RefreshTokenResponse = {
       user: User
     };
 }
-

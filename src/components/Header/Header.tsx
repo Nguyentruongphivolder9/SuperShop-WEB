@@ -5,7 +5,7 @@ import NavHeader from '../NavHeader'
 
 export default function Header() {
   return (
-    <div className='pb-5 bg-[linear-gradient(-180deg,#00BFFF,#0099FF)] text-white'>
+    <div className='sticky top-0 z-30 pb-5 bg-[linear-gradient(-180deg,#00BFFF,#0099FF)] text-white'>
       <div className='container'>
         <NavHeader />
         <div className='grid grid-cols-12 gap-4 mt-4 items-end'>
