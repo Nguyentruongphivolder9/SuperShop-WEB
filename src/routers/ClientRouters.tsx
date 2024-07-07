@@ -23,8 +23,6 @@ import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
 import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
 
-import EmailVerfication from 'src/pages/EmailVerfication'
-
 import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
 import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
 import { ProductAddProvider } from 'src/contexts/productAdd.context'
