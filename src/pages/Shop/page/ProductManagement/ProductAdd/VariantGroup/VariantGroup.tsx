@@ -1,19 +1,19 @@
 import { ProductVariantsRequest, VariantsGroupRequest } from 'src/types/product.type'
 import InputValueOfVariation from '../InputValueOfVariation'
 import { useContext } from 'react'
-import { AppContext } from 'src/contexts/app.context'
 import { generateUniqueId } from 'src/utils/utils'
 import { useFieldArray } from 'react-hook-form'
+import { ProductAddContext } from 'src/contexts/productAdd.context'
 
 interface Props {
   indexVariantsGroup: number
-  handlerRemoveVariations: (id: string, index: number) => void
+  handlerRemoveVariations: (index: number) => void
   data: VariantsGroupRequest
   isPrimary: boolean
 }
 
 export default function VariantGroup({ handlerRemoveVariations, isPrimary, data, indexVariantsGroup }: Props) {
-  const { productMethods } = useContext(AppContext)
+  const { productMethods } = useContext(ProductAddContext)
 
   const {
     register,
@@ -32,6 +32,11 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
     name: `variantsGroup.${indexVariantsGroup}.variants`
   })
 
+  // const arraysVariantsGroupTest = useWatch({
+  //   control,
+  //   name: `variantsGroup.${indexVariantsGroup}.variants`
+  // })
+
   const { append: appendProductVariants, remove: removeProductVariants } = useFieldArray({
     control,
     name: 'productVariants'
@@ -44,7 +49,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
     const newVariant = {
       id: generateUniqueId(),
       name: '',
-      imageFile: '',
+      imageUrl: '',
       isActive: true
     }
     appendVariants(newVariant)
@@ -71,7 +76,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
                 id: generateUniqueId(),
                 price: 0,
                 stockQuantity: 0,
-                variantsGroup1Id: data.id,
+                variantsGroup1Id: variantsGroup?.[0]?.id,
                 variant1Id: newVariant.id,
                 variantsGroup2Id: itemVariantGroup.id,
                 variant2Id: item.id
@@ -90,7 +95,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
                 stockQuantity: 0,
                 variantsGroup1Id: itemVariantGroup.id,
                 variant1Id: itemVariant1.id,
-                variantsGroup2Id: data.id,
+                variantsGroup2Id: variantsGroup?.[1]?.id,
                 variant2Id: newVariant.id
               }
               newObjectProductVariant.push(newProductVariant)
@@ -156,7 +161,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
           </div>
           {/* validation */}
         </div>
-        <button type='button' onClick={() => handlerRemoveVariations(data.id, indexVariantsGroup)}>
+        <button type='button' onClick={() => handlerRemoveVariations(indexVariantsGroup)}>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             fill='none'

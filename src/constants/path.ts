@@ -1,3 +1,5 @@
+import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
+
 const path = {
   home: '/',
   user: '/user',
@@ -20,6 +22,10 @@ const path = {
 
   //Email verification.
   emailVerify: '/emailVerify'
+
+  advertiseManagement: '/shopchannel/portal/advertise',
+  advertiseAdd: '/shopchannel/portal/advertise/new'
+
 } as const
 
 export default path
