@@ -21,7 +21,7 @@ const path = {
   productAdd: '/shopchannel/portal/product/new',
 
   //Email verification.
-  emailVerify: '/emailVerify'
+  emailVerify: '/emailVerify',
 
   advertiseManagement: '/shopchannel/portal/advertise',
   advertiseAdd: '/shopchannel/portal/advertise/new'
