@@ -2,7 +2,6 @@ import { createContext, useState } from 'react'
 import { ExtendedPurchase } from 'src/types/purchase.type'
 import { User } from 'src/types/user.type'
 import { getAccessTokenFromLS, getProfileFromLs } from 'src/utils/auth'
-import { productSchema, ProductSchema } from 'src/utils/validations/productValidation'
 
 interface AppContextInterface {
   isAuthenticated: boolean

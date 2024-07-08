@@ -1,4 +1,4 @@
-import { FormDataProduct } from 'src/contexts/app.context'
+import { FormDataProduct } from 'src/contexts/productAdd.context'
 import { PreviewImagesResponse, Product, ProductList, ProductListConfig } from 'src/types/product.type'
 import { SuccessResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'

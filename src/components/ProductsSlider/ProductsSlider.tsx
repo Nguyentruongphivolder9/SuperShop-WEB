@@ -20,7 +20,7 @@ export default function ProductsSlider() {
   }
 
   const sliderItems = Array.from({ length: 18 }).map((_, i) => (
-    <div key={i} className='h-[345px] pb-2 w-full overflow-hidden px-2'>
+    <div key={i} className='h-[345px] pb-2 w-full overflow-hidden px-1'>
       <Product />
     </div>
   ))

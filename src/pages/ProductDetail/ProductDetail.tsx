@@ -12,6 +12,9 @@ import { ProductImagesResponse } from 'src/types/product.type'
 import { Link } from 'react-router-dom'
 import ProductRatingStar from 'src/components/ProductRatingStar'
 import ProductRating from './ProductRating'
+import ProductsSlider from 'src/components/ProductsSlider'
+import Product from 'src/components/Product'
+import VariantButton from './VariantButton'
 // import purchaseApi from 'src/apis/purchase.api'
 // import { purchasesStatus } from 'src/constants/purchase'
 // import { toast } from 'react-toastify'
@@ -263,94 +266,11 @@ export default function ProductDetail() {
                       <div className='text-[#757575] text-sm w-full'>color</div>
                     </div>
                     <div className='col-span-7 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
-                      <button className='relative text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm border border-[#00000017] min-h-10 min-w-20 outline-0 justify-center '>
-                        Đen nhám+kính trong
-                        <img
-                          className='h-6 w-6 absolute top-[50%] -translate-y-[50%] object-cover left-2'
-                          src='https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqrmhk3mjbcn3a'
-                          alt=''
-                        />
-                      </button>
+                      <VariantButton />
+                      <VariantButton />
+                      <VariantButton />
+                      <VariantButton />
+                      <VariantButton />
                     </div>
                   </div>
                   <div className='mb-6'></div>
@@ -562,9 +482,14 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <div className='mt-8'>
+      <div className='mt-4'>
         <div className='container'>
-          <div className='uppercase text-gray-400'>FROM THE SAME SHOP</div>
+          <div className='bg-white px-4 pt-4 shadow'>
+            <div className='uppercase text-gray-400'>FROM THE SAME SHOP</div>
+            <div className='mt-3'>
+              <ProductsSlider />
+            </div>
+          </div>
           {/* {productsData && (
             <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 '>
               {productsData.data.data.products.map((product, index) => (
@@ -574,6 +499,102 @@ export default function ProductDetail() {
               ))}
             </div>
           )} */}
+        </div>
+      </div>
+
+      <div className='mt-8'>
+        <div className='container'>
+          <div className='uppercase text-gray-400'>YOU MAY ALSO LIKE</div>
+          <div className='mt-3'>
+            <div className='grid grid-cols-12 gap-2'>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+              </div>
+            </div>
+          </div>
+          <div className='w-full h-10 flex items-center justify-center mt-4'>
+            <button
+              type='button'
+              className='border border-blue hover:bg-sky-100 rounded-md text-md text-blue px-9 py-2'
+            >
+              See more
+            </button>
+          </div>
         </div>
       </div>
     </div>

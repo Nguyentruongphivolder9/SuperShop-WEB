@@ -71,7 +71,7 @@ export default function UserSideNav() {
               'text-orange-500 bg-orange-50': isActive,
               'text-gray-700': !isActive
             })
-          }
+}
         >
           <div className='mr-3 h-[22px] w-[22px]'>
             <img src='https://cf.shopee.vn/file/f0049e9df4e536bc3e7f140d071e9078' alt='' className='h-full w-full' />

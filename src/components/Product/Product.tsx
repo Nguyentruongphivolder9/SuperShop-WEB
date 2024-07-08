@@ -11,8 +11,12 @@ interface Props {
 // export default function Product({ product }: Props) {
 export default function Product() {
   return (
-    <Link className='H-full w-full' to={`${path.home}${generateNameId({ name: 'product.name', id: 'product._id' })}`}>
-      <div className='overflow-hidden w-full h-full border rounded-sm bg-white shadow transition-transform duration-100 ease-linear hover:translate-y-[-0.0625rem] hover:shadow-md'>
+    <Link
+      className='h-full w-full relative'
+      to={`${path.home + 'products/'}${generateNameId({ name: 'product.name', id: 'product._id' })}`}
+    >
+      <div className='absolute w-full h-full top-0 left-0 hover:border hover:border-blue z-10'></div>
+      <div className='overflow-hidden w-full h-full border rounded-sm bg-white'>
         <div className='relative w-full pt-[100%]'>
           <img
             src={
