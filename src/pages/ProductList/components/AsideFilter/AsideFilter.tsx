@@ -8,7 +8,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { Schema, schema } from 'src/utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { NoUndefinedField } from 'src/types/utils.type'
-import RatingStars from '../RatingStars'
+import RatingStars from '../../../../components/RatingStars'
 import omit from 'lodash/omit'
 import { ObjectSchema } from 'yup'
 import { QueryConfig } from 'src/hooks/useQueryConfig'
@@ -143,7 +143,7 @@ export default function AsideFilter({ queryConfig, categories }: Props) {
       </Link>
       <div className='my-4 h-[1px] bg-gray-300' />
       <div className='my-5'>
-        <div>Khoảng giá</div>
+        <div>Price Range</div>
         <form className='mt-2' onSubmit={onSubmit}>
           <div className='flex items-start'>
             <Controller
@@ -154,7 +154,7 @@ export default function AsideFilter({ queryConfig, categories }: Props) {
                   <InputNumber
                     type='text'
                     className='grow'
-                    placeholder='₫ TỪ'
+                    placeholder='₫ From'
                     classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
                     classNameError='hidden'
                     {...field}
@@ -176,7 +176,7 @@ export default function AsideFilter({ queryConfig, categories }: Props) {
                   <InputNumber
                     type='text'
                     className='grow'
-                    placeholder='₫ ĐẾN'
+                    placeholder='₫ To'
                     classNameInput='p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm'
                     classNameError='hidden'
                     {...field}
@@ -190,20 +190,20 @@ export default function AsideFilter({ queryConfig, categories }: Props) {
             />
           </div>
           <div className='mt-1 min-h-[1.25rem] text-center text-sm text-red-600'>{errors.price_min?.message}</div>
-          <Button className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'>
-            Áp dụng
+          <Button className='flex w-full items-center justify-center bg-blue p-2 text-sm uppercase text-white hover:bg-orange/80'>
+            APPLY
           </Button>
         </form>
       </div>
       <div className='my-4 h-[1px] bg-gray-300' />
-      <div className='text-sm'>Đánh giá</div>
+      <div className='text-sm'>Rating</div>
       {/* <RatingStars queryConfig={queryConfig} /> */}
       <div className='my-4 h-[1px] bg-gray-300' />
       <Button
         onClick={handleRemoveAll}
-        className='flex w-full items-center justify-center bg-orange p-2 text-sm uppercase text-white hover:bg-orange/80'
+        className='flex w-full items-center justify-center bg-blue p-2 text-sm uppercase text-white hover:bg-orange/80'
       >
-        Xóa tất cả
+        CLEAR ALL
       </Button>
     </div>
   )

@@ -1,5 +1,3 @@
-import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
-
 const path = {
   home: '/',
   user: '/user',
@@ -10,8 +8,8 @@ const path = {
   login: '/login',
   register: '/register',
   logout: '/logout',
-  productDetail: ':nameId',
-  category: 'category',
+  productDetail: '/products/:nameId',
+  category: 'categories/:nameId',
   cart: '/cart',
 
   // shop channels
@@ -28,7 +26,11 @@ const path = {
   emailVerify: '/emailVerify',
 
   advertiseManagement: '/shopchannel/portal/advertise',
-  advertiseAdd: '/shopchannel/portal/advertise/new'
+  advertiseAdd: '/shopchannel/portal/advertise/new',
+
+  // admin
+  adminSuperShop: '/admin-super-shop',
+  adminCategories: '/admin-super-shop/categories'
 } as const
 
 export default path
