@@ -46,59 +46,59 @@ export default function SortProductList({ queryConfig, pageSize }: Props) {
   }
 
   return (
-    <div className='bg-gray-300/40 py-4 px-3'>
+    <div className='bg-gray-300/40 py-4 px-5'>
       <div className='flex flex-wrap items-centerr justify-between gap-2'>
-        <div className='flex items-center flex-wrap gap-2'>
-          <div>Sắp xếp theo</div>
+        <div className='flex text-[#555555] text-sm items-center flex-wrap gap-2'>
+          <div>Sort by</div>
           <button
-            className={classNames('h-8 px-4 capitalize text-sm text-center', {
+            className={classNames('h-8 px-4 capitalize text-sm text-center rounded-sm', {
               'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.view),
               'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.view)
             })}
             onClick={() => handleSort(sortBy.view)}
           >
-            Phổ biến
+            Popular
           </button>
           <button
-            className={classNames('h-8 px-4 capitalize text-sm text-center', {
-              'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.createdAt),
+            className={classNames('h-8 px-4 capitalize text-sm text-center rounded-sm', {
+              'bg-blue text-white hover:bg-orange/80': isActiveSortBy(sortBy.createdAt),
               'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.createdAt)
             })}
             onClick={() => handleSort(sortBy.createdAt)}
           >
-            Mới nhất
+            Latest
           </button>
           <button
-            className={classNames('h-8 px-4 capitalize text-sm text-center', {
+            className={classNames('h-8 px-4 capitalize text-sm text-center rounded-sm', {
               'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.sold),
               'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.sold)
             })}
             onClick={() => handleSort(sortBy.sold)}
           >
-            Bán chạy
+            Top Sales
           </button>
           <select
             value={order || ''}
-            className={classNames('h-8 px-4 capitalize  te text-sm text-left outline-none', {
+            className={classNames('h-8 px-4 capitalize  te text-sm text-left outline-none rounded-sm', {
               'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.price),
               'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.price)
             })}
             onChange={(e) => handlePriceOrder(e.target.value as Exclude<ProductListConfig['order'], undefined>)}
           >
             <option value='' className='bg-white text-black' disabled>
-              Giá
+              Price
             </option>
             <option value={orderConstant.asc} className='bg-white text-black'>
-              Giá: Thấp đến cao
+              Price: Low to High
             </option>
             <option value={orderConstant.desc} className='bg-white text-black'>
-              Giá: Cao đến thấp
+              Price: High to Low
             </option>
           </select>
         </div>
 
         <div className='flex items-center'>
-          <div className=''>
+          <div className='text-sm'>
             <span className='text-orange'>{page}</span>
             <span>/{pageSize}</span>
           </div>

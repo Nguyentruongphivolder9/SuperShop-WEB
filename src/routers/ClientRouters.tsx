@@ -161,12 +161,13 @@ const ClientRoutes = [
   },
   {
     path: path.emailVerify,
-    element:
+    element: (
       <MainLayout>
         <Suspense>
           <EmailVerfication></EmailVerfication>
         </Suspense>
       </MainLayout>
+    )
   },
   {
     path: path.category,

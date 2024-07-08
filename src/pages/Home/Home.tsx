@@ -49,7 +49,7 @@ export default function Home() {
               <div className='col-span-4 h-96 rounded-md overflow-hidden bg-slate-400'>
                 <BannerSmallSlider />
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -57,7 +57,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -65,7 +65,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -73,7 +73,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -81,7 +81,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -89,7 +89,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -97,7 +97,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -105,7 +105,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -113,7 +113,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -121,7 +121,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -129,7 +129,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -137,7 +137,7 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
@@ -145,7 +145,39 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className='relative group h-96 col-span-2 hover:border hover:border-blue rounded-sm overflow-hidden'>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
+                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
+                    Find Similar
+                  </Link>
+                </div>
+              </div>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
+                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
+                    Find Similar
+                  </Link>
+                </div>
+              </div>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
+                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
+                    Find Similar
+                  </Link>
+                </div>
+              </div>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
+                <Product />
+                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
+                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
+                    Find Similar
+                  </Link>
+                </div>
+              </div>
+              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
                 <Product />
                 <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
                   <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
