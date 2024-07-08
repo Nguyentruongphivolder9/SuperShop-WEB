@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import path from 'src/constants/path'
 
 export default function NavShop() {
   return (
@@ -139,7 +140,7 @@ export default function NavShop() {
                 <NavLink to={'#'}>My Shop&apos;s Flash Sale</NavLink>
               </li>
               <li className='text-[#333333] text-[13px] hover:text-[#0099FF] py-[5px]'>
-                <NavLink to={'#'}>Vouchers</NavLink>
+                <NavLink to={path.voucherShop}>Vouchers</NavLink>
               </li>
             </ul>
           </li>

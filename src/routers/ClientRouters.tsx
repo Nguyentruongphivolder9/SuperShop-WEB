@@ -17,11 +17,15 @@ import HistoryPurchase from 'src/pages/User/pages/HistoryPurchase'
 import Profile from 'src/pages/User/pages/Profile'
 import ShopLayout from 'src/layouts/ShopLayout'
 import ShopChannel from 'src/pages/Shop/page/ShopChannel'
+import cartRouter from './cartRouter'
+import VoucherShop from 'src/pages/Shop/page/VoucherShop'
 import ProductManagement from 'src/pages/Shop/page/ProductManagement'
 import ProductsListActive from 'src/pages/Shop/page/ProductManagement/ProductsListActive'
 import ProductAll from 'src/pages/Shop/page/ProductManagement/ProductsAll'
 import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
+import VoucherWallet from 'src/pages/User/pages/VoucherWallet'
+import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
 
 import EmailVerfication from 'src/pages/EmailVerfication'
 
@@ -73,18 +77,9 @@ const ClientRoutes = [
     path: '',
     element: <ProtectedRoute />,
     children: [
+      cartRouter,
       {
-        path: path.cart,
-        element: (
-          <CartLayout>
-            <Suspense>
-              <Cart></Cart>
-            </Suspense>
-          </CartLayout>
-        )
-      },
-      {
-        path: path.user,
+        path: path.user, // localhoas//user
         element: (
           <MainLayout>
             <UserLayout></UserLayout>
@@ -93,11 +88,7 @@ const ClientRoutes = [
         children: [
           {
             path: path.profile,
-            element: (
-              <Suspense>
-                <Profile></Profile>
-              </Suspense>
-            )
+            element: <Profile></Profile>
           },
           {
             path: path.changePassword,
@@ -112,6 +103,14 @@ const ClientRoutes = [
             element: (
               <Suspense>
                 <HistoryPurchase></HistoryPurchase>
+              </Suspense>
+            )
+          },
+          {
+            path: path.voucher,
+            element: (
+              <Suspense>
+                <VoucherWallet></VoucherWallet>
               </Suspense>
             )
           }
@@ -154,6 +153,14 @@ const ClientRoutes = [
           {
             path: path.advertiseManagement,
             element: <AdvertiseManagement></AdvertiseManagement>
+          },
+          {
+            path: path.voucherShop,
+            element: <VoucherShop></VoucherShop>
+          },
+          {
+            path: path.voucherShopAdd,
+            element: <VoucherAdd></VoucherAdd>
           }
         ]
       }
