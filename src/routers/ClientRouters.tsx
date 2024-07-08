@@ -27,8 +27,6 @@ import Home from 'src/pages/Home'
 import VoucherWallet from 'src/pages/User/pages/VoucherWallet'
 import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
 
-import EmailVerfication from 'src/pages/EmailVerfication'
-
 import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
 import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
 import { ProductAddProvider } from 'src/contexts/productAdd.context'

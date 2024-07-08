@@ -8,20 +8,14 @@ import { getAvatarUrl } from 'src/utils/utils'
 export default function UserSideNav() {
   const { profile } = useContext(AppContext)
   return (
-    <div>
+    <div className='p-4 bg-white rounded-lg shadow-md'>
       <div className='flex items-center border-b border-b-gray-200 py-4'>
-        <Link to={path.profile} className='h-12 w-12 flex-shrink-0 overflow-hidden rounded-full borderr border-black'>
-          <img
-            src={
-              'https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo'
-            }
-            alt=''
-            className='h-full w-full object-cover'
-          />
+        <Link to={path.profile} className='h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-gray-300'>
+          <img src={profile?.avatarUrl || getAvatarUrl(profile?.email)} alt='' className='h-full w-full object-cover' />
         </Link>
         <div className='flex-grow pl-4'>
-          <div className='mb-1 truncate font-semibold text-gray-600'>Mrbeast</div>
-          <Link to={path.profile} className='flex items-center capitalize text-gray-500'>
+          <div className='mb-1 truncate font-semibold text-gray-800'>{profile?.userName}</div>
+          <Link to={path.profile} className='flex items-center capitalize text-gray-500 hover:text-gray-800 transition-colors'>
             <svg
               width={12}
               height={12}
@@ -41,69 +35,48 @@ export default function UserSideNav() {
       </div>
       <div className='mt-7'>
         <NavLink
-          to={path.changePassword}
+          to={path.profile}
           className={({ isActive }) =>
-            classNames('flex items-center mt-3 capitalize transition-colors', {
-              'text-blue': isActive,
-              'text-gray-600': !isActive
+            classNames('flex items-center capitalize transition-colors py-2 rounded-md hover:bg-gray-100', {
+              'text-orange-500 bg-orange-50': isActive,
+              'text-gray-700': !isActive
             })
           }
         >
           <div className='mr-3 h-[22px] w-[22px]'>
             <img src='https://cf.shopee.vn/file/ba61750a46794d8847c3f463c5e71cc4' alt='' className='h-full w-full' />
           </div>
-          My Acount
+          Tài khoản của tôi
+        </NavLink>
+
+        <NavLink
+          to={path.changePassword}
+          className={({ isActive }) =>
+            classNames('flex items-center mt-3 capitalize transition-colors py-2 rounded-md hover:bg-gray-100', {
+              'text-orange-500 bg-orange-50': isActive,
+              'text-gray-700': !isActive
+            })
+          }
+        >
+          <div className='mr-3 h-[22px] w-[22px]'>
+            <img src='https://cf.shopee.vn/file/ba61750a46794d8847c3f463c5e71cc4' alt='' className='h-full w-full' />
+          </div>
+          Đổi mật khẩu
         </NavLink>
 
         <NavLink
           to={path.historyPurchase}
           className={({ isActive }) =>
-            classNames('flex items-center mt-3 capitalize transition-colors', {
-              'text-blue': isActive,
-              'text-gray-600': !isActive
+            classNames('flex items-center mt-3 capitalize transition-colors py-2 rounded-md hover:bg-gray-100', {
+              'text-orange-500 bg-orange-50': isActive,
+              'text-gray-700': !isActive
             })
-          }
+}
         >
           <div className='mr-3 h-[22px] w-[22px]'>
             <img src='https://cf.shopee.vn/file/f0049e9df4e536bc3e7f140d071e9078' alt='' className='h-full w-full' />
           </div>
-          My Purchase
-        </NavLink>
-        <NavLink
-          to={''}
-          className={({ isActive }) =>
-            classNames('flex items-center mt-3 capitalize transition-colors', {
-              'text-blue': isActive,
-              'text-gray-600': !isActive
-            })
-          }
-        >
-          <div className='mr-3 h-[22px] w-[22px]'>
-            <img
-              src='https://down-vn.img.susercontent.com/file/e10a43b53ec8605f4829da5618e0717c'
-              alt=''
-              className='h-full w-full'
-            />
-          </div>
-          Notifications
-        </NavLink>
-        <NavLink
-          to={path.voucher}
-          className={({ isActive }) =>
-            classNames('flex items-center mt-3 capitalize transition-colors hover:text-blue', {
-              'text-blue': isActive,
-              'text-gray-600': !isActive
-            })
-          }
-        >
-          <div className='mr-3 h-[22px] w-[22px]'>
-            <img
-              src='https://down-vn.img.susercontent.com/file/84feaa363ce325071c0a66d3c9a88748'
-              alt=''
-              className='h-full w-full'
-            />
-          </div>
-          My Vouchers
+          Đơn mua
         </NavLink>
       </div>
     </div>

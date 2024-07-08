@@ -1,5 +1,5 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation } from '@tanstack/react-query';
 import Input from '../Input/Input';
@@ -9,10 +9,11 @@ import authApi from '../../apis/auth.api';
 import google from "../../assets/logoSvg/googleSvg.svg";
 import facebook from "../../assets/logoSvg/faceBookSvg.svg";
 import { Link } from 'react-router-dom';
-
+import { toast } from 'react-toastify';
 const emailVerification = schema.pick(['email']);
 type FormDataEmail = Pick<Schema, 'email'>;
-type FormDataRegister = Pick<UserSchema, 'user_name' | 'full_name' | 'gender' | 'phone' | 'email' | 'address' | 'avatar' | 'date_of_birth' | 'password' | 'confirm_password'>;
+const userRegister = userSchema.pick(['user_name', 'full_name', 'gender', 'phone', 'email', 'address', 'date_of_birth', 'password', 'confirm_password'])
+export type FormDataRegister = Pick<UserSchema, 'user_name' | 'full_name' | 'gender' | 'phone' | 'email' | 'address' | 'date_of_birth' | 'password' | 'confirm_password'>;
 
 
 type SubRegisterProps = {
@@ -23,6 +24,10 @@ type SubRegisterProps = {
     goToPrevStep: () => void;
     handleSetEmail?: React.Dispatch<React.SetStateAction<FormDataEmail>>;
     email?: FormDataEmail;
+    is_form_completed?: boolean;
+    handleSetIsFormCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
+    userInfor?: FormDataRegister;
+    handleSetUserInfo?: React.Dispatch<React.SetStateAction<FormDataRegister>>;
 };
 
 
@@ -31,6 +36,20 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
     const [email, setEmail] = useState<FormDataEmail>({
         email: ''
     });
+    const [userInfo, setUserInfo] = useState<FormDataRegister>({
+        user_name: "",
+        full_name: "",
+        gender: "",
+        phone: "",
+        email: "",
+        address: "",
+        date_of_birth: new Date(),
+        password: "",
+        confirm_password: ""
+    })
+    const [isVerifyEmailCompleted, setIsVerifyEmailCompleted] = useState<boolean>(false);
+    const [isWaitingForEmailResponse, setIsWaitingForEmailResponse] = useState<boolean>(false);
+    const [isUserInforCompleted, setIsUserInforCompleted] = useState<boolean>(false);
     return (
         <>
             <h2 className="text-2xl mb-4">Đăng ký</h2>
@@ -39,10 +58,13 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     goToNextStep={goToNextStep}
                     goToPrevStep={goToPrevStep}
                     current_step={current_step}
-                    is_complete={is_complete}
                     steps={steps}
+                    //Attribute của riếng form
                     handleSetEmail={setEmail}
+                    is_complete={is_complete}
                     email={email}
+                    is_form_completed={isVerifyEmailCompleted}
+                    handleSetIsFormCompleted={setIsVerifyEmailCompleted}
                 />
             )}
             {current_step === 2 && (
@@ -50,9 +72,12 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     goToNextStep={goToNextStep}
                     goToPrevStep={goToPrevStep}
                     current_step={current_step}
-                    is_complete={is_complete}
                     steps={steps}
+                    //Attributes cuar rieeng form
                     email={email}
+                    is_complete={is_complete}
+                    is_form_completed={isWaitingForEmailResponse}
+                    handleSetIsFormCompleted={setIsWaitingForEmailResponse}
                 />
             )}
 
@@ -74,6 +99,12 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     current_step={current_step}
                     is_complete={is_complete}
                     steps={steps}
+                    //Attributes của riêng form.
+                    email={email}
+                    userInfor={userInfo}
+                    handleSetUserInfo={setUserInfo}
+                    handleSetIsFormCompleted={setIsUserInforCompleted}
+                    is_form_completed={isUserInforCompleted}
                 />
             )}
 
@@ -112,17 +143,43 @@ export default Registers;
 
 
 
-const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep }: SubRegisterProps) => {
-    const { register, handleSubmit, formState: { errors } } = useForm<FormDataRegister>({
+const UserInformation = ({ current_step, steps, is_complete, email, goToNextStep, goToPrevStep, userInfor, handleSetUserInfo, is_form_completed, handleSetIsFormCompleted }: SubRegisterProps) => {
+    const { register, handleSubmit, formState: { errors }, setValue, getValues } = useForm<FormDataRegister>({
         resolver: yupResolver(userSchema),
+        defaultValues: userInfor
     });
 
-    const onSubmit = handleSubmit((data) => {
+    const [selectedGender, setSelectedGender] = useState<string>(userInfor?.gender || '');
 
+    const handleGenderSelect = (gender: string) => {
+        setSelectedGender(gender);
+        if (handleSetUserInfo && typeof gender !== 'undefined') {
+            handleSetUserInfo(prev => ({ ...prev, gender }));
+            setValue('gender', gender, { shouldValidate: true });
+        }
+    };
+
+    const userInforMutation = useMutation({
+        mutationFn: async (body: Omit<FormDataRegister, "confirm_password">) => {
+            await authApi.registerAccount(body);
+        },
+        onSuccess: () => {
+            handleSetIsFormCompleted?.(true);
+            goToNextStep();
+        },
+        onError: (error) => {
+            toast.error(`${error.message}`);
+        }
     });
+
+    const onSubmit: SubmitHandler<FormDataRegister> = (data) => {
+        console.log(data)
+        userInforMutation.mutate(data);
+    };
+
     return (
         <>
-            <form className="bg-white pb-4 rounded-2" onSubmit={onSubmit} noValidate>
+            <form className="bg-white pb-4 rounded-2" onSubmit={handleSubmit(onSubmit)} noValidate>
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Họ tên đầy đủ : <b className='text-red-500'>(*)</b></label>
                 <Input
                     name='full_name'
@@ -131,7 +188,6 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
                     className='mt-6'
                     errorMessage={errors.full_name?.message}
                     placeholder='Nhập họ tên đầy đủ'
-
                 />
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Tên tài khoản : <b className='text-red-500'>(*)</b></label>
                 <Input
@@ -142,7 +198,19 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
                     errorMessage={errors.user_name?.message}
                     placeholder='Nhập tên tài khoản'
                 />
+
+                <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Địa chỉ Email của bạn : <b className='text-red-500'>(*)</b></label>
+
+                <Input
+                    name='email'
+                    register={register}
+                    type='email'
+                    className='mt-6'
+                    value={email?.email ? email.email : "anhtienb237@gmail.com"}
+                    disabled={true}
+                />
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Số điện thoại : <b className='text-red-500'>(*)</b></label>
+
                 <Input
                     name='phone'
                     register={register}
@@ -185,39 +253,57 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
                     className='mt-6'
                     errorMessage={errors.date_of_birth?.message}
                 />
-                <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Giới tính : <b className='text-red-500'>(*)</b></label>
-                <div className='flex mt-6 justify-between'>
-                    <div className='flex items-center bg-cyan-200 rounded-md p-3 w-full m-4 cursor-pointer'>
-                        <label htmlFor='gender_male' className='font-bold text-gray-800 ml-3'>
+                <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">
+                    Giới tính : <b className="text-red-500">(*)</b>
+                </label>
+                <div className="flex mt-6 justify-between">
+                    <div
+                        className={`flex items-center rounded-md p-3 w-full m-4 cursor-pointer transition-colors duration-300 ease-in-out ${selectedGender === 'male' ? 'bg-cyan-400 text-white' : 'bg-gray-300 text-black'
+                            }`}
+                        onClick={() => handleGenderSelect('male')}
+                    >
+                        <label className="font-bold ml-3">
                             Nam
                         </label>
                         <Input
-                            name='gender'
+                            name="gender"
                             register={register}
-                            type='radio'
+                            type="radio"
                             value="male"
                             errorMessage={errors.gender?.message}
+                            className="hidden"
                         />
                     </div>
-                    <div className='flex items-center bg-cyan-200 rounded-md p-3 w-full m-4 cursor-pointer'>
-                        <label htmlFor='gender_female' className='font-bold text-gray-800 ml-3'>
+                    <div
+                        className={`flex items-center rounded-md p-3 w-full m-4 cursor-pointer transition-colors duration-300 ease-in-out ${selectedGender === 'female' ? 'bg-pink-500 text-white' : 'bg-gray-300 text-black'
+                            }`}
+                        onClick={() => handleGenderSelect('female')}
+                    >
+                        <label className="font-bold ml-3">
                             Nữ
                         </label>
                         <Input
-                            name='gender'
+                            name="gender"
                             register={register}
-                            type='radio'
-                            value='female'
+                            type="radio"
+                            value="female"
                             errorMessage={errors.gender?.message}
+                            className="hidden"
                         />
                     </div>
-
+                    <div>{errors.gender?.message}</div>
                 </div>
 
+                <Button
+                    type='submit'
+                    className='flex items-center justify-center w-full text-center py-2 px-2 uppercase bg-blue text-white text-sm hover:bg-cyan-400 mr-2 mt-10'
+                >
+                    Xác nhận tài khoản
+                </Button>
                 <div className='flex justify-between'>
                     <Button
-                        type='submit'
                         className='flex items-center justify-center w-full text-center py-2 px-2 uppercase bg-blue text-white text-sm hover:bg-cyan-400 mr-2 mt-10'
+                        disabled={is_form_completed === false}
                     >
                         Tiếp theo
                     </Button>
@@ -231,7 +317,7 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
                 </div>
             </form>
         </>
-    )
+    );
 }
 
 
@@ -257,7 +343,7 @@ const WatingForVerifyCation = ({ current_step, steps, is_complete, goToNextStep,
     )
 }
 
-const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, handleSetEmail, email }: SubRegisterProps) => {
+const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, handleSetEmail, email, is_form_completed, handleSetIsFormCompleted }: SubRegisterProps) => {
     const { register, handleSubmit, formState: { errors } } = useForm<FormDataEmail>({
         resolver: yupResolver(emailVerification),
         defaultValues: email
@@ -269,9 +355,18 @@ const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevS
     const onSubmit = handleSubmit((data) => {
         if (handleSetEmail && typeof data !== 'undefined') {
             handleSetEmail(data);
-            emailVerificationMutation.mutate(data);
-            console.log(data);
+            emailVerificationMutation.mutate(data, {
+                onSuccess: (data) => {
+                    toast.success(`${data.data.message}`);
+                    handleSetIsFormCompleted?.(true);
+                    goToNextStep();
+                },
+                onError: (error) => {
+                    toast.error(`${error.message}`);
+                }
+            });
         }
+
 
     })
     return (<>
@@ -296,6 +391,7 @@ const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevS
                 <Button
                     onClick={goToNextStep}
                     className='flex items-center justify-center w-full text-center py-2 px-2 uppercase bg-blue text-white text-sm hover:bg-cyan-400 mr-2 mt-10'
+                    disabled={is_form_completed === false}
                 >
                     Tiếp theo
                 </Button>
@@ -312,12 +408,41 @@ const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevS
     </>)
 }
 
-const WaitingEmailVerifyCation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, email }: SubRegisterProps) => {
-    const [isCompleted, setIsCompleted] = useState(false);
+const WaitingEmailVerifyCation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, email, handleSetIsFormCompleted, is_form_completed }: SubRegisterProps) => {
+    const waitingForEmailResponseMutation = useMutation({
+        mutationFn: async (email: string) => await authApi.waitingForEmailResponse({ email })
+    });
+
+    if (is_form_completed === false) {
+        useEffect(() => {
+            const interval = setInterval(async () => {
+                try {
+                    if (email?.email) {
+                        await waitingForEmailResponseMutation.mutateAsync(email.email, {
+                            onSuccess: (data) => {
+                                if (data.data.body === true) {
+                                    clearInterval(interval);
+                                    handleSetIsFormCompleted?.(true);
+                                    goToNextStep();
+                                }
+                            },
+                            onError: (error) => {
+                                toast.error(`${error.message}`);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('API call failed:', error);
+                }
+            }, 5000);
+
+            return () => clearInterval(interval);
+        }, [email, handleSetIsFormCompleted, waitingForEmailResponseMutation]);
+    }
     return (
         <div className="verification-container bg-gray-100 p-6 shadow-lg max-w-md mx-auto mt-10">
             <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Kiểm tra hòm thư của bạn</h2>
-            <div className="flex items-center justify-center mb-6">
+            {is_form_completed === false ? (<><div className="flex items-center justify-center mb-6">
                 <button
                     type='button'
                     className='inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow text-white bg-red-500 hover:bg-red-400 transition ease-in-out duration-150 cursor-not-allowed'
@@ -329,23 +454,44 @@ const WaitingEmailVerifyCation = ({ current_step, steps, is_complete, goToNextSt
                     Chờ đợi xác thực từ bạn...
                 </button>
             </div>
-            <ul className="text-center list-disc text-gray-700 bg-green-100 rounded-lg p-6">
-                <li className="mb-4">
-                    Hãy vào Gmail <a href={`https://mail.google.com/mail/u/0/#inbox`} className='underline font-semibold text-indigo-700' target="_blank" >{email?.email}</a> của bạn và ấn vào nút xác nhận được đính kèm bên trong thư.
-                </li>
-                <li className="mb-4">
-                    Nếu bạn không thấy email xác nhận, hãy nhấn vào nút
-                </li>
-                <a
-                    className='py-2 px-4 uppercase bg-blue text-white text-sm font-medium hover:bg-cyan-400 inline-block'
-                    href='/anhtien'>
-                    Gửi lại
-                </a>
-            </ul>
+                <ul className="text-center list-disc text-gray-700 bg-green-100 rounded-lg p-6">
+                    <li className="mb-4">
+                        Hãy vào Gmail <a href={`https://mail.google.com/mail/u/0/#inbox`} className='underline font-semibold text-indigo-700' target="_blank" >{email?.email}</a> và ấn vào nút xác nhận được đính kèm bên trong thư.
+                    </li>
+                    <li className="mb-4">
+                        Nếu bạn không thấy email xác nhận, hãy nhấn
+                    </li>
+                    <a
+                        className='py-2 px-4 uppercase bg-blue text-white text-sm font-medium hover:bg-cyan-400 inline-block'
+                        href='/anhtien'>
+                        Gửi lại
+                    </a>
+                </ul></>) : (
+                <>
+                    <div className="bg-green-500 p-6 rounded-lg shadow-lg text-center">
+                        <svg className="animate-bounce mx-auto w-20 h-20 bg-white rounded-full text-green-500 p-3 shadow-md" fill="none" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="16" stroke="currentColor" strokeWidth="12" fill="none" />
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="3"
+                                stroke="currentColor"
+                                d="M8 12l4 3 5-8"
+                            />
+                        </svg>
+                        <div className="bg-white w-full rounded-lg p-4 mt-4">
+                            <p className="text-lg text-green-500 font-semibold">Xác thực Email đã hoàn thành</p>
+                            <p className="text-sm text-green-500">Bạn có thể qua bước tiếp theo</p>
+                        </div>
+                    </div>
+
+                </>
+            )}
             <div className="flex justify-between pt-7">
                 <Button
                     onClick={goToNextStep}
-                    className={`flex items-center justify-center w-full text-center py-3 px-5 uppercase bg-blue text-white text-sm font-medium hover:bg-cyan-400 mr-2  ${isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={is_form_completed === false}
+                    className={`flex items-center justify-center w-full text-center py-3 px-5 uppercase bg-blue text-white text-sm font-medium hover:bg-cyan-400 mr-2`}
                 >
                     Tiếp theo
                 </Button>
