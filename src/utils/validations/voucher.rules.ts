@@ -44,6 +44,7 @@ export const voucherShema = yup.object({
     .required('This field cannot be empty')
     .matches(/^[A-Za-z0-9]{1,5}$/, 'Code is not allowed to have special characters')
     .required('Code is required'),
+  voucherType: yup.string(),
   startDate: yup.date().min(new Date(), 'Please enter a start time that is later than the current time.'),
   endDate: yup
     .date()

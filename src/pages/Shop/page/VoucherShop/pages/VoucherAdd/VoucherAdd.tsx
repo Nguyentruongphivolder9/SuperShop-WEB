@@ -5,10 +5,14 @@ import 'react-datepicker/dist/react-datepicker.css'
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { vi } from 'date-fns/locale/vi'
 import { Controller, useForm } from 'react-hook-form'
-import { VoucherSchema, voucherShema } from 'src/utils/Voucher/voucher.rules'
+import { VoucherSchema, voucherShema } from 'src/utils/validations/voucher.rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Button from 'src/components/Button'
 import classNames from 'classnames'
+import { useMutation } from '@tanstack/react-query'
+import voucherApi from 'src/apis/voucher.api'
+import { GMTToLocalStingTime } from '../../utils/date.utils'
+import useQueryParams from 'src/hooks/useQueryParams'
 registerLocale('vi', vi)
 const range = (start: number, end: number) => {
   return new Array(end - start + 1).fill(null).map((d, i) => i + start)
@@ -41,6 +45,7 @@ type FormData = VoucherSchema
 export default function VoucherAdd() {
   const [startDate, setStartDate] = useState(addMinutes(new Date(), 10))
   const [endDate, setEndDate] = useState(addHours(addMinutes(new Date(), 10), 1))
+  const queryParams: { voucherType?: string } = useQueryParams()
 
   const {
     control,
@@ -56,6 +61,7 @@ export default function VoucherAdd() {
     defaultValues: {
       name: '',
       code: '',
+      voucherType: queryParams.voucherType,
       discountType: 'fixed',
       isLimit: true,
       startDate: startDate,
@@ -65,8 +71,20 @@ export default function VoucherAdd() {
     resolver: yupResolver(voucherShema)
   })
 
-  const onSubmit = handleSubmit((data) => {
-    console.log('data', data)
+  const createVoucherMutaion = useMutation({
+    mutationFn: voucherApi.createVoucher
+  })
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await createVoucherMutaion.mutateAsync({
+        ...data,
+        startDate: GMTToLocalStingTime(data.startDate),
+        endDate: GMTToLocalStingTime(data.endDate)
+      })
+    } catch (error) {
+      console.log(error)
+    }
   })
 
   console.log('watch', watch())

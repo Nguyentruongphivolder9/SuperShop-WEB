@@ -5,6 +5,10 @@ import VoucherBoxType from './components/VoucherBoxType'
 import classNames from 'classnames'
 import path from 'src/constants/path'
 import useQueryParams from 'src/hooks/useQueryParams'
+import Table from './components/Table'
+import { VoucherResponse } from 'src/types/voucher.type'
+import voucherApi from 'src/apis/voucher.api'
+import { useQuery } from '@tanstack/react-query'
 
 const voucherTimeTabs = [
   { status: 'all', name: 'All' },
@@ -16,6 +20,13 @@ const voucherTimeTabs = [
 export default function VoucherShop() {
   const queryParams: { status?: string } = useQueryParams()
   const status: string = queryParams.status || 'all'
+
+  const { data } = useQuery({
+    queryKey: ['vouchers'],
+    queryFn: () => voucherApi.getVouchers()
+  })
+
+  const vouchers: VoucherResponse[] = data?.data.body?.content || []
 
   return (
     <>
@@ -33,7 +44,7 @@ export default function VoucherShop() {
           <h2 className='text-[18px] leading-[24px] text-[#333333] mb-4'>Improve conversion rates</h2>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4'>
             <VoucherBoxType
-              linkURL={path.voucherShopAdd}
+              linkURL={`${path.voucherShopAdd}?${createSearchParams({ voucherType: 'shop' })}`}
               title='Shop-wide vouchers'
               content='Voucher applies to all products in your Shop'
               icon={
@@ -192,15 +203,18 @@ export default function VoucherShop() {
           <div className='mt-6'>
             <div className='flex items-center'>
               <label className='text-sm mr-4 '>Search</label>
-              <div className='border border-gray-300 h-[1.875rem] mr-6 rounded-sm'>
-                <select name='' className='h-full w-[140px] px-3 text-sm hover:border-gray-500 focus:outline-none'>
+              <div className='h-[1.875rem] mr-6 rounded-sm'>
+                <select
+                  name=''
+                  className='h-full w-[140px] px-3 text-sm border hover:border-gray-500 focus:outline-none'
+                >
                   <option value='name'>Voucher Name</option>
                   <option value='code'>Voucher Code</option>
                 </select>
                 <input
                   type='text'
                   placeholder='Input'
-                  className='h-full px-3 text-sm border-l border-l-gray-300 hover:border-gray-500 focus:outline-none '
+                  className='h-full px-3 text-sm border border-l-gray-300 hover:border-gray-500 focus:outline-none focus:ring-0'
                 />
               </div>
               <Button className='border border-blue text-blue hover:bg-[#f4fbff] text-sm py-1 px-4 min-w-[76px] min-h-[32px] rounded-[4px]'>
@@ -208,6 +222,8 @@ export default function VoucherShop() {
               </Button>
             </div>
           </div>
+
+          <Table data={vouchers} />
         </div>
       </div>
     </>
