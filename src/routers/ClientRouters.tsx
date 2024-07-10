@@ -26,6 +26,7 @@ import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
 import VoucherWallet from 'src/pages/User/pages/VoucherWallet'
 import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
+import Chat from 'src/pages/Chat'
 
 import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
 import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
@@ -77,7 +78,7 @@ const ClientRoutes = [
     children: [
       cartRouter,
       {
-        path: path.user, // localhoas//user
+        path: path.user, // localhost//user
         element: (
           <MainLayout>
             <UserLayout></UserLayout>
@@ -168,9 +169,7 @@ const ClientRoutes = [
     path: path.emailVerify,
     element: (
       <MainLayout>
-        <Suspense>
-          <EmailVerfication></EmailVerfication>
-        </Suspense>
+        <Suspense>{/* <EmailVerfication></EmailVerfication> */}</Suspense>
       </MainLayout>
     )
   },
@@ -205,6 +204,18 @@ const ClientRoutes = [
       </MainLayout>
     )
   },
+
+  {
+    path: path.chat,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+
   {
     path: '*',
     element: (

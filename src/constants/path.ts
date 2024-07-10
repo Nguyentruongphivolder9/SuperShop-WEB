@@ -11,6 +11,7 @@ const path = {
   productDetail: '/products/:nameId',
   category: 'categories/:nameId',
   cart: '/cart',
+  chat: '/chat',
 
   // shop channels
   shopChannel: '/shopchannel',

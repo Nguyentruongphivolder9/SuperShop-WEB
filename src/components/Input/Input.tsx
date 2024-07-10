@@ -1,14 +1,14 @@
-import { InputHTMLAttributes, useState, useEffect } from 'react';
-import { RegisterOptions, UseFormRegister } from 'react-hook-form';
+import { InputHTMLAttributes, useState, useEffect } from 'react'
+import { RegisterOptions, UseFormRegister } from 'react-hook-form'
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
-  errorMessage?: string;
-  classNameInput?: string;
-  classNameError?: string;
-  classNameEye?: string;
-  classNameInputError?: string;
-  register?: UseFormRegister<any>;
-  rules?: RegisterOptions;
+  errorMessage?: string
+  classNameInput?: string
+  classNameError?: string
+  classNameEye?: string
+  classNameInputError?: string
+  register?: UseFormRegister<any>
+  rules?: RegisterOptions
 }
 
 export default function Input({
@@ -23,67 +23,67 @@ export default function Input({
   classNameEye = 'absolute size-5 top-[8px] right-[5px] cursor-pointer',
   ...rest
 }: Props) {
-  const [openEye, setOpenEye] = useState(false);
-  const [day, setDay] = useState('');
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
-  const [dateError, setDateError] = useState('');
+  const [openEye, setOpenEye] = useState(false)
+  const [day, setDay] = useState('')
+  const [month, setMonth] = useState('')
+  const [year, setYear] = useState('')
+  const [dateError, setDateError] = useState('')
 
-  const registerResult = register && name ? register(name, rules) : null;
+  const registerResult = register && name ? register(name, rules) : null
 
   const toggleEye = () => {
-    setOpenEye((prev) => !prev);
-  };
+    setOpenEye((prev) => !prev)
+  }
 
   const handleType = () => {
     if (rest.type === 'password') {
-      return openEye ? 'text' : 'password';
+      return openEye ? 'text' : 'password'
     }
-    return rest.type;
-  };
+    return rest.type
+  }
 
   // Generate array of years from current year to 1900
   const generateYears = () => {
-    const currentYear = new Date().getFullYear();
-    const years = [];
+    const currentYear = new Date().getFullYear()
+    const years = []
     for (let i = currentYear; i >= 1900; i--) {
-      years.push(i);
+      years.push(i)
     }
-    return years;
-  };
+    return years
+  }
 
   // Generate array of months (1 -> 12)
   const generateMonths = () => {
-    return Array.from({ length: 12 }, (_, i) => i + 1);
-  };
+    return Array.from({ length: 12 }, (_, i) => i + 1)
+  }
 
   // Generate array of days (1 -> 31)
   const generateDays = () => {
-    return Array.from({ length: 31 }, (_, i) => i + 1);
-  };
+    return Array.from({ length: 31 }, (_, i) => i + 1)
+  }
 
   useEffect(() => {
     if (day && month && year) {
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
       if (
         date.getFullYear() !== parseInt(year) ||
         date.getMonth() !== parseInt(month) - 1 ||
         date.getDate() !== parseInt(day)
       ) {
-        setDateError('Ngày không hợp lệ');
+        setDateError('Ngày không hợp lệ')
       } else {
-        setDateError('');
+        setDateError('')
         if (registerResult) {
-          const dateObject = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0);
+          const dateObject = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0)
           registerResult.onChange({
             target: {
-              value: dateObject,
+              value: dateObject
             }
-          });
+          })
         }
       }
     }
-  }, [day, month, year, registerResult]);
+  }, [day, month, year, registerResult])
 
   return (
     <div className={'relative ' + className}>
@@ -97,14 +97,14 @@ export default function Input({
       )}
 
       {rest.type === 'datetime-local' && (
-        <div className="flex space-x-2">
+        <div className='flex space-x-2'>
           <select
             className={`${classNameInput} ${day ? '' : 'text-gray-400'}`}
             value={day}
             onChange={(e) => setDay(e.target.value)}
             name={`${name}-day`}
           >
-            <option value="">Ngày</option>
+            <option value=''>Ngày</option>
             {generateDays().map((d) => (
               <option key={d} value={d}>
                 Ngày {d}
@@ -117,7 +117,7 @@ export default function Input({
             onChange={(e) => setMonth(e.target.value)}
             name={`${name}-month`}
           >
-            <option value="">Tháng</option>
+            <option value=''>Tháng</option>
             {generateMonths().map((m) => (
               <option key={m} value={m}>
                 Tháng {m}
@@ -130,7 +130,7 @@ export default function Input({
             onChange={(e) => setYear(e.target.value)}
             name={`${name}-year`}
           >
-            <option value="">Năm</option>
+            <option value=''>Năm</option>
             {generateYears().map((y) => (
               <option key={y} value={y}>
                 Năm {y}
@@ -167,5 +167,5 @@ export default function Input({
       )}
       {errorMessage && <div className={classNameError}>{errorMessage}</div>}
     </div>
-  );
+  )
 }
