@@ -215,6 +215,26 @@ const ClientRoutes = [
       </MainLayout>
     )
   },
+  {
+    path: path.conversations,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
+    path: path.conversationDetail,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
 
   {
     path: '*',

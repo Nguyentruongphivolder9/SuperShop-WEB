@@ -1,4 +1,4 @@
-import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
+import { Button, Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
 import { Fragment } from 'react'
 import { IoClose } from 'react-icons/io5'
 
@@ -83,8 +83,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }: ModalProps) 
                     z-10
                   '
                 >
-                  <button
-                    type='button'
+                  <Button
                     className='
                       rounded-md
                       bg-white
@@ -104,7 +103,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }: ModalProps) 
                         w-6
                       '
                     />
-                  </button>
+                  </Button>
                 </div>
                 {children}
               </DialogPanel>

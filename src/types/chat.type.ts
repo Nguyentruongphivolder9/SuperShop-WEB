@@ -28,7 +28,7 @@ export interface Message {
   seenIds: string
   conversationId: string
   senderIds: string
-  createAt: string
+  createdAt: string
   updatedAt: string
 }
 

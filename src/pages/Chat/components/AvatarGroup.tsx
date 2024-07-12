@@ -27,7 +27,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({ users = [] }: AvatarGroupProp
                 w-[21px]
                 ${positionMap[index as keyof typeof positionMap]}`}
         >
-          <img alt='Avatar' loading='lazy' src={user?.avatarUrl || '/images/placeholder.jpg'} />
+          <img alt='Avatar' loading='lazy' src={user?.avatarUrl || '/src/assets/images/placeholder.jpg'} />
         </div>
       ))}
     </div>

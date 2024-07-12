@@ -1,3 +1,4 @@
+import { Button } from '@headlessui/react'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 
@@ -17,8 +18,7 @@ const DesktopItem: React.FC<DesktopItemProps> = ({ href, label, icon: Icon, acti
   }
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
-    <li onClick={handleClick}>
+    <Button onClick={handleClick}>
       <Link
         to={href}
         className={clsx(
@@ -41,7 +41,7 @@ const DesktopItem: React.FC<DesktopItemProps> = ({ href, label, icon: Icon, acti
         <Icon className='h-6 w-6 shrink-0' />
         <span className='sr-only'>{label}</span>
       </Link>
-    </li>
+    </Button>
   )
 }
 

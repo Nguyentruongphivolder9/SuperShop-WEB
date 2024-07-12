@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 // import { FullConversationType } from "../types";
 
+import { AppContext } from 'src/contexts/app.context'
 import { FullConversationType } from 'src/types/chat.type'
 import { User } from 'src/types/user.type'
 
@@ -11,15 +12,16 @@ const useOtherUser = (
         users: User[]
       }
 ) => {
-  const session = useSession()
+  //const session = useSession()
+  const { profile } = useContext(AppContext)
 
   const otherUser = useMemo(() => {
-    const currentUserEmail = session?.data?.user?.email
+    const currentUserEmail = profile?.email
 
     const otherUser = conversation.users.filter((user) => user.email !== currentUserEmail)
 
     return otherUser[0]
-  }, [session?.data?.user?.email, conversation.users])
+  }, [profile?.email, conversation.users])
 
   return otherUser
 }

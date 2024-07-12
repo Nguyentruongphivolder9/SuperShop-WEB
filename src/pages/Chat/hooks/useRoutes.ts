@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { useMemo } from 'react'
 import { HiChat } from 'react-icons/hi'
-import { HiUsers } from 'react-icons/hi2'
+import { HiArrowLeftOnRectangle, HiUsers } from 'react-icons/hi2'
 import useConversation from './useConversation'
 
 const useRoutes = () => {
@@ -21,6 +21,12 @@ const useRoutes = () => {
         href: '/users',
         icon: HiUsers,
         active: location.pathname === '/users'
+      },
+      {
+        label: 'Logout',
+        href: '#',
+        onClick: () => signOut(),
+        icon: HiArrowLeftOnRectangle
       }
     ],
     [location.pathname, conversationId]
