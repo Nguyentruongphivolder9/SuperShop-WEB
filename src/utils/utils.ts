@@ -3,6 +3,7 @@ import config from 'src/constants/config'
 import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ErrorResponse } from 'src/types/utils.type'
 import { format } from 'date-fns'
+import { ProductVariantsResponse } from 'src/types/product.type'
 
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   // eslint-disable-next-line import/no-named-as-default-member
@@ -46,11 +47,20 @@ const removeSpecialCharacter = (str: string) => {
 // export const removeBakcSpaceCharacter = (str: string)
 
 export const generateNameId = ({ name, id }: { name: string; id: string }) => {
-  return removeSpecialCharacter(name).replace(/\s/g, '-') + `-i-${id}`
+  return removeSpecialCharacter(name).replace(/\s/g, '-') + `-i.${id}`
 }
 
 export const getIdFromNameId = (nameId: string) => {
-  const arr = nameId.split('-i-')
+  const arr = nameId.split('-i.')
+  return arr[arr.length - 1]
+}
+
+export const generateCategoryNameId = ({ name, id }: { name: string; id: string }) => {
+  return removeSpecialCharacter(name).replace(/\s/g, '-') + `-cat.${id}`
+}
+
+export const getIdFromCategoryNameId = (nameId: string) => {
+  const arr = nameId.split('-cat.')
   return arr[arr.length - 1]
 }
 
@@ -69,4 +79,40 @@ export const imageFileConvertToUrl = (file: File) => {
 export const formatDateTime = (date: string) => {
   const convertDate = new Date(date)
   return format(convertDate, 'yyyy-MM-dd kk:mm')
+}
+
+export const formatText = (text: string) => {
+  let value
+  if (text.trim().length < 1) {
+    value = text.trim()
+  } else {
+    value = text.replace(/\s\s+/g, ' ')
+  }
+  return value
+}
+
+export const calculateLowestPrice = (productVariants: ProductVariantsResponse[]): number => {
+  return productVariants.reduce((lowestPrice, variant) => {
+    return variant.price < lowestPrice ? variant.price : lowestPrice
+  }, productVariants[0]?.price || 0)
+}
+
+export const calculateHighestPrice = (productVariants: ProductVariantsResponse[]): number => {
+  return productVariants.reduce((highestPrice, variant) => {
+    return variant.price > highestPrice ? variant.price : highestPrice
+  }, productVariants[0]?.price || 0)
+}
+
+export const calculateFromToPrice = (productVariants: ProductVariantsResponse[]): string => {
+  const highestPrice = calculateHighestPrice(productVariants)
+  const lowestPrice = calculateHighestPrice(productVariants)
+  if (highestPrice == lowestPrice) {
+    return '₫' + `${formatCurrency(lowestPrice)}`
+  }
+
+  return '₫' + `${formatCurrency(lowestPrice)}` + '- ₫' + `${formatCurrency(highestPrice)}`
+}
+
+export const calculateTotalStockQuantity = (productVariants: ProductVariantsResponse[]): number => {
+  return productVariants.reduce((total, variant) => total + variant.stockQuantity, 0)
 }

@@ -30,6 +30,7 @@ import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
 import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
 import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
 import { ProductAddProvider } from 'src/contexts/productAdd.context'
+import RecommendationDaily from 'src/pages/RecommendationDaily'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext) //
@@ -161,19 +162,29 @@ const ClientRoutes = [
             element: <VoucherAdd></VoucherAdd>
           }
         ]
+      },
+      {
+        path: path.recommendationDaily,
+        element: (
+          <MainLayout>
+            <Suspense>
+              <RecommendationDaily></RecommendationDaily>
+            </Suspense>
+          </MainLayout>
+        )
       }
     ]
   },
-  {
-    path: path.emailVerify,
-    element: (
-      <MainLayout>
-        <Suspense>
-          <EmailVerfication></EmailVerfication>
-        </Suspense>
-      </MainLayout>
-    )
-  },
+  // {
+  //   path: path.emailVerify,
+  //   element: (
+  //     <MainLayout>
+  //       <Suspense>
+  //         <EmailVerfication></EmailVerfication>
+  //       </Suspense>
+  //     </MainLayout>
+  //   )
+  // },
   {
     path: path.category,
     element: (

@@ -6,16 +6,15 @@ export const URl_REGISTER = 'auth/register'
 export const URL_LOGOUT = 'account/logout'
 export const URL_REFRESH_TOKEN = 'refresh-access-token'
 export const URL_EMAIL_VERIFICATION = 'auth/send-email'
-export const URL_WAITING_FOR_EMAIL_RESPONSE = "auth/waiting-for-email-response"
-type LogoutRequest =  {
-  email:string;
+export const URL_WAITING_FOR_EMAIL_RESPONSE = 'auth/waiting-for-email-response'
+type LogoutRequest = {
+  email: string
 }
 const authApi = {
-  
-  waitingForEmailResponse(body: {email:string}){
+  waitingForEmailResponse(body: { email: string }) {
     return http.post<WaitingForEmailResponse>(`${URL_WAITING_FOR_EMAIL_RESPONSE}`, body)
   },
-  verifyEmail(body: {email:string}) {
+  verifyEmail(body: { email: string }) {
     return http.post<AuthResponse>(`${URL_EMAIL_VERIFICATION}`, body)
   },
   registerAccount(body: Omit<FormDataRegister, 'confirm_password'>) {
@@ -27,11 +26,10 @@ const authApi = {
   logout: (body: LogoutRequest) => {
     return http.post<AuthResponse>(`${URL_LOGOUT}`, body, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       }
-    });
+    })
   }
-  
 }
 
 export default authApi

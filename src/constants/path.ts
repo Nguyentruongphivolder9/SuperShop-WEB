@@ -8,9 +8,11 @@ const path = {
   login: '/login',
   register: '/register',
   logout: '/logout',
+  product: '/products',
   productDetail: '/products/:nameId',
   category: 'categories/:nameId',
   cart: '/cart',
+  recommendationDaily: '/find_similar_products',
 
   // shop channels
   shopChannel: '/shopchannel',

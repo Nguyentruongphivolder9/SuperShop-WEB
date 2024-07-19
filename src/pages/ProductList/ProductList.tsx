@@ -8,6 +8,7 @@ import { ProductListConfig } from 'src/types/product.type'
 import AsideFilter from './components/AsideFilter'
 import SortProductList from './components/SortProductList'
 import Product from '../../components/Product'
+import path from 'src/constants/path'
 
 const productsData = [
   {
@@ -196,6 +197,7 @@ export default function ProductList() {
               queryConfig={queryConfig}
               // pageSize={productsData.data.data.pagination.page_size}
               pageSize={20}
+              path={path.product}
             />
           </div>
         </div>
