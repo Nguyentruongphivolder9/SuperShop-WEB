@@ -1,38 +1,56 @@
-import { Link } from 'react-router-dom'
-import Popover from '../Popover'
-import path from 'src/constants/path'
-import { useContext } from 'react'
-import { AppContext } from 'src/contexts/app.context'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import authApi from 'src/apis/auth.api'
-import { getAvatarUrl } from 'src/utils/utils'
-import { useTranslation } from 'react-i18next'
-import { locales } from 'src/i18n/i18n'
+import { Link } from 'react-router-dom';
+import Popover from '../Popover';
+import path from 'src/constants/path';
+import { useContext } from 'react';
+import { AppContext } from 'src/contexts/app.context';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import authApi from 'src/apis/auth.api';
+import { getAvatarUrl } from 'src/utils/utils';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+
+type FormDataLogout = {
+  email: string;
+};
 
 export default function NavHeader() {
-  const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext)
-  const queryClient = useQueryClient()
-  const { i18n } = useTranslation()
+  const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext);
+  const queryClient = useQueryClient();
+  const { i18n } = useTranslation();
 
   const logoutMutation = useMutation({
-    mutationFn: authApi.logout,
-    onSuccess: () => {
-      setIsAuthenticated(false)
-      setProfile(null)
-      queryClient.clear()
-    }
-  })
+    mutationFn: (body: FormDataLogout) => authApi.logout(body),
+  });
 
   const handleLogout = () => {
-    logoutMutation.mutate()
-  }
+    const token = localStorage.getItem('accessToken') || '';
+    const email = profile?.email || '';
+
+    if (token && email) {
+      logoutMutation.mutate(
+        { email },
+        {
+          onSuccess: () => {
+            setIsAuthenticated(false);
+            setProfile(null);
+            queryClient.clear();
+            localStorage.removeItem('accessToken');
+          },
+          onError: (e) => {
+            toast.error('Đăng xuất thất bại, vui lòng thử lại sau.');
+            console.log(e);
+          },
+        }
+      );
+    }
+  };
 
   const handleLanguageChange = (language: string) => {
-    i18n.changeLanguage(language)
-  }
+    i18n.changeLanguage(language);
+  };
 
   return (
-    <div className='flex justify-between ml-auto'>
+    <div className='flex justify-between ml-auto container'>
       <div className=''>
         <Link
           to={'/shopchannel'}
@@ -41,17 +59,15 @@ export default function NavHeader() {
           Seller Centre
         </Link>
       </div>
-      <div className='flex  space-x-4'>
+      <div className='flex space-x-4'>
         <Popover
           className='flex cursor-pointer items-center h-fit px-[10px] py-[7px] hover:text-white/70'
           renderPopover={
             <div className='relative rounded-sm border border-gray-200 bg-white shadow-md'>
-              {' '}
-              <div className='flex flex-col '>
-                {' '}
-                <button className='text-sm py-2 pl-6 pr-32 text-left hover:text-orange'>Tiếng Việt</button>{' '}
-                <button className='text-sm mt-2 py-2 pl-6 pr-32 text-left hover:text-orange'>English</button>{' '}
-              </div>{' '}
+              <div className='flex flex-col'>
+                <button className='text-sm py-2 pl-6 pr-32 text-left hover:text-orange'>Tiếng Việt</button>
+                <button className='text-sm mt-2 py-2 pl-6 pr-32 text-left hover:text-orange'>English</button>
+              </div>
             </div>
           }
         >
@@ -109,8 +125,7 @@ export default function NavHeader() {
           >
             <div className='flex items-center space-x-2'>
               <img
-                // src={profile?.avatarUrl || getAvatarUrl(profile?.email)}
-                src={'https://cf.shopee.vn/file/5e43c09b3e295847ff5d41456d032beb'}
+                src={profile?.avatarUrl || getAvatarUrl(profile?.email)}
                 alt='avatar'
                 className='w-6 h-6 rounded-full object-cover'
               />
@@ -132,5 +147,5 @@ export default function NavHeader() {
         )}
       </div>
     </div>
-  )
+  );
 }

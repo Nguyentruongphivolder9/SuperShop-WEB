@@ -111,13 +111,18 @@ export const userSchema = yup.object({
     .max(160, 'Độ dài từ 5 - 160 ký tự'),
   address: yup.string().max(160, 'Độ dài tối đa là 160 ký tự'),
   avatar: yup.string().max(1000, 'Độ dài tối đa là 1000 ký tự'),
-  date_of_birth: yup.date().required('Ngày sinh là bắt buộc').max(new Date(), 'Hãy chọn một ngày trong quá khứ'),
+  birth_day: yup.date().required('Ngày sinh là bắt buộc').max(new Date(), 'Hãy chọn một ngày trong quá khứ'),
   password: yup
     .string()
     .required('Password là bắt buộc')
     .min(6, 'Độ dài từ 6 - 160 ký tự')
     .max(160, 'Độ dài từ 6 - 160 ký tự'),
-  confirm_password: handleConfirmPasswordYup('password')
+  confirm_password: yup
+    .string()
+    .required('Nhập lại password là bắt buộc')
+    .min(6, 'Độ dài từ 6 - 160 ký tự')
+    .max(160, 'Độ dài từ 6 - 160 ký tự')
+    .oneOf([yup.ref('password')], 'Nhập lại password không khớp')
 })
 
 export type UserSchema = yup.InferType<typeof userSchema>
