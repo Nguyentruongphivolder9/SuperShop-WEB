@@ -6,7 +6,6 @@ import 'react-datepicker/dist/react-datepicker.css'
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { vi } from 'date-fns/locale/vi'
 import { Controller, useForm } from 'react-hook-form'
-import { VoucherSchema, voucherShema } from 'src/utils/validations/voucherValidation'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Button from 'src/components/Button'
 import classNames from 'classnames'
@@ -15,9 +14,9 @@ import voucherApi from 'src/apis/voucher.api'
 import { GMTToLocalStingTime } from '../../utils/date.utils'
 import useQueryParams from 'src/hooks/useQueryParams'
 import { AppContext } from 'src/contexts/app.context'
-import { toast } from 'react-toastify'
-import { useNavigate } from 'react-router-dom'
-import path from 'src/constants/path'
+import { VoucherRequest } from 'src/types/voucher.type'
+import { DiscountType, StatusVoucher } from '../../enums/voucherInfo.enum'
+import { voucherUpdateSchema, VoucherUpdateShema } from 'src/utils/validations/voucherValidation'
 registerLocale('vi', vi)
 const range = (start: number, end: number) => {
   return new Array(end - start + 1).fill(null).map((d, i) => i + start)
@@ -46,17 +45,18 @@ const isThreeMonthsAhead = (date: Date) => {
   return date <= threeMonthsAhead
 }
 
-type FormData = VoucherSchema
+type FormData = VoucherUpdateShema
 export default function VoucherAdd() {
   const { profile } = useContext(AppContext)
-  const navigate = useNavigate()
-  const [startDate, setStartDate] = useState(addMinutes(new Date(), 10))
-  const [endDate, setEndDate] = useState(addHours(addMinutes(new Date(), 10), 1))
+  // const [startDate, setStartDate] = useState(addMinutes(new Date(), 10))
+  // const [endDate, setEndDate] = useState(addHours(addMinutes(new Date(), 10), 1))
+  const [isUpComing, setIsUPComing] = useState(true)
   const queryParams: { voucherType?: string; edit?: string } = useQueryParams()
   const { edit: idUpdate } = queryParams
   const {
     control,
     register,
+    unregister,
     handleSubmit,
     setValue,
     trigger,
@@ -65,34 +65,61 @@ export default function VoucherAdd() {
     formState: { errors },
     watch
   } = useForm<FormData>({
-    defaultValues: {
-      name: '',
-      code: '',
-      voucherType: queryParams.voucherType,
-      discountType: 'fixed',
-      isLimit: true,
-      startDate: startDate,
-      endDate: endDate
-    },
     mode: 'onBlur',
-    resolver: yupResolver(voucherShema)
+    resolver: yupResolver(voucherUpdateSchema)
   })
 
-  const createVoucherMutaion = useMutation({
-    mutationFn: voucherApi.createVoucher,
-    onSuccess() {
-      navigate(path.voucherShop)
-    }
+  const { data: updateData } = useQuery({
+    queryKey: ['voucherById', idUpdate],
+    queryFn: async () => {
+      //prettier-ignore
+      const {data: {body}} = await voucherApi.getVoucher(idUpdate as string)
+      return body
+    },
+    enabled: !!idUpdate
   })
+
+  const updateMutaion = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: VoucherRequest }) => voucherApi.updateVoucher({ id, body })
+  })
+  console.log(updateData)
+  useEffect(() => {
+    if (updateData) {
+      setIsUPComing(updateData.status === StatusVoucher.UPCOMING)
+      setValue('status', updateData.status)
+      setValue('code', updateData.code)
+      setValue('name', updateData.name)
+      setValue('startDate', new Date(updateData.startDate))
+      setValue('endDate', new Date(updateData.endDate))
+      setValue('minimumTotalOrder', updateData.minimumTotalOrder)
+      setValue('oldQuantity', updateData.quantity)
+      setValue('quantity', updateData.quantity)
+      setValue('maxDistribution', updateData.maxDistribution)
+      if (updateData.discountType === DiscountType.FIXED) {
+        setValue('discountType', DiscountType.FIXED)
+        setValue('fixedAmount', updateData.fixedAmount)
+      }
+      if (updateData.discountType === DiscountType.PERCENTAGE) {
+        setValue('discountType', DiscountType.PERCENTAGE)
+        setValue('percentageAmount', updateData.percentageAmount)
+        setValue('maximumDiscount', updateData.maximumDiscount)
+        setValue('isLimit', updateData.isLimit)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateData])
 
   const onSubmit = handleSubmit(async (data) => {
+    const { status, oldQuantity, ...formData } = data
     try {
-      const res = await createVoucherMutaion.mutateAsync({
-        ...data,
-        startDate: GMTToLocalStingTime(data.startDate),
-        endDate: GMTToLocalStingTime(data.endDate)
+      await updateMutaion.mutateAsync({
+        id: idUpdate as string,
+        body: {
+          ...formData,
+          startDate: GMTToLocalStingTime(data.startDate),
+          endDate: GMTToLocalStingTime(data.endDate)
+        }
       })
-      toast.success(res.data.message)
     } catch (error) {
       console.log(error)
     }
@@ -109,6 +136,25 @@ export default function VoucherAdd() {
             <div className='p-4 bg-white'>
               <h3 className='mb-6 text-[20px] font-medium text-[#333]'>Basic Information</h3>
               <div>
+                <div className='grid grid-cols-12 text-sm items-center'>
+                  <div className='col-span-3 flex justify-end items-center'>
+                    <label className='min-w-[200px] w-[200px] max-w-[200px] h-[60px] text-right leading-[48px] py-2 mr-3'>
+                      Status
+                    </label>
+                  </div>
+                  <div className='col-span-9'>
+                    <div className='inline-flex items-center h-[60px] py-3 pl-3 pr-7 mr-4 '>
+                      <span
+                        className={`${updateData?.status == 'ongoing' ? 'bg-green-200 text-green-500' : 'bg-red-200 text-red-500'} px-1 rounded-sm capitalize text-xs`}
+                      >
+                        {updateData?.status}
+                      </span>
+                      <input type='hidden' {...register('status')} />
+                      <input type='hidden' {...register('oldQuantity')} />
+                      <div className='check_part'></div>
+                    </div>
+                  </div>
+                </div>
                 <div className='grid grid-cols-12 mb-4 text-sm items-center'>
                   <div className='col-span-3 flex justify-end'>
                     <label className='min-w-[200px] w-[200px] max-w-[200px] h-[80px] text-right leading-[48px] py-2 mr-3'>
@@ -147,7 +193,7 @@ export default function VoucherAdd() {
                       className={classNames(
                         'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
                         {
-                          'border-gray-200 hover:border-gray-500': !errors.name?.message,
+                          'border-gray-200 hover:border-gray-400': !errors.name?.message,
                           'border-red-300': errors.name?.message
                         }
                       )}
@@ -158,7 +204,7 @@ export default function VoucherAdd() {
                         className=' flex-grow flex-1 h-[30px] outline-none'
                         maxLength={100}
                       />
-                      <div className='pl-2 text-gray-400'>{getValues('name').length}/100</div>
+                      <div className='pl-2 text-gray-400'>{getValues('name') && getValues('name').length}/100</div>
                     </div>
                     <p className='text-red-500 text-xs'>{errors.name?.message}</p>
                     <p className='text-gray-400 text-xs'>Voucher name is not visible to buyers</p>
@@ -173,14 +219,18 @@ export default function VoucherAdd() {
                   <div className='col-span-9'>
                     <div
                       className={classNames(
-                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        `flex items-center px-3 ${
+                          !isUpComing
+                            ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
+                            : 'bg-white hover:border-gray-400'
+                        } border text-sm rounded`,
                         {
-                          'border-gray-200 hover:border-gray-500': !errors.code?.message,
+                          'border-gray-200': !errors.code?.message,
                           'border-red-300': errors.code?.message
                         }
                       )}
                     >
-                      <div className='pr-2 text-sm uppercase'>{profile?.userName.slice(0, 5)}</div>
+                      <div className='pr-2 text-sm uppercase '>{profile?.userName.slice(0, 5)}</div>
                       <div className='h-4 w-[1px] bg-gray-300'></div>
                       <input
                         type='text'
@@ -191,9 +241,12 @@ export default function VoucherAdd() {
                           }
                         })}
                         maxLength={5}
-                        className=' flex-grow flex-1 px-3 h-[30px] outline-none '
+                        className={classNames('flex-grow flex-1 px-3 h-[30px] outline-none', {
+                          'cursor-not-allowed text-gray-500': !isUpComing
+                        })}
+                        disabled={!isUpComing}
                       />
-                      <div className='pl-2 text-gray-400'>{getValues('code').length}/5</div>
+                      <div className='pl-2 text-gray-400'>{getValues('code') && getValues('code').length}/5</div>
                     </div>
                     <div className='text-sm text-gray-400'>
                       <p className='text-red-500 text-xs'>{errors.code?.message}</p>
@@ -201,7 +254,7 @@ export default function VoucherAdd() {
                       <p>
                         Your complete voucher code is:{' '}
                         <span className='uppercase'>{profile?.userName.slice(0, 4)}</span>
-                        {getValues('code').toUpperCase()}
+                        {getValues('code') && getValues('code').toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -220,8 +273,16 @@ export default function VoucherAdd() {
                           name='startDate'
                           render={({ field }) => (
                             <DatePicker
-                              className='h-8 border rounded w-full bg-gray-50 outline-none cursor-pointer hover:border-gray-400 transition-colors'
+                              className={classNames(
+                                'h-8 border rounded w-full outline-none focus:border-gray-400 transition-colors',
+                                {
+                                  'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200':
+                                    !isUpComing,
+                                  'bg-gray-50 cursor-pointer hover:border-gray-400': isUpComing
+                                }
+                              )}
                               showIcon
+                              disabled={!isUpComing}
                               toggleCalendarOnIconClick
                               icon={
                                 <svg
@@ -238,7 +299,7 @@ export default function VoucherAdd() {
                                 trigger('endDate')
                               }}
                               onBlur={field.onBlur}
-                              selected={field.value ?? startDate}
+                              selected={field.value}
                               shouldCloseOnSelect={true}
                               locale='vi'
                               showTimeSelect
@@ -313,7 +374,15 @@ export default function VoucherAdd() {
                           name='endDate'
                           render={({ field }) => (
                             <DatePicker
-                              className='h-8 border rounded w-full bg-gray-50 outline-none cursor-pointer hover:border-gray-400 transition-colors'
+                              className={classNames(
+                                'h-8 border rounded w-full outline-none focus:border-gray-400 hover:border-gray-400 transition-colors',
+                                {
+                                  'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200':
+                                    updateData?.status === StatusVoucher.EXPIRE,
+                                  'cursor-pointer': updateData?.status !== StatusVoucher.EXPIRE
+                                }
+                              )}
+                              disabled={updateData?.status === StatusVoucher.EXPIRE}
                               showIcon
                               toggleCalendarOnIconClick
                               icon={
@@ -328,7 +397,7 @@ export default function VoucherAdd() {
                               }
                               onChange={field.onChange}
                               onBlur={field.onBlur}
-                              selected={field.value ?? endDate}
+                              selected={field.value}
                               shouldCloseOnSelect={true}
                               locale='vi'
                               showTimeSelect
@@ -394,18 +463,6 @@ export default function VoucherAdd() {
                         <p className='text-red-500 text-xs'>{errors.endDate?.message}</p>
                       </div>
                     </div>
-                    {/* <div className='flex items-center'>
-                      <input type='checkbox' id='early' />
-                      <label htmlFor='early' className='ml-3'>
-                        Display voucher early
-                      </label>
-                    </div>
-                    {true && (
-                      <div>
-                        <input type='date' />
-                        <p>Once voucher starts displaying, this section can no longer be edited</p>
-                      </div>
-                    )} */}
                   </div>
                 </div>
               </div>
@@ -421,38 +478,49 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div className='flex items-center h-[30px] bg-white text-sm rounded border-spacing-0 border-collapse'>
-                      <div className='relative text-sm uppercase h-full rounded-l-md border boder-gray-200 border-r-0 border-r-transparent hover:border-gray-300 transition-colors'>
+                      <div className='relative text-sm uppercase h-full rounded-l-sm border boder-gray-200 border-r-0 border-r-transparent hover:border-gray-300 transition-colors'>
                         <select
                           {...register('discountType', {
                             required: true,
                             onChange(event) {
                               setValue('discountType', event.target.value)
-                              clearErrors('fixedAmount')
-                              clearErrors('percentageAmount')
                               clearErrors('minimumTotalOrder')
                             }
                           })}
+                          disabled={!isUpComing}
                           defaultValue='fixed'
-                          className='h-full w-[140px] text-sm rounded border-none focus:outline-none'
+                          className={classNames('h-full w-[140px] text-sm round-l-sm border-none focus:outline-none', {
+                            'cursor-not-allowed bg-[#e8eaec]': !isUpComing
+                          })}
                         >
                           <option value='fixed'>Fix Amount</option>
                           <option value='percentage'>By Percentage</option>
                         </select>
                       </div>
-                      {getValues('discountType') === 'fixed' ? (
+                      {getValues('discountType') === DiscountType.FIXED ? (
                         <div className='h-full w-full'>
                           <div
-                            className={classNames('relative flex items-center h-full w-full px-3 border ', {
-                              ' boder-gray-200 hover:border-gray-400': !errors.fixedAmount?.message,
-                              'border-red-300': errors.fixedAmount?.message
-                            })}
+                            className={classNames(
+                              `relative flex items-center h-full w-full px-3 border has-[:focus]:border-gray-400 ${
+                                !isUpComing
+                                  ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
+                                  : 'bg-white hover:border-gray-400'
+                              }`,
+                              {
+                                'border-gray-200': !errors.fixedAmount?.message,
+                                'border-red-300': errors.fixedAmount?.message
+                              }
+                            )}
                           >
                             <div className='text-sm text-gray-300'>₫</div>
                             <div className='h-4 w-[1px] mx-2 bg-gray-300'></div>
                             <input
                               type='text'
                               {...register('fixedAmount')}
-                              className='flex-1 h-full outline-none border-none'
+                              className={classNames(`flex-1 h-full outline-none border-none`, {
+                                'cursor-not-allowed bg-[#e8eaec]': !isUpComing
+                              })}
+                              disabled={!isUpComing}
                             />
                           </div>
                           <p className='text-red-500 text-xs'>{errors.fixedAmount?.message}</p>
@@ -460,15 +528,25 @@ export default function VoucherAdd() {
                       ) : (
                         <div className='h-full w-full'>
                           <div
-                            className={classNames('relative flex items-center h-full w-full px-3 border ', {
-                              'boder-gray-200 hover:border-gray-400': !errors.percentageAmount?.message,
-                              'border-red-300': errors.percentageAmount?.message
-                            })}
+                            className={classNames(
+                              `relative flex items-center h-full w-full px-3 border has-[:focus]:border-gray-400 ${
+                                !isUpComing
+                                  ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
+                                  : 'bg-white hover:border-gray-400'
+                              }`,
+                              {
+                                'boder-gray-200': !errors.percentageAmount?.message,
+                                'border-red-300': errors.percentageAmount?.message
+                              }
+                            )}
                           >
                             <input
                               type='text'
                               {...register('percentageAmount')}
-                              className='flex-1 h-full outline-none border-none'
+                              className={classNames(`flex-1 h-full outline-none border-none`, {
+                                'cursor-not-allowed bg-[#e8eaec]': !isUpComing
+                              })}
+                              disabled={!isUpComing}
                             />
                             <div className='h-4 w-[1px] mx-2 bg-gray-300'></div>
                             <div className='text-sm text-gray-400'>%OFF</div>
@@ -479,7 +557,7 @@ export default function VoucherAdd() {
                     </div>
                   </div>
                 </div>
-                {watch('discountType') === 'percentage' && (
+                {watch('discountType') === DiscountType.PERCENTAGE && (
                   <div className='grid grid-cols-12 mb-6 text-sm '>
                     <div className='col-span-3 flex justify-end h-full'>
                       <label className='mr-3 min-w-[200px] w-[200px] max-w-[200px] h-full text-right leading-[16px] py-1'>
@@ -502,9 +580,16 @@ export default function VoucherAdd() {
                                     value='limit'
                                     onChange={() => field.onChange(true)}
                                     checked={field.value === true}
-                                    className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer'
+                                    className={classNames('w-4 h-4 text-blue-600', {
+                                      'cursor-not-allowed opacity-85': !isUpComing,
+                                      'cursor-pointer': updateData?.status === StatusVoucher.UPCOMING
+                                    })}
+                                    disabled={!isUpComing}
                                   />
-                                  <label htmlFor='inline-radio' className='ms-2 text-sm font-medium text-gray-90'>
+                                  <label
+                                    htmlFor='inline-radio'
+                                    className={`ms-2 text-sm font-medium text-gray-90 ${!isUpComing ? 'cursor-not-allowed' : ''}`}
+                                  >
                                     Set amount
                                   </label>
                                 </div>
@@ -519,9 +604,16 @@ export default function VoucherAdd() {
                                       clearErrors('maximumDiscount')
                                     }}
                                     checked={field.value === false}
-                                    className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer'
+                                    className={classNames('w-4 h-4 text-blue-600', {
+                                      'cursor-not-allowed opacity-85': !isUpComing,
+                                      'cursor-pointer': isUpComing
+                                    })}
+                                    disabled={!isUpComing}
                                   />
-                                  <label htmlFor='inline-2-radio' className='ms-2 text-sm font-medium text-gray-90'>
+                                  <label
+                                    htmlFor='inline-2-radio'
+                                    className={`ms-2 text-sm font-medium text-gray-90 ${!isUpComing ? 'cursor-not-allowed' : ''}`}
+                                  >
                                     No limit
                                   </label>
                                 </div>
@@ -534,9 +626,13 @@ export default function VoucherAdd() {
                         <div>
                           <div
                             className={classNames(
-                              'flex items-center px-3 mt-2 bg-white border text-sm rounded transition-colors',
+                              `flex items-center px-3 ${
+                                !isUpComing
+                                  ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
+                                  : 'bg-white hover:border-gray-400'
+                              } border text-sm rounded`,
                               {
-                                'boder-gray-200 hover:border-gray-400': !errors.maximumDiscount?.message,
+                                'border-gray-200': !errors.maximumDiscount?.message,
                                 'border-red-300': errors.maximumDiscount?.message
                               }
                             )}
@@ -546,7 +642,10 @@ export default function VoucherAdd() {
                             <input
                               type='text'
                               {...register('maximumDiscount')}
-                              className='flex-grow flex-1 px-3 h-[30px] outline-none'
+                              className={classNames('flex-grow flex-1 px-3 h-[30px] outline-none', {
+                                'cursor-not-allowed text-gray-500': !isUpComing
+                              })}
+                              disabled={!isUpComing}
                             />
                           </div>
                           <div className='text-sm text-gray-400'>
@@ -565,17 +664,27 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'boder-gray-200 hover:border-gray-400': !errors.minimumTotalOrder?.message,
-                        'border-red-300': errors.minimumTotalOrder?.message
-                      })}
+                      className={classNames(
+                        `flex items-center px-3 ${
+                          !isUpComing
+                            ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
+                            : 'bg-white hover:border-gray-400'
+                        } border text-sm rounded`,
+                        {
+                          'border-gray-200': !errors.code?.message,
+                          'border-red-300': errors.code?.message
+                        }
+                      )}
                     >
                       <div className='pr-2 text-sm uppercase text-gray-400'>₫</div>
                       <div className='h-4 w-[1px] bg-gray-300'></div>
                       <input
                         type='text'
                         {...register('minimumTotalOrder')}
-                        className=' flex-grow flex-1 px-3 h-[30px] outline-none '
+                        className={classNames('flex-grow flex-1 px-3 h-[30px] outline-none', {
+                          'cursor-not-allowed text-gray-500': !isUpComing
+                        })}
+                        disabled={!isUpComing}
                       />
                     </div>
                     <div className='text-sm text-gray-400'>
@@ -591,13 +700,16 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
-                        'border-red-300': errors.quantity?.message
-                      })}
+                      className={classNames(
+                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        {
+                          'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
+                          'border-red-300': errors.quantity?.message
+                        }
+                      )}
                     >
                       <input
-                        type='number'
+                        type='text'
                         {...register('quantity')}
                         className=' flex-grow flex-1 h-[30px] outline-none '
                       />
@@ -605,6 +717,9 @@ export default function VoucherAdd() {
                     <div className='text-sm text-gray-400'>
                       <p className='text-red-500 text-xs'>{errors.quantity?.message}</p>
                       <p>Total usable voucher for all buyers</p>
+                      {updateData?.status === StatusVoucher.ONGOING && (
+                        <p>You only can increase the voucher quantity because the voucher status is on-going</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -616,15 +731,25 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
-                        'border-red-300': errors.quantity?.message
-                      })}
+                      className={classNames(
+                        `flex items-center px-3 ${
+                          !isUpComing
+                            ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
+                            : 'bg-white hover:border-gray-400'
+                        } border text-sm rounded`,
+                        {
+                          'border-gray-200': !errors.code?.message,
+                          'border-red-300': errors.code?.message
+                        }
+                      )}
                     >
                       <input
                         type='text'
                         {...register('maxDistribution')}
-                        className=' flex-grow flex-1 h-[30px] outline-none '
+                        className={classNames('flex-grow flex-1 px-3 h-[30px] outline-none', {
+                          'cursor-not-allowed text-gray-500': !isUpComing
+                        })}
+                        disabled={!isUpComing}
                       />
                     </div>
                     <div className='text-sm text-gray-400'>

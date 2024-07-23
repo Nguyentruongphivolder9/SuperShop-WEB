@@ -32,6 +32,10 @@ import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
 import { ProductAddProvider } from 'src/contexts/productAdd.context'
 import RecommendationDaily from 'src/pages/RecommendationDaily'
 
+import VoucherEdit from 'src/pages/Shop/page/VoucherShop/pages/VoucherEdit'
+import { VoucherProvider } from 'src/contexts/voucher.context'
+
+
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext) //
   // getcookies -> roles
@@ -155,11 +159,19 @@ const ClientRoutes = [
           },
           {
             path: path.voucherShop,
-            element: <VoucherShop></VoucherShop>
+            element: (
+              <VoucherProvider>
+                <VoucherShop></VoucherShop>
+              </VoucherProvider>
+            )
           },
           {
             path: path.voucherShopAdd,
             element: <VoucherAdd></VoucherAdd>
+          },
+          {
+            path: path.voucherShopEdit,
+            element: <VoucherEdit></VoucherEdit>
           }
         ]
       },

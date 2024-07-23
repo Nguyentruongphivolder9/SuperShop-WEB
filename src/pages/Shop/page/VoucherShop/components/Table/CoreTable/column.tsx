@@ -1,10 +1,12 @@
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef } from '@tanstack/react-table'
 import { VoucherResponse } from 'src/types/voucher.type'
-import { GMTToLocalStingTime } from '../../../utils/date.utils'
 import { format, parseISO } from 'date-fns'
-import Actions from './Actions'
+import ActionsCell from './Actions'
 import PercentImg from '../../../images/percent.png'
 import DollarImg from '../../../images/dollar_fixed.png'
+import QuantityUpdaterCell from './QuantityUpdater'
+import { StatusVoucher } from '../../../enums/voucherInfo.enum'
+
 export const columnDef: ColumnDef<VoucherResponse>[] = [
   {
     accessorKey: 'code',
@@ -22,7 +24,13 @@ export const columnDef: ColumnDef<VoucherResponse>[] = [
           <div className=''>
             <div className='text-sm font-medium text-gray-900'>
               <span
-                className={`${row.original.status == 'ongoing' ? 'bg-green-200 text-green-500' : 'bg-red-200 text-red-500'} px-1 rounded-sm capitalize text-xs`}
+                className={`${
+                  row.original.status === StatusVoucher.ONGOING
+                    ? 'bg-green-200 text-green-500'
+                    : row.original.status === StatusVoucher.UPCOMING
+                      ? 'bg-red-200 text-red-500'
+                      : 'bg-gray-400 text-gray-200'
+                } px-1 rounded-sm capitalize text-xs`}
               >
                 {row.original.status}
               </span>
@@ -46,7 +54,12 @@ export const columnDef: ColumnDef<VoucherResponse>[] = [
   },
   {
     accessorKey: 'quantity',
-    header: 'Usage quantity'
+    header: 'Usage quantity',
+    cell: QuantityUpdaterCell
+  },
+  {
+    accessorKey: 'usage',
+    header: 'Usage'
   },
   {
     id: 'date',
@@ -57,6 +70,6 @@ export const columnDef: ColumnDef<VoucherResponse>[] = [
   {
     accessorKey: 'actions',
     header: 'Actions',
-    cell: ({ cell, row }) => <Actions cell={cell} row={row} />
+    cell: ActionsCell
   }
 ]
