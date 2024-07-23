@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { Link, NavLink, createSearchParams } from 'react-router-dom'
+import { Link, createSearchParams } from 'react-router-dom'
 import Button from 'src/components/Button'
 import VoucherBoxType from './components/VoucherBoxType'
 import classNames from 'classnames'
@@ -9,6 +9,11 @@ import Table from './components/Table'
 import { VoucherResponse } from 'src/types/voucher.type'
 import voucherApi from 'src/apis/voucher.api'
 import { useQuery } from '@tanstack/react-query'
+import { useContext, useMemo } from 'react'
+import { columnDef } from './components/Table/CoreTable/column'
+import { FormProvider, useForm } from 'react-hook-form'
+import { VoucherUpdateShema } from 'src/utils/validations/voucherValidation'
+import { VoucherContext } from 'src/contexts/voucher.context'
 
 const voucherTimeTabs = [
   { status: 'all', name: 'All' },
@@ -20,14 +25,11 @@ const voucherTimeTabs = [
 export default function VoucherShop() {
   const queryParams: { status?: string } = useQueryParams()
   const status: string = queryParams.status || 'all'
-
   const { data } = useQuery({
     queryKey: ['vouchers'],
     queryFn: () => voucherApi.getVouchers()
   })
-
-  const vouchers: VoucherResponse[] = data?.data.body?.content || []
-
+  const vouchers: VoucherResponse[] = useMemo(() => data?.data.body?.content ?? [], [data?.data.body?.content])
   return (
     <>
       <div className='bg-white p-5 mb-5'>

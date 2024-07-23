@@ -21,7 +21,7 @@ const path = {
   productAdd: '/shopchannel/portal/product/new',
   voucherShop: '/shopchannel/portal/marketing/vouchers/list',
   voucherShopAdd: '/shopchannel/portal/marketing/vouchers/new',
-
+  voucherShopEdit: '/shopchannel/portal/marketing/vouchers/edit',
   //Email verification.
   emailVerify: '/emailVerify',
 

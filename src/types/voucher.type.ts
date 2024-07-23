@@ -1,4 +1,5 @@
-import { VoucherSchema } from 'src/utils/validations/voucher.rules'
+/* eslint-disable import/namespace */
+import { VoucherSchema } from 'src/utils/validations/voucherValidation'
 
 export interface Voucher {
   id: string
@@ -19,6 +20,8 @@ export interface Voucher {
 }
 
 export type VoucherRequest = Omit<VoucherSchema, 'startDate' | 'endDate'> & {
+  id?: string
+  isEnd?: boolean
   startDate: string
   endDate: string
 }

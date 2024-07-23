@@ -1,3 +1,5 @@
+import { Box, Button, Collapse, Group } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import classNames from 'classnames'
 import { useContext } from 'react'
 import { Link, NavLink } from 'react-router-dom'
@@ -7,6 +9,7 @@ import { getAvatarUrl } from 'src/utils/utils'
 
 export default function UserSideNav() {
   const { profile } = useContext(AppContext)
+  const [openedNoti, handlersNoti] = useDisclosure(false)
   return (
     <div className='p-4 bg-white rounded-lg shadow-md'>
       <div className='flex items-center border-b border-b-gray-200 py-4'>
@@ -15,7 +18,10 @@ export default function UserSideNav() {
         </Link>
         <div className='flex-grow pl-4'>
           <div className='mb-1 truncate font-semibold text-gray-800'>{profile?.userName}</div>
-          <Link to={path.profile} className='flex items-center capitalize text-gray-500 hover:text-gray-800 transition-colors'>
+          <Link
+            to={path.profile}
+            className='flex items-center capitalize text-gray-500 hover:text-gray-800 transition-colors'
+          >
             <svg
               width={12}
               height={12}
@@ -29,7 +35,7 @@ export default function UserSideNav() {
                 fillRule='evenodd'
               />
             </svg>
-            Sửa hồ sơ
+            Edit Profile
           </Link>
         </div>
       </div>
@@ -37,29 +43,46 @@ export default function UserSideNav() {
         <NavLink
           to={path.profile}
           className={({ isActive }) =>
-            classNames('flex items-center capitalize transition-colors py-2 rounded-md hover:bg-gray-100', {
-              'text-orange-500 bg-orange-50': isActive,
+            classNames('flex items-center capitalize transition-colors py-2 px-2 rounded-md hover:bg-sky-100', {
+              'text-sky-500 bg-sky-50': isActive,
               'text-gray-700': !isActive
             })
           }
         >
           <div className='mr-3 h-[22px] w-[22px]'>
-            <img src='https://cf.shopee.vn/file/ba61750a46794d8847c3f463c5e71cc4' alt='' className='h-full w-full' />
+            <svg
+              className='fill-blue w-5 h-5'
+              xmlns='http://www.w3.org/2000/svg'
+              width='32'
+              height='32'
+              fill='#000000'
+              viewBox='0 0 256 256'
+            >
+              <path d='M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z'></path>
+            </svg>
           </div>
-          Tài khoản của tôi
+          My Account
         </NavLink>
-
         <NavLink
           to={path.changePassword}
           className={({ isActive }) =>
-            classNames('flex items-center mt-3 capitalize transition-colors py-2 rounded-md hover:bg-gray-100', {
-              'text-orange-500 bg-orange-50': isActive,
+            classNames('flex items-center mt-3 capitalize transition-colors py-2 px-2 rounded-md hover:bg-sky-100', {
+              'text-sky-500 bg-sky-50': isActive,
               'text-gray-700': !isActive
             })
           }
         >
           <div className='mr-3 h-[22px] w-[22px]'>
-            <img src='https://cf.shopee.vn/file/ba61750a46794d8847c3f463c5e71cc4' alt='' className='h-full w-full' />
+            <svg
+              className='fill-blue w-5 h-5'
+              xmlns='http://www.w3.org/2000/svg'
+              width='32'
+              height='32'
+              fill='#000000'
+              viewBox='0 0 256 256'
+            >
+              <path d='M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM224,98.1c-1.09,34.09-29.75,61.86-63.89,61.9H160a63.7,63.7,0,0,1-23.65-4.51,8,8,0,0,0-8.84,1.68L116.69,168H96a8,8,0,0,0-8,8v16H72a8,8,0,0,0-8,8v16H40V187.31l58.83-58.82a8,8,0,0,0,1.68-8.84A63.72,63.72,0,0,1,96,95.92c0-34.14,27.81-62.8,61.9-63.89A64,64,0,0,1,224,98.1ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z'></path>
+            </svg>
           </div>
           Đổi mật khẩu
         </NavLink>
@@ -67,16 +90,112 @@ export default function UserSideNav() {
         <NavLink
           to={path.historyPurchase}
           className={({ isActive }) =>
-            classNames('flex items-center mt-3 capitalize transition-colors py-2 rounded-md hover:bg-gray-100', {
-              'text-orange-500 bg-orange-50': isActive,
+            classNames('flex items-center mt-3 capitalize transition-colors py-2 px-2 rounded-md hover:bg-sky-100', {
+              'text-sky-500 bg-sky-50': isActive,
               'text-gray-700': !isActive
             })
-}
+          }
         >
           <div className='mr-3 h-[22px] w-[22px]'>
-            <img src='https://cf.shopee.vn/file/f0049e9df4e536bc3e7f140d071e9078' alt='' className='h-full w-full' />
+            <svg
+              className='fill-blue w-5 h-5'
+              xmlns='http://www.w3.org/2000/svg'
+              width='32'
+              height='32'
+              fill='#000000'
+              viewBox='0 0 256 256'
+            >
+              <path d='M168,128a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,128Zm-8,24H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16ZM216,40V200a32,32,0,0,1-32,32H72a32,32,0,0,1-32-32V40a8,8,0,0,1,8-8H72V24a8,8,0,0,1,16,0v8h32V24a8,8,0,0,1,16,0v8h32V24a8,8,0,0,1,16,0v8h24A8,8,0,0,1,216,40Zm-16,8H184v8a8,8,0,0,1-16,0V48H136v8a8,8,0,0,1-16,0V48H88v8a8,8,0,0,1-16,0V48H56V200a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16Z'></path>
+            </svg>
           </div>
-          Đơn mua
+          My Purchase
+        </NavLink>
+
+        <div>
+          <button
+            onClick={handlersNoti.toggle}
+            className={classNames(
+              'flex items-center w-full mt-3 capitalize transition-colors py-2 px-2 rounded-md hover:bg-sky-100',
+              {
+                'text-sky-500 bg-sky-50': openedNoti,
+                'text-gray-700': !openedNoti
+              }
+            )}
+          >
+            <div className='mr-3 h-[22px] w-[22px]'>
+              <svg
+                className='fill-blue w-5 h-5'
+                xmlns='http://www.w3.org/2000/svg'
+                width='32'
+                height='32'
+                fill='#000000'
+                viewBox='0 0 256 256'
+              >
+                <path d='M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z'></path>
+              </svg>
+            </div>
+            Notifications
+          </button>
+          <Box className='ml-4'>
+            <Collapse in={openedNoti} transitionDuration={200} transitionTimingFunction='linear'>
+              <NavLink
+                to={'/notifications/order'}
+                className={({ isActive }) =>
+                  classNames(
+                    'flex items-center mt-3 py-1 px-2 capitalize transition-colors rounded-md hover:bg-sky-100 text-sm font-normal',
+                    {
+                      'text-sky-500 bg-sky-50': isActive,
+                      'text-gray-700': !isActive
+                    }
+                  )
+                }
+              >
+                <div className='mr-1 h-[22px] w-[22px]'>
+                  <svg
+                    className='fill-blue w-5 h-5'
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='32'
+                    height='32'
+                    fill='#000000'
+                    viewBox='0 0 256 256'
+                  >
+                    <path d='M168,128a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,128Zm-8,24H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16ZM216,40V200a32,32,0,0,1-32,32H72a32,32,0,0,1-32-32V40a8,8,0,0,1,8-8H72V24a8,8,0,0,1,16,0v8h32V24a8,8,0,0,1,16,0v8h32V24a8,8,0,0,1,16,0v8h24A8,8,0,0,1,216,40Zm-16,8H184v8a8,8,0,0,1-16,0V48H136v8a8,8,0,0,1-16,0V48H88v8a8,8,0,0,1-16,0V48H56V200a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16Z'></path>
+                  </svg>
+                </div>
+                <span className='flex-1'>Order updates</span>
+              </NavLink>
+            </Collapse>
+          </Box>
+        </div>
+        <NavLink
+          to={path.voucher}
+          className={({ isActive }) =>
+            classNames('flex items-center mt-3 capitalize transition-colors py-2 px-2 rounded-md hover:bg-sky-100', {
+              'text-sky-500 bg-sky-50': isActive,
+              'text-gray-700': !isActive
+            })
+          }
+        >
+          <div className='mr-3 h-[22px] w-[22px]'>
+            <svg className='fill-blue w-5 h-5' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'>
+              <defs>
+                <style dangerouslySetInnerHTML={{ __html: '.cls-1{fill:none;}' }} />
+              </defs>
+              <title />
+              <g data-name='Layer 2' id='Layer_2'>
+                <path d='M26,25H6a3,3,0,0,1-3-3V20a1,1,0,0,1,1-1,3,3,0,0,0,0-6,1,1,0,0,1-1-1V10A3,3,0,0,1,6,7H26a3,3,0,0,1,3,3v2a1,1,0,0,1-1,1,3,3,0,0,0,0,6,1,1,0,0,1,1,1v2A3,3,0,0,1,26,25ZM5,20.9V22a1,1,0,0,0,1,1H26a1,1,0,0,0,1-1V20.9a5,5,0,0,1,0-9.8V10a1,1,0,0,0-1-1H6a1,1,0,0,0-1,1v1.1a5,5,0,0,1,0,9.8Z' />
+                <path d='M13,10a1,1,0,0,1-1-1V8a1,1,0,0,1,2,0V9A1,1,0,0,1,13,10Z' />
+                <path d='M13,25a1,1,0,0,1-1-1V23a1,1,0,0,1,2,0v1A1,1,0,0,1,13,25Z' />
+                <path d='M13,14a1,1,0,1,1,.71-.29A1.05,1.05,0,0,1,13,14Z' />
+                <path d='M13,17a1,1,0,1,1,.71-.29,1,1,0,0,1-.33.21A1,1,0,0,1,13,17Z' />
+                <path d='M13,20a1,1,0,1,1,.71-.29A1.05,1.05,0,0,1,13,20Z' />
+              </g>
+              <g id='frame'>
+                <rect className='cls-1' height={32} width={32} />
+              </g>
+            </svg>
+          </div>
+          My Vouchers
         </NavLink>
       </div>
     </div>
