@@ -17,24 +17,24 @@ function RejectedRoute() {
 
 const AdminRoutes = [
   {
-    // path: '',
-    // element: <ProtectedRouteAdmin></ProtectedRouteAdmin>,
-    // children: [
-    //   {
-    path: path.adminSuperShop,
-    element: <AdminLayout />,
+    path: '',
+    element: <ProtectedRouteAdmin></ProtectedRouteAdmin>,
     children: [
       {
         path: path.adminSuperShop,
-        element: <DashBoard />
-      },
-      {
-        path: path.adminCategories,
-        element: <CategoriesManagement />
+        element: <AdminLayout />,
+        children: [
+          {
+            path: path.adminSuperShop,
+            element: <DashBoard />
+          },
+          {
+            path: path.adminCategories,
+            element: <CategoriesManagement />
+          }
+        ]
       }
     ]
-    //   }
-    // ]
   }
 ]
 

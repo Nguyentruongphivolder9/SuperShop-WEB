@@ -10,6 +10,11 @@ interface Props {
 export default function VariationsForm({ handlerAddVariations, handlerRemoveVariations, variantsGroup }: Props) {
   return (
     <div className='col-span-9 flex flex-col gap-1'>
+      {/* <div className='grid grid-cols-3 divide-x'>
+        <div>01</div>
+        <div>02</div>
+        <div>03</div>
+      </div> */}
       {variantsGroup &&
         variantsGroup.map((variantGroup, index) => (
           <VariantGroup

@@ -111,7 +111,7 @@ export const userSchema = yup.object({
     .max(160, 'Độ dài từ 5 - 160 ký tự'),
   address: yup.string().max(160, 'Độ dài tối đa là 160 ký tự'),
   avatar: yup.string().max(1000, 'Độ dài tối đa là 1000 ký tự'),
-  date_of_birth: yup.date().required('Ngày sinh là bắt buộc').max(new Date(), 'Hãy chọn một ngày trong quá khứ'),
+  birth_day: yup.date().required('Ngày sinh là bắt buộc').max(new Date(), 'Hãy chọn một ngày trong quá khứ'),
   password: yup
     .string()
     .required('Password là bắt buộc')

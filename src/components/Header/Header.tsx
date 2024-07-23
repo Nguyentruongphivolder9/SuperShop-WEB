@@ -11,7 +11,7 @@ export default function Header() {
     <div className='sticky top-0 z-30 pb-5 bg-[linear-gradient(-180deg,#00BFFF,#0099FF)] text-white'>
       <div className='container'>
         <NavHeader />
-        <div className='grid grid-cols-12 gap-4 mt-4 items-end'>
+        <div className='grid grid-cols-12 gap-4 mt-1 items-end'>
           <Link to={'/'} className='col-span-2'>
             <svg viewBox='0 0 192 65' className='h-11 w-full lg:h-11 fill-white text-cyan-500'>
               <g fillRule='evenodd'>

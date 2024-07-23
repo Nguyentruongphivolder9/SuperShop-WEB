@@ -1,21 +1,17 @@
 import { FormDataProduct } from 'src/contexts/productAdd.context'
-import { PreviewImagesResponse, Product, ProductList, ProductListConfig } from 'src/types/product.type'
-import { SuccessResponse } from 'src/types/utils.type'
+import { PreviewImagesResponse, Product } from 'src/types/product.type'
+import { Pagination, SuccessResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'
 
-const URL = 'products'
 const productApi = {
-  getProducts(params: ProductListConfig) {
-    return http.get<SuccessResponse<ProductList>>(URL, {
-      params
-    })
+  getProducts() {
+    return http.get<SuccessResponse<Pagination<Product[]>>>('products')
   },
-  getProductDetail(id: string) {
-    return http.get<SuccessResponse<Product>>(`${URL}/${id}`)
+  getProductById(id: string) {
+    console.log(id)
+    return http.get<SuccessResponse<Product>>(`products/${id}`)
   },
   productCreate(body: FormDataProduct) {
-    console.log(body)
-
     return http.post<SuccessResponse<string>>('products', body)
   },
   preCheckImageInfoProCreate(body: FormData) {

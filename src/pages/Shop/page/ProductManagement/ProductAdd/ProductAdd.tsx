@@ -17,7 +17,7 @@ import { generateUniqueId } from 'src/utils/utils'
 import { FormProvider, useFieldArray, useWatch } from 'react-hook-form'
 import Button from 'src/components/Button'
 import {
-  ProductImagesRequest,
+  PreviewImagesResponse,
   ProductVariantsRequest,
   VariantsGroupRequest,
   VariantsRequest
@@ -27,16 +27,16 @@ import { useMutation } from '@tanstack/react-query'
 import TipTapEditor from './TipTapEditor'
 import { FormDataProduct, ProductAddContext } from 'src/contexts/productAdd.context'
 import { toast } from 'react-toastify'
-
-const S3_BUCKET_URL = 'https://super-shop.s3.ap-south-1.amazonaws.com/products'
+import config from 'src/constants/config'
 
 export default function ProductAdd() {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
-  const [images, setImages] = useState<ProductImagesRequest[]>([])
+  const [images, setImages] = useState<PreviewImagesResponse[]>([])
   const [isDisplayCateList, setIsDisplayCateList] = useState(false)
   const [isDisplayFormVariations, setIsDisplayFormVariations] = useState(false)
   const [arraysVariant1, setArraysVariant1] = useState<VariantsRequest[]>([])
   const [arraysVariant2, setArraysVariant2] = useState<VariantsRequest[]>([])
+  const [categoryValue, setCategoryValue] = useState<string>('')
   const { productMethods } = useContext(ProductAddContext)
 
   const {
@@ -101,7 +101,7 @@ export default function ProductAdd() {
   })
 
   useEffect(() => {
-    setImages(productImagesWatch as ProductImagesRequest[])
+    setImages(productImagesWatch as PreviewImagesResponse[])
   }, [productImagesWatch])
 
   const handleUploadImages = () => {
@@ -132,7 +132,7 @@ export default function ProductAdd() {
     }
 
     try {
-      const arraysImage: ProductImagesRequest[] = []
+      const arraysImage: PreviewImagesResponse[] = []
       const responsePreCheckImage = await preCheckImageCreateMutation.mutateAsync(formData)
       const resultPreCheckImage = responsePreCheckImage.data.body
       console.log(resultPreCheckImage)
@@ -140,7 +140,7 @@ export default function ProductAdd() {
       resultPreCheckImage?.forEach((item) => {
         const newImage = {
           id: item.id,
-          imageUrl: item.preImageUrl
+          imageUrl: item.imageUrl
         }
         arraysImage.push(newImage)
       })
@@ -264,7 +264,7 @@ export default function ProductAdd() {
       const newVariant2 = {
         id: generateUniqueId(),
         name: '',
-        imageUrl: '',
+        variantImage: {},
         isActive: true
       }
 
@@ -299,7 +299,7 @@ export default function ProductAdd() {
       const newVariant = {
         id: generateUniqueId(),
         name: '',
-        imageUrl: '',
+        variantImage: {},
         isActive: true
       }
       const newVariantGroup = {
@@ -361,8 +361,15 @@ export default function ProductAdd() {
 
   return (
     <div>
-      {isDisplayCateList && <CategoryList handlerShowCategoryList={handlerShowCategoryList} />}
-      <div className='grid grid-cols-12 gap-4'>
+      {isDisplayCateList && (
+        <CategoryList
+          handlerShowCategoryList={handlerShowCategoryList}
+          setCategoryId={setValue}
+          setCategoryValue={setCategoryValue}
+          categoryValue={categoryValue}
+        />
+      )}
+      <div className='grid grid-cols-11 gap-4'>
         <FormProvider {...productMethods}>
           <form className='col-span-9'>
             <div className='sticky z-10 top-14 h-14 flex flex-row rounded-md bg-white items-center shadow mb-4'>
@@ -450,7 +457,7 @@ export default function ProductAdd() {
                         <div className='group w-24 h-24 relative border-dashed border-2 border-blue rounded-md overflow-hidden flex items-center'>
                           <img
                             className='object-cover h-full w-full'
-                            src={`${S3_BUCKET_URL}/${images[0].imageUrl}`}
+                            src={`${config.awsURL}products/${images[0].imageUrl}`}
                             alt={'upload file'}
                           />
                         </div>
@@ -513,50 +520,64 @@ export default function ProductAdd() {
                   </div>
                 </div>
 
-                <div className='grid grid-cols-11 mb-6'>
-                  <div className='col-span-2 flex flex-row justify-end items-center gap-1 mr-5'>
+                <div className='grid grid-cols-11 mb-3'>
+                  <div className='col-span-2 h-10 flex flex-row justify-end items-center gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Category</div>
                   </div>
-                  <div className='col-span-9 px-5 border h-10 rounded-md flex items-center p-1 hover:border-[#999999]'>
-                    <button
-                      onClick={handlerShowCategoryList}
-                      type='button'
-                      className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full cursor-pointer'
+                  <div className='col-span-9'>
+                    <div
+                      className={`px-5 border h-10 rounded-md flex items-center p-1  ${errors.categoryId?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
                     >
-                      <input
-                        type='text'
-                        className='text-sm text-[#333333] w-full border-none outline-none pr-3 cursor-pointer'
-                        placeholder='Please set category'
-                        readOnly
-                      />
-                      <div className='flex-shrink-0 bg-orange hover:opacity-95'>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          strokeWidth={1.5}
-                          stroke='currentColor'
-                          className='size-5 text-[#999999]'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            d='m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10'
-                          />
-                        </svg>
-                      </div>
-                    </button>
+                      <button
+                        onClick={handlerShowCategoryList}
+                        type='button'
+                        className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full cursor-pointer'
+                      >
+                        <input hidden {...register('categoryId')} />
+                        <input
+                          type='text'
+                          value={categoryValue}
+                          className='text-sm text-[#333333] w-full border-none outline-none pr-3 cursor-pointer'
+                          placeholder='Please set category'
+                          readOnly
+                        />
+                        <div className='flex-shrink-0 bg-orange hover:opacity-95'>
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            strokeWidth={1.5}
+                            stroke='currentColor'
+                            className='size-5 text-[#999999]'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              d='m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10'
+                            />
+                          </svg>
+                        </div>
+                      </button>
+                    </div>
+                    <div
+                      className={`${errors.categoryId?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
+                    >
+                      {errors.categoryId?.message}
+                    </div>
                   </div>
                 </div>
 
-                <div className='grid grid-cols-11 mb-6'>
+                <div className='grid grid-cols-11 mb-3'>
                   <div className='col-span-2 flex flex-row justify-end gap-1 mr-5'>
                     <span className='text-red-600 text-xs'>*</span>
                     <div className='text-sm text-[#333333]'>Product Description</div>
                   </div>
                   <div className='col-span-9 relative'>
-                    <TipTapEditor control={control} />
+                    <TipTapEditor
+                      control={control}
+                      className={`rounded-md overflow-hidden flex flex-col border ${errors.description?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
+                    />
                     <div
                       className={`${errors.description?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
                     >
@@ -978,7 +999,7 @@ export default function ProductAdd() {
               <div className='flex flex-row gap-4'>
                 <Button
                   className='text-[#999999] bg-white text-sm h-8 w-36 flex items-center justify-center  rounded-md border border-solid border-[#999999]'
-                  type='reset'
+                  type='button'
                 >
                   Cancel
                 </Button>
@@ -1002,7 +1023,7 @@ export default function ProductAdd() {
         </FormProvider>
 
         {/* Filling Suggestion */}
-        <div className='col-span-3'>
+        <div className='col-span-2'>
           <div className='rounded-md bg-white shadow sticky top-20'>
             <div className='h-14 bg-[#E5EEFB] flex flex-row items-center justify-center'>Filling Suggestion</div>
             <div className='py-4'>

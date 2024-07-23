@@ -1,79 +1,44 @@
-// import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
 import { useEffect, useMemo, useRef, useState } from 'react'
-// import { useNavigate, useParams } from 'react-router-dom'
-// import productApi from 'src/apis/product.api'
-// import { ProductListConfig, Product as ProductType } from 'src/types/product.type'
-import { formatCurrency, formatDateTime, formatNumbertoSocialStyle, getIdFromNameId, rateSale } from 'src/utils/utils'
-// import Product from '../ProductList/components/Product'
+import {
+  calculateFromToPrice,
+  calculateHighestPrice,
+  calculateLowestPrice,
+  calculateTotalStockQuantity,
+  formatCurrency,
+  formatDateTime,
+  formatNumbertoSocialStyle,
+  getIdFromNameId,
+  rateSale
+} from 'src/utils/utils'
 import QuantityController from '../../components/QuantityController'
 import ImageSmallSlider from 'src/components/ImageSmallSlider'
-import { ProductImagesResponse } from 'src/types/product.type'
-import { Link } from 'react-router-dom'
+import { ProductVariantsResponse } from 'src/types/product.type'
+import { Link, useParams } from 'react-router-dom'
 import ProductRatingStar from 'src/components/ProductRatingStar'
 import ProductRating from './ProductRating'
 import ProductsSlider from 'src/components/ProductsSlider'
-import Product from 'src/components/Product'
 import VariantButton from './VariantButton'
-// import purchaseApi from 'src/apis/purchase.api'
-// import { purchasesStatus } from 'src/constants/purchase'
-// import { toast } from 'react-toastify'
-// import path from 'src/constants/path'
-// import { useTranslation } from 'react-i18next'
+import productApi from 'src/apis/product.api'
+import { useQuery } from '@tanstack/react-query'
+import config from 'src/constants/config'
 
 export default function ProductDetail() {
   // const { t } = useTranslation('product')
   // const navigate = useNavigate()
   // const queryClient = useQueryClient()
   const [buyCount, setBuyCount] = useState(1)
-  // const { nameId } = useParams()
-  // const id = getIdFromNameId(nameId as string)
-  // const { data: ProductDetailData } = useQuery({
-  //   queryKey: ['product', id],
-  //   queryFn: () => productApi.getProductDetail(id as string)
-  // })
-  // const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
-  const [activeImage, setActiveImage] = useState('')
-  // const product = ProductDetailData?.data.data
-  const imageRef = useRef<HTMLImageElement>(null)
+  const { nameId } = useParams()
 
-  // const currentImages = useMemo(
-  //   () => (product ? product.images.slice(...currentIndexImages) : []),
-  //   [product, currentIndexImages]
-  // )
-  const currentImages: ProductImagesResponse[] = [
-    {
-      id: 'dhjfbsdhka-sfkjsdfs',
-      imageUrl:
-        'https://super-shop.s3.ap-south-1.amazonaws.com/products/ss-picture-307efaa9-aec7-48bf-b129-52443200bbc2',
-      isPrimary: false
-    },
-    {
-      id: '754-sdkjfhsk',
-      imageUrl: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqsp7wlvy59zef_tn',
-      isPrimary: true
-    },
-    {
-      id: '999-sdkjfhsk',
-      imageUrl: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqsp7wlvy59zef_tn',
-      isPrimary: true
-    },
-    {
-      id: '467-sdkjfhsk',
-      imageUrl: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqsp7wlvy59zef_tn',
-      isPrimary: true
-    },
-    {
-      id: 'gdjfgsj-sdkjfhsk',
-      imageUrl: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lqsp7wlvy59zef_tn',
-      isPrimary: true
-    },
-    {
-      id: 'gdjfgsj-sdddddddd',
-      imageUrl: 'https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lfywumhbsjmyeb_tn',
-      isPrimary: false
-    }
-  ]
+  const id = getIdFromNameId(nameId as string)
+  const { data: ProductDetailData } = useQuery({
+    queryKey: ['productById', id],
+    queryFn: () => productApi.getProductById(id)
+  })
+
+  const [activeImage, setActiveImage] = useState('')
+  const product = ProductDetailData?.data.body
+  const imageRef = useRef<HTMLImageElement>(null)
 
   // const queryConfig: ProductListConfig = { limit: '15', page: '1', category: product?.category._id }
   // const { data: productsData } = useQuery({
@@ -89,28 +54,11 @@ export default function ProductDetail() {
   //   mutationFn: (body: { buy_count: number; product_id: string }) => purchaseApi.addToCart(body)
   // })
 
-  // useEffect(() => {
-  //   if (product && product.images) {
-  //     setActiveImage(product.images[0])
-  //   }
-  // }, [product])
-
-  // const next = () => {
-  //   if (currentIndexImages[1] < (product as ProductType).images.length) {
-  //     setCurrentIndexImages((prev) => {
-  //       setActiveImage((product as ProductType).images[prev[0] + 1])
-  //       return [prev[0] + 1, prev[1] + 1]
-  //     })
-  //   }
-  // }
-  // const prev = () => {
-  //   if (currentIndexImages[0] > 0) {
-  //     setCurrentIndexImages((prev) => {
-  //       setActiveImage((product as ProductType).images[prev[1] - 1])
-  //       return [prev[0] - 1, prev[1] - 1]
-  //     })
-  //   }
-  // }
+  useEffect(() => {
+    if (product && product.productImages) {
+      setActiveImage(product.productImages[0].imageUrl)
+    }
+  }, [product])
 
   const chooseActive = (img: string) => {
     setActiveImage(img)
@@ -182,10 +130,8 @@ export default function ProductDetail() {
                 <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
               </svg>
             </div>
-            <div className='text-sm text-[#000000cc]'>
-              Mũ bảo hiểm fullface Royal M266 2 kính,nón bảo hiểm chùm đầu có lót tháo rời vệ sinh,hàng chính hãng bảo
-              hành 12 tháng
-            </div>
+
+            <div className='text-sm text-[#000000cc]'>{product?.name}</div>
           </div>
         </div>
       </div>
@@ -200,48 +146,42 @@ export default function ProductDetail() {
                 onMouseLeave={handleRemoveZoom}
               >
                 <img
-                  // src={activeImage}
-                  // alt={product.name}
-                  src={activeImage}
-                  alt={
-                    'Mũ bảo hiểm fullface Royal M266 2 kính,nón bảo hiểm chùm đầu có lót tháo rời vệ sinh,hàng chính hãng bảo hành 12 tháng'
-                  }
+                  src={`${config.awsURL}products/${activeImage}`}
+                  alt={product?.name}
                   className='absolute pointer-events-none left-0 top-0 h-full w-full bg-white object-cover'
                   ref={imageRef}
                 />
               </div>
-              <div className='mt-4'>
-                <ImageSmallSlider activeImage={activeImage} chooseActive={chooseActive} images={currentImages} />
-              </div>
+              {product?.productImages && (
+                <div className='mt-4'>
+                  <ImageSmallSlider
+                    activeImage={activeImage}
+                    chooseActive={chooseActive}
+                    images={product.productImages}
+                  />
+                </div>
+              )}
             </div>
             <div className='col-span-7'>
-              {/* <h1 className='text-xl font-medium uppercase'>{product.name}</h1> */}
-              <h1 className='text-xl font-medium line-clamp-2'>
-                Mũ bảo hiểm fullface Royal M266 2 kính,nón bảo hiểm chùm đầu có lót tháo rời vệ sinh,hàng chính hãng bảo
-                hành 12 tháng
-              </h1>
+              <h1 className='text-xl font-medium line-clamp-2'>{product?.name}</h1>
               <div className='mt-3 flex items-center'>
                 <div className='flex items-center'>
-                  {/* <span className='mr-1 border-b-2 border-b-orange text-orange'>{product.rating}</span> */}
-                  <span className='mr-1 border-b-2 border-b-blue text-blue'>4.7</span>
+                  <span className='mr-1 border-b-2 border-b-blue text-blue'>{product?.ratingStart}</span>
 
                   <ProductRatingStar
-                    // rating={product.rating}
-                    rating={4.7}
+                    rating={product?.ratingStart as number}
                     activeClassName='h-5 w-5 text-[#ffa727] fill-[#ffa727]'
                     nonActiveClassName='h-5 w-5 text-gray-300 fill-gray-300'
                   />
                 </div>
                 <div className='mx-4 h-4 w-[1px] bg-gray-300'></div>
                 <div className='flex items-center'>
-                  {/* <span>{formatNumbertoSocialStyle(product.sold)}</span> */}
-                  <span>{formatNumbertoSocialStyle(3333333)}</span>
+                  <span>{formatNumbertoSocialStyle(product?.ratingStart as number)}</span>
                   <span className='ml-1 text-gray-300'>Rating</span>
                 </div>
                 <div className='mx-4 h-4 w-[1px] bg-gray-300'></div>
                 <div className='flex items-center'>
-                  {/* <span>{formatNumbertoSocialStyle(product.sold)}</span> */}
-                  <span>{formatNumbertoSocialStyle(5)}</span>
+                  <span>{formatNumbertoSocialStyle(product?.sold as number)}</span>
                   <span className='ml-1 text-gray-300'>Sold</span>
                 </div>
               </div>
@@ -251,30 +191,36 @@ export default function ProductDetail() {
                 <div className='ml-4 rounded-sm bg-orange px-1 py-[2px] text-xs font-semibold uppercase text-white'>
                   {rateSale(product.price_before_discount, product.price)} giảm
                 </div> */}
-                <div className='text-gray-500 line-through'>₫{formatCurrency(200000)}</div>
-                <div className='ml-3 text-3xl font-medium text-blue'>₫{formatCurrency(300000)}</div>
-                <div className='ml-4 rounded-sm bg-red-400 px-1 py-[2px] text-xs font-semibold uppercase text-white'>
+                {/* <div className='text-gray-500 line-through'>₫{formatCurrency(200000)}</div> */}
+                {product?.isVariant && (
+                  <div className='ml-3 text-3xl font-medium text-blue'>
+                    {calculateFromToPrice(product?.productVariants)}
+                  </div>
+                )}
+                {/* <div className='ml-4 rounded-sm bg-red-400 px-1 py-[2px] text-xs font-semibold uppercase text-white'>
                   {rateSale(300000, 200000)} OFF
-                </div>
+                </div> */}
               </div>
 
               {/* variations */}
               <div className='mt-4 flex flex-col px-5 pb-4'>
-                <div className='w-full'>
-                  <div className='mb-6 grid grid-cols-9'>
-                    <div className='col-span-2 h-10 flex items-center mt-2'>
-                      <div className='text-[#757575] text-sm w-full'>color</div>
+                {product?.variantsGroup &&
+                  product.variantsGroup.map((groupItem, index) => (
+                    <div key={index} className='w-full'>
+                      <div className='mb-6 grid grid-cols-9'>
+                        <div className='col-span-2 h-10 flex items-center mt-2'>
+                          <div className='text-[#757575] text-sm w-full'>{groupItem.name}</div>
+                        </div>
+                        <div className='col-span-7 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
+                          {groupItem.variants &&
+                            groupItem.variants.map((variant, index) => (
+                              <VariantButton key={index} variantData={variant} />
+                            ))}
+                        </div>
+                      </div>
+                      <div className='mb-6'></div>
                     </div>
-                    <div className='col-span-7 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
-                      <VariantButton />
-                      <VariantButton />
-                      <VariantButton />
-                      <VariantButton />
-                      <VariantButton />
-                    </div>
-                  </div>
-                  <div className='mb-6'></div>
-                </div>
+                  ))}
               </div>
 
               <div className='flex items-center'>
@@ -288,7 +234,10 @@ export default function ProductDetail() {
                   max={100}
                 />
                 <div className='ml-6 text-gray-500 text-sm'>
-                  {/* {product.quantity} {t('available')} */}3 pieces available
+                  {product?.isVariant
+                    ? calculateTotalStockQuantity(product?.productVariants as ProductVariantsResponse[])
+                    : product?.stockQuantity}{' '}
+                  pieces available
                 </div>
               </div>
 
@@ -434,7 +383,7 @@ export default function ProductDetail() {
                   <div className='rounded bg-gray-50 p-3 text-lg capitalize text-[#000000DE]'>
                     Product Specifications
                   </div>
-                  <div className='mx-3 mt-6 mb-4 text-sm leading-loose'>
+                  <div className='mx-3 mt-4 mb-4 text-sm leading-loose'>
                     <div className='flex justify-start items-center h-fit mb-2'>
                       <div className='w-36 text-[#00000066] pr-3'>Category</div>
                       <div className='flex items-center justify-start line-clamp-1'>
@@ -461,12 +410,12 @@ export default function ProductDetail() {
                     </div>
                   </div>
                 </section>
-                <section className='pt-4 px-4'>
+                <section className='pt-4 px-4 pb-3'>
                   <div className='rounded bg-gray-50 p-3 text-lg capitalize text-[#000000DE]'>Product Description</div>
-                  <div className='mx-3 text-[#000000CC] mt-6 mb-4 text-sm leading-loose'>
+                  <div className='mx-3 text-[#000000CC] mt-4 mb-4 text-sm leading-loose'>
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize("<div className='red'>Hello</div>")
+                        __html: DOMPurify.sanitize(product?.description as string)
                       }}
                     />
                   </div>
@@ -507,84 +456,9 @@ export default function ProductDetail() {
           <div className='uppercase text-gray-400'>YOU MAY ALSO LIKE</div>
           <div className='mt-3'>
             <div className='grid grid-cols-12 gap-2'>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
+              {/* <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
                 <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
-              <div className='h-[350px] col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-              </div>
+              </div> */}
             </div>
           </div>
           <div className='w-full h-10 flex items-center justify-center mt-4'>

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import Slider from 'react-slick'
+import config from 'src/constants/config'
 import { ProductImagesResponse } from 'src/types/product.type'
 
 interface Props {
@@ -27,12 +28,17 @@ export default function ImageSmallSlider({ activeImage, images, chooseActive }: 
         {images.map((img, index) => {
           const isActive = img.imageUrl === activeImage
           return (
-            <div
-              className={`${isActive && 'absolute inset-0 border-2 border-blue'} h-24 relative w-full`}
-              key={index}
-              onMouseEnter={() => chooseActive(img.imageUrl)}
-            >
-              <img src={img.imageUrl} alt='' className='h-full w-full object-cover cursor-pointer' />
+            <div className='h-24 relative w-full p-1' key={index} onMouseEnter={() => chooseActive(img.imageUrl)}>
+              <img
+                src={`${config.awsURL}products/${img.imageUrl}`}
+                alt={img.imageUrl}
+                className='h-full w-full object-cover cursor-pointer'
+              />
+              {isActive && (
+                <div className='absolute inset-0 z-10 p-1 h-full w-full flex items-center justify-center'>
+                  <div className='border-2 border-blue h-full w-full'></div>
+                </div>
+              )}
             </div>
           )
         })}

@@ -5,15 +5,21 @@ import { useMutation } from '@tanstack/react-query';
 import Input from '../Input/Input';
 import Button from '../Button/Button';
 import { userSchema, schema, Schema, UserSchema } from '../../utils/rules';
-import authApi from '../../apis/auth.api';
+import authApi, { FinalRegisterForm } from '../../apis/auth.api';
 import google from "../../assets/logoSvg/googleSvg.svg";
 import facebook from "../../assets/logoSvg/faceBookSvg.svg";
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { User } from 'src/types/user.type';
+import { parseJwt } from 'src/utils/auth';
 const emailVerification = schema.pick(['email']);
 type FormDataEmail = Pick<Schema, 'email'>;
-const userRegister = userSchema.pick(['user_name', 'full_name', 'gender', 'phone', 'email', 'address', 'date_of_birth', 'password', 'confirm_password'])
-export type FormDataRegister = Pick<UserSchema, 'user_name' | 'full_name' | 'gender' | 'phone' | 'email' | 'address' | 'date_of_birth' | 'password' | 'confirm_password'>;
+const userRegister = userSchema.pick(['user_name', 'full_name', 'gender', 'phone', 'email', 'address', 'birth_day', 'password', 'confirm_password'])
+export type FormDataRegister = Pick<UserSchema, 'user_name' | 'full_name' | 'gender' | 'phone' | 'email' | 'address' | 'birth_day' | 'password' | 'confirm_password'>;
+export type FormWaitingForEmailVerify = {
+    email: string;
+    token: string | undefined;
+}
 
 
 type SubRegisterProps = {
@@ -28,6 +34,8 @@ type SubRegisterProps = {
     handleSetIsFormCompleted?: React.Dispatch<React.SetStateAction<boolean>>;
     userInfor?: FormDataRegister;
     handleSetUserInfo?: React.Dispatch<React.SetStateAction<FormDataRegister>>;
+    verifyToken?: string;
+    handleSetVeifyToken?: React.Dispatch<React.SetStateAction<string>>
 };
 
 
@@ -41,12 +49,13 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
         full_name: "",
         gender: "",
         phone: "",
-        email: "",
+        email: email.email,
         address: "",
-        date_of_birth: new Date(),
+        birth_day: new Date(),
         password: "",
         confirm_password: ""
     })
+    const [verifyToken, setVerifyToken] = useState<string>("");
     const [isVerifyEmailCompleted, setIsVerifyEmailCompleted] = useState<boolean>(false);
     const [isWaitingForEmailResponse, setIsWaitingForEmailResponse] = useState<boolean>(false);
     const [isUserInforCompleted, setIsUserInforCompleted] = useState<boolean>(false);
@@ -63,6 +72,7 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     handleSetEmail={setEmail}
                     is_complete={is_complete}
                     email={email}
+                    handleSetVeifyToken={setVerifyToken}
                     is_form_completed={isVerifyEmailCompleted}
                     handleSetIsFormCompleted={setIsVerifyEmailCompleted}
                 />
@@ -74,10 +84,13 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     current_step={current_step}
                     steps={steps}
                     //Attributes cuar rieeng form
+                    verifyToken={verifyToken}
+                    handleSetEmail={setEmail}
                     email={email}
                     is_complete={is_complete}
                     is_form_completed={isWaitingForEmailResponse}
                     handleSetIsFormCompleted={setIsWaitingForEmailResponse}
+                    handleSetUserInfo={setUserInfo}
                 />
             )}
 
@@ -143,14 +156,12 @@ export default Registers;
 
 
 
-const UserInformation = ({ current_step, steps, is_complete, email, goToNextStep, goToPrevStep, userInfor, handleSetUserInfo, is_form_completed, handleSetIsFormCompleted }: SubRegisterProps) => {
+const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, userInfor, handleSetUserInfo, is_form_completed, handleSetIsFormCompleted }: SubRegisterProps) => {
     const { register, handleSubmit, formState: { errors }, setValue, getValues } = useForm<FormDataRegister>({
         resolver: yupResolver(userSchema),
         defaultValues: userInfor
     });
-
     const [selectedGender, setSelectedGender] = useState<string>(userInfor?.gender || '');
-
     const handleGenderSelect = (gender: string) => {
         setSelectedGender(gender);
         if (handleSetUserInfo && typeof gender !== 'undefined') {
@@ -158,28 +169,63 @@ const UserInformation = ({ current_step, steps, is_complete, email, goToNextStep
             setValue('gender', gender, { shouldValidate: true });
         }
     };
-
     const userInforMutation = useMutation({
-        mutationFn: async (body: Omit<FormDataRegister, "confirm_password">) => {
-            await authApi.registerAccount(body);
-        },
-        onSuccess: () => {
-            handleSetIsFormCompleted?.(true);
-            goToNextStep();
-        },
-        onError: (error) => {
-            toast.error(`${error.message}`);
+        mutationFn: async (body: FormDataRegister) => {
+            const { birth_day, confirm_password, ...rest } = body;
+            const dataToSend: FinalRegisterForm = {
+                ...rest,
+                birth_day: birth_day.toISOString()
+            };
+            return await authApi.registerAccount(dataToSend);
         }
     });
 
-    const onSubmit: SubmitHandler<FormDataRegister> = (data) => {
-        console.log(data)
-        userInforMutation.mutate(data);
-    };
+    const onSubmit = handleSubmit((data: FormDataRegister) => {
+        console.log(data);
+        userInforMutation.mutate(data, {
+            onSuccess: (data) => {
+                console.log(data.data.body);
+                alert('Register successful');
+                const userResponse: User = parseJwt(data.data.body.accessToken);
+                const {
+                    avatarUrl,
+                    email,
+                    fullName,
+                    gender,
+                    isActive,
+                    phoneNumber,
+                    userName,
+                    role,
+                    address,
+                    birthDay,
+                    ...rest
+                } = userResponse;
+
+                handleSetUserInfo?.({
+                    user_name: userName,
+                    full_name: fullName,
+                    gender: gender,
+                    phone: phoneNumber,
+                    email: email,
+                    address: address,
+                    birth_day: birthDay,
+                    password: "",
+                    confirm_password: ""
+                });
+
+                handleSetIsFormCompleted?.(true);
+                goToNextStep();
+            },
+            onError: (error: any) => {
+                toast.error(`Error: ${error.message}`);
+            }
+        });
+    });
+
 
     return (
         <>
-            <form className="bg-white pb-4 rounded-2" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form className="bg-white pb-4 rounded-2" onSubmit={onSubmit} noValidate>
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Họ tên đầy đủ : <b className='text-red-500'>(*)</b></label>
                 <Input
                     name='full_name'
@@ -199,16 +245,6 @@ const UserInformation = ({ current_step, steps, is_complete, email, goToNextStep
                     placeholder='Nhập tên tài khoản'
                 />
 
-                <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Địa chỉ Email của bạn : <b className='text-red-500'>(*)</b></label>
-
-                <Input
-                    name='email'
-                    register={register}
-                    type='email'
-                    className='mt-6'
-                    value={email?.email ? email.email : "anhtienb237@gmail.com"}
-                    disabled={true}
-                />
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Số điện thoại : <b className='text-red-500'>(*)</b></label>
 
                 <Input
@@ -247,11 +283,11 @@ const UserInformation = ({ current_step, steps, is_complete, email, goToNextStep
                 />
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">Ngày sinh nhật : <b className='text-red-500'>(*)</b></label>
                 <Input
-                    name='date_of_birth'
+                    name='birth_day'
                     register={register}
                     type='date'
                     className='mt-6'
-                    errorMessage={errors.date_of_birth?.message}
+                    errorMessage={errors.birth_day?.message}
                 />
                 <label className="text-gray-500 text-md font-semibold block mt-6 -mb-5">
                     Giới tính : <b className="text-red-500">(*)</b>
@@ -343,7 +379,7 @@ const WatingForVerifyCation = ({ current_step, steps, is_complete, goToNextStep,
     )
 }
 
-const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, handleSetEmail, email, is_form_completed, handleSetIsFormCompleted }: SubRegisterProps) => {
+const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, handleSetEmail, email, is_form_completed, handleSetIsFormCompleted, handleSetVeifyToken }: SubRegisterProps) => {
     const { register, handleSubmit, formState: { errors } } = useForm<FormDataEmail>({
         resolver: yupResolver(emailVerification),
         defaultValues: email
@@ -358,6 +394,7 @@ const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevS
             emailVerificationMutation.mutate(data, {
                 onSuccess: (data) => {
                     toast.success(`${data.data.message}`);
+                    handleSetVeifyToken?.(data.data.body);
                     handleSetIsFormCompleted?.(true);
                     goToNextStep();
                 },
@@ -408,37 +445,43 @@ const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevS
     </>)
 }
 
-const WaitingEmailVerifyCation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, email, handleSetIsFormCompleted, is_form_completed }: SubRegisterProps) => {
+const WaitingEmailVerifyCation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, email, handleSetIsFormCompleted, handleSetEmail, is_form_completed, verifyToken, handleSetUserInfo }: SubRegisterProps) => {
     const waitingForEmailResponseMutation = useMutation({
-        mutationFn: async (email: string) => await authApi.waitingForEmailResponse({ email })
+        mutationFn: async (body: FormWaitingForEmailVerify) => await authApi.waitingForEmailResponse(body)
     });
 
-    if (is_form_completed === false) {
-        useEffect(() => {
+    useEffect(() => {
+        if (!is_form_completed && email?.email) {
             const interval = setInterval(async () => {
                 try {
-                    if (email?.email) {
-                        await waitingForEmailResponseMutation.mutateAsync(email.email, {
-                            onSuccess: (data) => {
-                                if (data.data.body === true) {
-                                    clearInterval(interval);
-                                    handleSetIsFormCompleted?.(true);
-                                    goToNextStep();
-                                }
-                            },
-                            onError: (error) => {
-                                toast.error(`${error.message}`);
+                    const data: FormWaitingForEmailVerify = { email: email?.email ?? "", token: verifyToken };
+                    await waitingForEmailResponseMutation.mutateAsync(data, {
+                        onSuccess: (data) => {
+                            console.log(data);
+                            if (data.data.body === true) {
+                                clearInterval(interval);
+                                handleSetIsFormCompleted?.(true);
+                                handleSetEmail?.(email);
+                                handleSetUserInfo?.((prevUserInfo) => ({
+                                    ...prevUserInfo,
+                                    email: email.email
+                                }));
+                                goToNextStep();
                             }
-                        });
-                    }
+                        },
+                        onError: (error) => {
+                            toast.error(`${error.message}`);
+                        }
+                    });
                 } catch (error) {
                     console.error('API call failed:', error);
                 }
             }, 5000);
 
             return () => clearInterval(interval);
-        }, [email, handleSetIsFormCompleted, waitingForEmailResponseMutation]);
-    }
+        }
+    }, [email, is_form_completed, handleSetIsFormCompleted, handleSetEmail, goToNextStep, verifyToken, waitingForEmailResponseMutation]);
+
     return (
         <div className="verification-container bg-gray-100 p-6 shadow-lg max-w-md mx-auto mt-10">
             <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Kiểm tra hòm thư của bạn</h2>

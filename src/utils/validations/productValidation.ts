@@ -44,6 +44,7 @@ export const productSchema = yup.object({
     .trim()
     .required('This field cannot be empty')
     .min(10, 'Your product title is too short. Please input at least 10 characters.'),
+  categoryId: yup.string().required('This field cannot be empty'),
   price: handlePriceProductYup('isVariant') as yup.NumberSchema<number | undefined, yup.AnyObject, undefined, ''>,
   stockQuantity: handleStockQuantityProductYup('isVariant') as yup.NumberSchema<
     number | undefined,
@@ -102,17 +103,19 @@ export const productSchema = yup.object({
             yup.object({
               id: yup.string().required('This field cannot be empty'),
               name: yup.string().trim().required('This field cannot be empty'),
-              imageUrl: yup.string().nullable()
+              variantImage: yup.object({
+                id: yup.string().nullable(),
+                imageUrl: yup.string().nullable()
+              })
             })
           )
           .max(50, 'Variations List has exceeded maximum value: 50')
           .test({
-            test: function (this: yup.TestContext<yup.AnyObject>, values) {
-              // const { fixedAmount, percentageAmount, discountType, maximumDiscount } = this.parent
+            test: function (values) {
               if (!values) return true
-              let isValid = false
 
-              const errors: yup.CreateErrorOptions[] = []
+              let hasDuplicate = false
+              const errors: yup.ValidationError[] = []
 
               values.forEach((variant, index) => {
                 const { name } = variant
@@ -120,18 +123,20 @@ export const productSchema = yup.object({
                 if (name !== null && name !== undefined && name !== '') {
                   values.forEach((otherVariant, otherIndex) => {
                     if (index !== otherIndex && otherVariant.name === name) {
-                      isValid = true
-                      errors.push({
-                        path: `${this.path}.${index}.name`,
-                        message: 'Options of variations should be different.'
-                      })
+                      hasDuplicate = true
+                      errors.push(
+                        this.createError({
+                          path: `${this.path}[${index}].name`,
+                          message: 'Options of variations should be different.'
+                        })
+                      )
                     }
                   })
                 }
               })
 
-              if (isValid) {
-                return this.createError(errors as yup.AnyObject)
+              if (hasDuplicate) {
+                return new yup.ValidationError(errors)
               } else {
                 return true
               }
@@ -143,9 +148,9 @@ export const productSchema = yup.object({
     .test({
       test: function (this: yup.TestContext<yup.AnyObject>, values) {
         if (!values) return true
-        let isValid = false
+        let hasDuplicate = false
 
-        const errors: yup.CreateErrorOptions[] = []
+        const errors: yup.ValidationError[] = []
 
         values.forEach((variant, index) => {
           const { name } = variant
@@ -153,19 +158,20 @@ export const productSchema = yup.object({
           if (name !== null && name !== undefined && name !== '') {
             values.forEach((otherVariant, otherIndex) => {
               if (index !== otherIndex && otherVariant.name === name) {
-                console.log(`${this.path}.${index}.name`)
-                isValid = true
-                errors.push({
-                  path: `${this.path}.${index}.name`,
-                  message: 'Names of variations should be different.'
-                })
+                hasDuplicate = true
+                errors.push(
+                  this.createError({
+                    path: `${this.path}.${index}.name`,
+                    message: 'Names of variations should be different.'
+                  })
+                )
               }
             })
           }
         })
 
-        if (isValid) {
-          return this.createError(errors as yup.AnyObject)
+        if (hasDuplicate) {
+          return new yup.ValidationError(errors)
         } else {
           return true
         }

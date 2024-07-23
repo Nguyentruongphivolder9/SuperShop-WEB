@@ -1,5 +1,10 @@
-import { useContext, useRef } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useContext, useRef, useState } from 'react'
+import productApi from 'src/apis/product.api'
+import config from 'src/constants/config'
+import { AppContext } from 'src/contexts/app.context'
 import { ProductAddContext } from 'src/contexts/productAdd.context'
+import { PreviewImagesResponse } from 'src/types/product.type'
 
 interface Props {
   indexVariants: number
@@ -7,6 +12,12 @@ interface Props {
   handlerRemoveVariant: (index: number) => void
   isPrimary: boolean
   sizeVariants: number
+}
+
+interface ErrorModelImage {
+  fileName: string
+  errorType: string
+  errorSize: string
 }
 
 export default function InputValueOfVariation({
@@ -18,30 +29,123 @@ export default function InputValueOfVariation({
 }: Props) {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
   const { productMethods } = useContext(ProductAddContext)
+  const { setChildrenModal, setIsModal } = useContext(AppContext)
+  const [imageVariant, setImageVariant] = useState<PreviewImagesResponse | null>(null)
 
   const {
     register,
     watch,
+    setValue,
     formState: { errors }
   } = productMethods
 
-  // useEffect(() => {
-  //   arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((variant, index) => {
-  //     const { name } = variant
+  const preCheckImageCreateMutation = useMutation({
+    mutationFn: productApi.preCheckImageInfoProCreate
+  })
+  const preCheckImageDeleteMutation = useMutation({
+    mutationFn: productApi.preCheckImageInfoProRemove
+  })
 
-  //     if (name !== null && name !== undefined && name !== '') {
-  //       clearErrors(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`)
-  //       arraysVariantsGroupTest?.[indexVariantsGroup]?.variants?.forEach((otherVariant, otherIndex) => {
-  //         if (index !== otherIndex && otherVariant.name === name) {
-  //           setError(`variantsGroup.${indexVariantsGroup}.variants.${index}.name`, {
-  //             type: 'unique',
-  //             message: 'Options of variations should be different.'
-  //           })
-  //         }
-  //       })
-  //     }
-  //   })
-  // }, [arraysVariantsGroupTest, setError, indexVariantsGroup, clearErrors])
+  const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    const formData = new FormData()
+    let isHasError = false
+    const errorModel: ErrorModelImage = {
+      fileName: files[0].name,
+      errorType: '',
+      errorSize: ''
+    }
+
+    const fileExtension = files[0].name.split('.').pop()?.toLowerCase()
+    const validExtensions = ['png', 'jpg', 'jpeg']
+
+    if (!fileExtension || !validExtensions.includes(fileExtension)) {
+      isHasError = true
+      errorModel.errorType = ''
+    }
+    if (files[0].type.split('/')[0] !== 'image') {
+      isHasError = true
+      errorModel.errorType = ''
+    }
+
+    if (files[0].size > 2097152) {
+      isHasError = true
+      errorModel.errorSize = '- File size exceeds 2.0 MB.'
+    }
+
+    if (isHasError) {
+      setIsModal(true)
+      setChildrenModal(
+        <div className='w-[400px] bg-white border-dashed border-[1px] border-blue rounded-md shadow h-auto'>
+          <div className='flex flex-col'>
+            <div className='p-6 text-[#333333] flex justify-start items-center'>
+              <span className='text-xl'>Notice</span>
+            </div>
+            <div className='px-6 text-[#333333] text-sm flex flex-col'>
+              {errorModel.fileName && <div className='mb-2'>{errorModel.fileName}</div>}
+              {errorModel.errorType && <div className='mb-1'>{errorModel.errorType}</div>}
+              {errorModel.errorSize && <div className=''>{errorModel.errorSize}</div>}
+            </div>
+            <div className='p-6'>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsModal(false)
+                  setChildrenModal(null)
+                }}
+                className={`text-sm border border-solid border-gray-300 rounded-md px-4 py-2 bg-blue text-white`}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsModal(false)
+              setChildrenModal(null)
+            }}
+            type='button'
+            className='text-[#999999] h-6 p-1 absolute right-12 top-6 w-6'
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              fill='none'
+              viewBox='0 0 24 24'
+              strokeWidth={1.5}
+              stroke='currentColor'
+              className='size-6'
+            >
+              <path strokeLinecap='round' strokeLinejoin='round' d='M6 18 18 6M6 6l12 12' />
+            </svg>
+          </button>
+        </div>
+      )
+    }
+
+    formData.append('imageFiles', files[0])
+    try {
+      const responsePreCheckImage = await preCheckImageCreateMutation.mutateAsync(formData)
+      const resultPreCheckImage = responsePreCheckImage.data.body
+      if (resultPreCheckImage) {
+        const variantImage: PreviewImagesResponse = resultPreCheckImage[0]
+        setValue(`variantsGroup.${indexVariantsGroup}.variants.${indexVariants}.variantImage`, variantImage)
+        setImageVariant(variantImage)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const deleteImage = async (id: string) => {
+    try {
+      await preCheckImageDeleteMutation.mutateAsync(id)
+      setImageVariant(null)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const handleUploadImage = () => {
     fileInputImagesRef.current?.click()
@@ -49,30 +153,48 @@ export default function InputValueOfVariation({
   return (
     <div className='col-span-1'>
       <div className='col-span-1 flex flex-row gap-1 h-9'>
-        {isPrimary && (
-          <div className='w-9 h-full border-dashed border-[1px] border-gray-400 bg-white rounded-sm flex items-center justify-center hover:border-blue hover:bg-sky-100'>
-            <input className='hidden' type='file' accept='.jpg,.jpeg,.png' ref={fileInputImagesRef} />
-            <button
-              className='h-full w-full flex flex-col justify-center items-center'
-              type='button'
-              onClick={handleUploadImage}
-            >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-                strokeWidth={1.5}
-                stroke='currentColor'
-                className='size-5 text-blue'
+        {isPrimary ? (
+          imageVariant ? (
+            <div className='w-9 h-full overflow-hidden border-dashed border-[1px] border-gray-400 bg-white rounded-sm flex items-center justify-center  '>
+              <img
+                className='object-cover h-full w-full'
+                src={`${config.awsURL}products/${imageVariant.imageUrl}`}
+                alt={'upload file'}
+              />
+            </div>
+          ) : (
+            <div className='w-9 h-full border-dashed border-[1px] border-gray-400 bg-white rounded-sm flex items-center justify-center hover:border-blue hover:bg-sky-100'>
+              <input
+                className='hidden'
+                type='file'
+                accept='.jpg,.jpeg,.png'
+                onChange={onFileChange}
+                ref={fileInputImagesRef}
+              />
+              <button
+                className='h-full w-full flex flex-col justify-center items-center'
+                type='button'
+                onClick={handleUploadImage}
               >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  d='m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z'
-                />
-              </svg>
-            </button>
-          </div>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  strokeWidth={1.5}
+                  stroke='currentColor'
+                  className='size-5 text-blue'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z'
+                  />
+                </svg>
+              </button>
+            </div>
+          )
+        ) : (
+          ''
         )}
         <div
           className={`flex-1 h-full px-3 border bg-[#fff] rounded-sm flex items-center ${errors.variantsGroup?.[indexVariantsGroup]?.variants?.[indexVariants]?.name?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
