@@ -13,7 +13,7 @@ import {
 } from 'src/utils/utils'
 import QuantityController from '../../components/QuantityController'
 import ImageSmallSlider from 'src/components/ImageSmallSlider'
-import { ProductVariantsResponse } from 'src/types/product.type'
+import { ProductVariantsResponse, VariantsGroupResponse } from 'src/types/product.type'
 import { Link, useParams } from 'react-router-dom'
 import ProductRatingStar from 'src/components/ProductRatingStar'
 import ProductRating from './ProductRating'
@@ -36,7 +36,11 @@ export default function ProductDetail() {
     queryFn: () => productApi.getProductById(id)
   })
 
-  const [activeImage, setActiveImage] = useState('')
+  const [activeImage, setActiveImage] = useState<string>('')
+  const [variantsGroup, setVariantsGroup] = useState<VariantsGroupResponse[]>([])
+  const [selectedVariants, setSelectedVariants] = useState<string[]>(['', ''])
+  const [productPrice, setProductPrice] = useState<string>('')
+  const [productStockQuantity, setProductStockQuantity] = useState<number | null>(null)
   const product = ProductDetailData?.data.body
   const imageRef = useRef<HTMLImageElement>(null)
 
@@ -55,10 +59,66 @@ export default function ProductDetail() {
   // })
 
   useEffect(() => {
-    if (product && product.productImages) {
-      setActiveImage(product.productImages[0].imageUrl)
+    if (product) {
+      let newVariantsGroup: VariantsGroupResponse[] = []
+
+      if (product.productImages) {
+        setActiveImage(product.productImages[0].imageUrl)
+      }
+
+      if (product.variantsGroup) {
+        product.variantsGroup.forEach((group) => {
+          if (group.isPrimary) {
+            newVariantsGroup = [group, ...newVariantsGroup]
+          } else {
+            newVariantsGroup = [...newVariantsGroup, group]
+          }
+        })
+      }
+
+      setVariantsGroup(newVariantsGroup)
+    } else {
+      setVariantsGroup([])
     }
   }, [product])
+
+  useEffect(() => {
+    if (product) {
+      let currentProductPrice = ''
+      let currentProductStockQuantity = 0
+
+      if (!product.isVariant && product.price) {
+        currentProductPrice = formatCurrency(product.price)
+        currentProductStockQuantity = product.stockQuantity
+      } else {
+        currentProductPrice = calculateFromToPrice(product?.productVariants)
+        currentProductStockQuantity = calculateTotalStockQuantity(product?.productVariants)
+
+        const getProductVariant = () => {
+          if (product.variantsGroup.length === 1 && selectedVariants[0]) {
+            return product.productVariants.find((item) => item.variant1.id === selectedVariants[0])
+          } else if (product.variantsGroup.length === 2 && selectedVariants[0] && selectedVariants[1]) {
+            return product.productVariants.find(
+              (item) => item.variant1.id === selectedVariants[0] && item.variant2.id === selectedVariants[1]
+            )
+          }
+          return null
+        }
+
+        const currentProductVariant = getProductVariant()
+        if (currentProductVariant) {
+          currentProductPrice = '₫' + formatCurrency(currentProductVariant.price ?? 0)
+          currentProductStockQuantity = currentProductVariant.stockQuantity ?? 0
+        }
+      }
+
+      setProductPrice(currentProductPrice)
+      setProductStockQuantity(currentProductStockQuantity)
+    } else {
+      setProductPrice('')
+      setProductStockQuantity(null)
+    }
+  }, [selectedVariants, product])
 
   const chooseActive = (img: string) => {
     setActiveImage(img)
@@ -109,7 +169,8 @@ export default function ProductDetail() {
   //   })
   // }
 
-  // if (!product) return null
+  if (!product) return null
+
   return (
     <div className='bg-[#f6f6f6]'>
       <div className='pt-5'>
@@ -177,12 +238,12 @@ export default function ProductDetail() {
                 <div className='mx-4 h-4 w-[1px] bg-gray-300'></div>
                 <div className='flex items-center'>
                   <span>{formatNumbertoSocialStyle(product?.ratingStart as number)}</span>
-                  <span className='ml-1 text-gray-300'>Rating</span>
+                  <span className='ml-1 text-sm text-gray-300'>Rating</span>
                 </div>
                 <div className='mx-4 h-4 w-[1px] bg-gray-300'></div>
                 <div className='flex items-center'>
                   <span>{formatNumbertoSocialStyle(product?.sold as number)}</span>
-                  <span className='ml-1 text-gray-300'>Sold</span>
+                  <span className='ml-1 text-sm text-gray-300'>Sold</span>
                 </div>
               </div>
               <div className='mt-4 flex items-center bg-gray-50 px-5 py-4'>
@@ -192,11 +253,7 @@ export default function ProductDetail() {
                   {rateSale(product.price_before_discount, product.price)} giảm
                 </div> */}
                 {/* <div className='text-gray-500 line-through'>₫{formatCurrency(200000)}</div> */}
-                {product?.isVariant && (
-                  <div className='ml-3 text-3xl font-medium text-blue'>
-                    {calculateFromToPrice(product?.productVariants)}
-                  </div>
-                )}
+                <div className='text-3xl font-medium text-blue'>{productPrice}</div>
                 {/* <div className='ml-4 rounded-sm bg-red-400 px-1 py-[2px] text-xs font-semibold uppercase text-white'>
                   {rateSale(300000, 200000)} OFF
                 </div> */}
@@ -204,21 +261,28 @@ export default function ProductDetail() {
 
               {/* variations */}
               <div className='mt-4 flex flex-col px-5 pb-4'>
-                {product?.variantsGroup &&
-                  product.variantsGroup.map((groupItem, index) => (
-                    <div key={index} className='w-full'>
-                      <div className='mb-6 grid grid-cols-9'>
+                {variantsGroup &&
+                  variantsGroup.map((groupItem, iGroup) => (
+                    <div key={iGroup} className='w-full'>
+                      <div className='mb-4 grid grid-cols-10'>
                         <div className='col-span-2 h-10 flex items-center mt-2'>
                           <div className='text-[#757575] text-sm w-full'>{groupItem.name}</div>
                         </div>
-                        <div className='col-span-7 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
+                        <div className='col-span-8 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
                           {groupItem.variants &&
-                            groupItem.variants.map((variant, index) => (
-                              <VariantButton key={index} variantData={variant} />
+                            groupItem.variants.map((variant, iVariant) => (
+                              <VariantButton
+                                key={iVariant}
+                                variantData={variant}
+                                activeImage={activeImage}
+                                indexGroupVariant={iGroup + 1}
+                                setActiveImage={setActiveImage}
+                                selectedVariants={selectedVariants}
+                                setSelectedVariants={setSelectedVariants}
+                              />
                             ))}
                         </div>
                       </div>
-                      <div className='mb-6'></div>
                     </div>
                   ))}
               </div>
@@ -230,15 +294,9 @@ export default function ProductDetail() {
                   onDecrease={handleByCount}
                   onIncrease={handleByCount}
                   onType={handleByCount}
-                  // max={product.quantity}
-                  max={100}
+                  max={productStockQuantity ?? 0}
                 />
-                <div className='ml-6 text-gray-500 text-sm'>
-                  {product?.isVariant
-                    ? calculateTotalStockQuantity(product?.productVariants as ProductVariantsResponse[])
-                    : product?.stockQuantity}{' '}
-                  pieces available
-                </div>
+                <div className='ml-6 text-gray-500 text-sm'>{productStockQuantity} pieces available</div>
               </div>
 
               <div className='mt-8 flex items-center'>
