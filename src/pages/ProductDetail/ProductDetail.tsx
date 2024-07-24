@@ -1,19 +1,15 @@
 import DOMPurify from 'dompurify'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   calculateFromToPrice,
-  calculateHighestPrice,
-  calculateLowestPrice,
   calculateTotalStockQuantity,
   formatCurrency,
-  formatDateTime,
   formatNumbertoSocialStyle,
-  getIdFromNameId,
-  rateSale
+  getIdFromNameId
 } from 'src/utils/utils'
 import QuantityController from '../../components/QuantityController'
 import ImageSmallSlider from 'src/components/ImageSmallSlider'
-import { ProductVariantsResponse, VariantsGroupResponse } from 'src/types/product.type'
+import { VariantsGroupResponse } from 'src/types/product.type'
 import { Link, useParams } from 'react-router-dom'
 import ProductRatingStar from 'src/components/ProductRatingStar'
 import ProductRating from './ProductRating'
