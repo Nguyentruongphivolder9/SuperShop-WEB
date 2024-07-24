@@ -105,12 +105,12 @@ export const calculateHighestPrice = (productVariants: ProductVariantsResponse[]
 
 export const calculateFromToPrice = (productVariants: ProductVariantsResponse[]): string => {
   const highestPrice = calculateHighestPrice(productVariants)
-  const lowestPrice = calculateHighestPrice(productVariants)
+  const lowestPrice = calculateLowestPrice(productVariants)
   if (highestPrice == lowestPrice) {
     return '₫' + `${formatCurrency(lowestPrice)}`
   }
 
-  return '₫' + `${formatCurrency(lowestPrice)}` + '- ₫' + `${formatCurrency(highestPrice)}`
+  return '₫' + `${formatCurrency(lowestPrice)}` + ' - ₫' + `${formatCurrency(highestPrice)}`
 }
 
 export const calculateTotalStockQuantity = (productVariants: ProductVariantsResponse[]): number => {

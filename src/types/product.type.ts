@@ -2,6 +2,8 @@ import { CategoryResponse } from './category.type'
 
 export interface Product {
   id: string
+  shopId: string
+  categoryId: string
   name: string
   price: number
   stockQuantity: number
@@ -11,7 +13,6 @@ export interface Product {
   conditionProduct: string
   isVariant: boolean
   isActive: boolean
-  category: CategoryResponse
   productImages: ProductImagesResponse[]
   variantsGroup: VariantsGroupResponse[]
   productVariants: ProductVariantsResponse[]
