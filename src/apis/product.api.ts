@@ -8,7 +8,6 @@ const productApi = {
     return http.get<SuccessResponse<Pagination<Product[]>>>('products')
   },
   getProductById(id: string) {
-    console.log(id)
     return http.get<SuccessResponse<Product>>(`products/${id}`)
   },
   productCreate(body: FormDataProduct) {
