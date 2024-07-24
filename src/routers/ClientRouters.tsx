@@ -26,6 +26,7 @@ import ProductAdd from 'src/pages/Shop/page/ProductManagement/ProductAdd'
 import Home from 'src/pages/Home'
 import VoucherWallet from 'src/pages/User/pages/VoucherWallet'
 import VoucherAdd from 'src/pages/Shop/page/VoucherShop/pages/VoucherAdd'
+import Chat from 'src/pages/Chat'
 
 import AdvertiseManagement from 'src/pages/Shop/page/AdvertiseManagement'
 import AdvertiseAdd from 'src/pages/Shop/page/AdvertiseManagement/AdvertiseAdd'
@@ -34,7 +35,6 @@ import RecommendationDaily from 'src/pages/RecommendationDaily'
 
 import VoucherEdit from 'src/pages/Shop/page/VoucherShop/pages/VoucherEdit'
 import { VoucherProvider } from 'src/contexts/voucher.context'
-
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext) //
@@ -82,7 +82,7 @@ const ClientRoutes = [
     children: [
       cartRouter,
       {
-        path: path.user, // localhoas//user
+        path: path.user, // localhost//user
         element: (
           <MainLayout>
             <UserLayout></UserLayout>
@@ -228,6 +228,38 @@ const ClientRoutes = [
       </MainLayout>
     )
   },
+
+  {
+    path: path.chat,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
+    path: path.conversations,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
+    path: path.conversationDetail,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+
   {
     path: '*',
     element: (

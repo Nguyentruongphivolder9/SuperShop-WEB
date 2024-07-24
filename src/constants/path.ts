@@ -14,6 +14,11 @@ const path = {
   cart: '/cart',
   recommendationDaily: '/find_similar_products',
 
+  //chat
+  chat: '/chat/users',
+  conversations: '/chat/conversations',
+  conversationDetail: '/chat/conversation/ :conversationId',
+
   // shop channels
   shopChannel: '/shopchannel',
 
