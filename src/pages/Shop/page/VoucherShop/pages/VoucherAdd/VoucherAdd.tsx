@@ -1,18 +1,23 @@
-import { useState } from 'react'
+/* eslint-disable import/namespace */
+import { useContext, useEffect, useState } from 'react'
 import { format, addHours, addMinutes, getTime, getYear, getMonth } from 'date-fns'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { vi } from 'date-fns/locale/vi'
 import { Controller, useForm } from 'react-hook-form'
-import { VoucherSchema, voucherShema } from 'src/utils/validations/voucher.rules'
+import { VoucherSchema, voucherShema } from 'src/utils/validations/voucherValidation'
 import { yupResolver } from '@hookform/resolvers/yup'
 import Button from 'src/components/Button'
 import classNames from 'classnames'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import voucherApi from 'src/apis/voucher.api'
 import { GMTToLocalStingTime } from '../../utils/date.utils'
 import useQueryParams from 'src/hooks/useQueryParams'
+import { AppContext } from 'src/contexts/app.context'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import path from 'src/constants/path'
 registerLocale('vi', vi)
 const range = (start: number, end: number) => {
   return new Array(end - start + 1).fill(null).map((d, i) => i + start)
@@ -43,10 +48,12 @@ const isThreeMonthsAhead = (date: Date) => {
 
 type FormData = VoucherSchema
 export default function VoucherAdd() {
+  const { profile } = useContext(AppContext)
+  const navigate = useNavigate()
   const [startDate, setStartDate] = useState(addMinutes(new Date(), 10))
   const [endDate, setEndDate] = useState(addHours(addMinutes(new Date(), 10), 1))
-  const queryParams: { voucherType?: string } = useQueryParams()
-
+  const queryParams: { voucherType?: string; edit?: string } = useQueryParams()
+  const { edit: idUpdate } = queryParams
   const {
     control,
     register,
@@ -72,16 +79,20 @@ export default function VoucherAdd() {
   })
 
   const createVoucherMutaion = useMutation({
-    mutationFn: voucherApi.createVoucher
+    mutationFn: voucherApi.createVoucher,
+    onSuccess() {
+      navigate(path.voucherShop)
+    }
   })
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await createVoucherMutaion.mutateAsync({
+      const res = await createVoucherMutaion.mutateAsync({
         ...data,
         startDate: GMTToLocalStingTime(data.startDate),
         endDate: GMTToLocalStingTime(data.endDate)
       })
+      toast.success(res.data.message)
     } catch (error) {
       console.log(error)
     }
@@ -98,14 +109,14 @@ export default function VoucherAdd() {
             <div className='p-4 bg-white'>
               <h3 className='mb-6 text-[20px] font-medium text-[#333]'>Basic Information</h3>
               <div>
-                <div className='grid grid-cols-12 mb-6 text-sm items-center'>
+                <div className='grid grid-cols-12 mb-4 text-sm items-center'>
                   <div className='col-span-3 flex justify-end'>
                     <label className='min-w-[200px] w-[200px] max-w-[200px] h-[80px] text-right leading-[48px] py-2 mr-3'>
                       Voucher Type
                     </label>
                   </div>
                   <div className='col-span-9'>
-                    <div className='inline-flex items-center h-[60px] py-3 pl-3 pr-7 mb-4 mr-4 rounded-md bg-white shadow-[0_0_17px_0_#e2e2e2]'>
+                    <div className='inline-flex items-center h-[50px] py-3 pl-3 pr-7 mb-4 mr-4 rounded-md bg-white shadow-[0_0_17px_0_#e2e2e2]'>
                       <div className='mr-3 ml-2'>
                         <svg
                           viewBox='0 0 21 20'
@@ -133,10 +144,13 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'border-gray-200 hover:border-gray-500': !errors.name?.message,
-                        'border-red-300': errors.name?.message
-                      })}
+                      className={classNames(
+                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        {
+                          'border-gray-200 hover:border-gray-500': !errors.name?.message,
+                          'border-red-300': errors.name?.message
+                        }
+                      )}
                     >
                       <input
                         type='text'
@@ -158,12 +172,15 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'border-gray-200 hover:border-gray-500': !errors.code?.message,
-                        'border-red-300': errors.code?.message
-                      })}
+                      className={classNames(
+                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        {
+                          'border-gray-200 hover:border-gray-500': !errors.code?.message,
+                          'border-red-300': errors.code?.message
+                        }
+                      )}
                     >
-                      <div className='pr-2 text-sm uppercase'>NGOC</div>
+                      <div className='pr-2 text-sm uppercase'>{profile?.userName.slice(0, 5)}</div>
                       <div className='h-4 w-[1px] bg-gray-300'></div>
                       <input
                         type='text'
@@ -181,7 +198,11 @@ export default function VoucherAdd() {
                     <div className='text-sm text-gray-400'>
                       <p className='text-red-500 text-xs'>{errors.code?.message}</p>
                       <p>Please enter A-Z, 0-9; 5 characters maximum.</p>
-                      <p>Your complete voucher code is: NGOC{getValues('code').toUpperCase()}</p>
+                      <p>
+                        Your complete voucher code is:{' '}
+                        <span className='uppercase'>{profile?.userName.slice(0, 4)}</span>
+                        {getValues('code').toUpperCase()}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -406,6 +427,8 @@ export default function VoucherAdd() {
                             required: true,
                             onChange(event) {
                               setValue('discountType', event.target.value)
+                              clearErrors('fixedAmount')
+                              clearErrors('percentageAmount')
                               clearErrors('minimumTotalOrder')
                             }
                           })}

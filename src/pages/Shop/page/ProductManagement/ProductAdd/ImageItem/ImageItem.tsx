@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import config from 'src/constants/config'
 
-const S3_BUCKET_URL = 'https://super-shop.s3.ap-south-1.amazonaws.com/products'
 interface Props {
   id: string
   imageUrl: string
@@ -26,7 +26,7 @@ export default function ImageItem({ id, imageUrl, index, deleteImage }: Props) {
       <img
         {...listeners}
         className='object-cover h-full w-full cursor-move'
-        src={`${S3_BUCKET_URL}/${imageUrl}`}
+        src={`${config.awsURL}products/${imageUrl}`}
         alt={'upload file'}
       />
       <div className='absolute bottom-0 left-0 w-full h-6 bg-[#333333] hidden group-hover:grid group-hover:grid-cols-2 '>

@@ -18,6 +18,7 @@ export type FormDataProduct = Pick<
   | 'variantsGroup'
   | 'productImages'
   | 'productVariants'
+  | 'categoryId'
 >
 
 const createProductSchema = productSchema.pick([
@@ -30,7 +31,8 @@ const createProductSchema = productSchema.pick([
   'conditionProduct',
   'variantsGroup',
   'productImages',
-  'productVariants'
+  'productVariants',
+  'categoryId'
 ])
 
 const initialProductAddContext: ProductAddContextInterface = {

@@ -49,7 +49,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
     const newVariant = {
       id: generateUniqueId(),
       name: '',
-      imageUrl: '',
+      variantImage: {},
       isActive: true
     }
     appendVariants(newVariant)
@@ -151,7 +151,9 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
                 className='text-sm text-[#333333] w-full border-none outline-none pr-3'
                 placeholder='Input'
               />
-              <div className='text-sm text-[#999999]'>{0}/14</div>
+              <div className='text-sm text-[#999999]'>
+                {watch(`variantsGroup.${indexVariantsGroup}.name`).length}/14
+              </div>
             </div>
             <div
               className={`${errors.variantsGroup?.[indexVariantsGroup]?.name?.message ? 'visible' : 'invisible'} mt-2 h-4 text-xs text-[#ff4742]`}

@@ -1,5 +1,6 @@
 import * as yup from 'yup'
 import { addHours } from 'date-fns'
+import { StatusVoucher } from 'src/pages/Shop/page/VoucherShop/enums/voucherInfo.enum'
 function emptyStringToNull(value: any, originalValue: any) {
   if (typeof originalValue === 'string' && originalValue === '') {
     return null
@@ -45,7 +46,7 @@ export const voucherShema = yup.object({
     .matches(/^[A-Za-z0-9]{1,5}$/, 'Code is not allowed to have special characters')
     .required('Code is required'),
   voucherType: yup.string(),
-  startDate: yup.date().min(new Date(), 'Please enter a start time that is later than the current time.'),
+  startDate: yup.date(),
   endDate: yup
     .date()
     .min(yup.ref('startDate'), 'End date must be after start date')
@@ -194,6 +195,7 @@ export const voucherShema = yup.object({
       return !isNaN(value)
     })
     .typeError('Please enter a number'),
+
   maxDistribution: yup
     .number()
     .integer('Please enter an interger number')
@@ -208,4 +210,36 @@ export const voucherShema = yup.object({
     .typeError('Please enter a number')
 })
 
+export const voucherUpdateSchema = voucherShema.shape({
+  status: yup.string(),
+  oldQuantity: yup.number(),
+  quantity: yup
+    .number()
+    .integer('Please enter an interger number')
+    .transform(emptyStringToNull)
+    .nullable()
+    .min(1, 'The value should be at least 1')
+    .max(200000, 'Price has exceeded maximum value: 200000')
+    .required('This field cannot be empty')
+    .test('is_number', 'Please enter a number', (value) => {
+      return !isNaN(value)
+    })
+    .typeError('Please enter a number')
+    .test({
+      test: function (this: yup.TestContext<yup.AnyObject>, value) {
+        const { status, oldQuantity: oldValue } = this.parent
+        if (status === StatusVoucher.ONGOING && value < oldValue) {
+          return this.createError({
+            path: 'quantity',
+            message: 'Quantities cannot be reduced in ongoing vouchers'
+          })
+        }
+        return true
+      }
+    })
+})
+export const voucherUpdateArraySchema = yup.array().of(voucherUpdateSchema)
+
 export type VoucherSchema = yup.InferType<typeof voucherShema>
+export type VoucherUpdateShema = yup.InferType<typeof voucherUpdateSchema>
+export type VoucherUpdateArraySchema = yup.InferType<typeof voucherUpdateArraySchema>

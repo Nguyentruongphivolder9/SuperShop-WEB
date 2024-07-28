@@ -7,12 +7,16 @@ import { FormDataProduct } from 'src/contexts/productAdd.context'
 
 interface Props {
   control: Control<FormDataProduct, any>
+  className: string
 }
 
 const content = ``
 const extensions = [StarterKit, Underline]
 
-export default function TipTapEditor({ control }: Props) {
+export default function TipTapEditor({
+  control,
+  className = 'rounded-md overflow-hidden flex flex-col border'
+}: Props) {
   const editor = useEditor({
     extensions,
     content,
@@ -39,7 +43,7 @@ export default function TipTapEditor({ control }: Props) {
         })
 
         return (
-          <div className='rounded-md overflow-hidden flex flex-col border'>
+          <div className={className}>
             <TipTapMenuBar editor={editor} />
             <EditorContent editor={editor} />
           </div>
