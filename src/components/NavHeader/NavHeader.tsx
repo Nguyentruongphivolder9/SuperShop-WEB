@@ -25,7 +25,7 @@ export default function NavHeader() {
   const handleLogout = () => {
     const token = localStorage.getItem('accessToken') || '';
     const email = profile?.email || '';
-
+    console.log("Token: ", token, + "Email: ", email);
     if (token && email) {
       logoutMutation.mutate(
         { email },
@@ -34,6 +34,7 @@ export default function NavHeader() {
             setIsAuthenticated(false);
             setProfile(null);
             queryClient.clear();
+            localStorage.removeItem('secretkey');
             localStorage.removeItem('accessToken');
           },
           onError: (e) => {
