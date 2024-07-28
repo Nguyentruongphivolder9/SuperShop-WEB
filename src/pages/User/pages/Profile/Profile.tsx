@@ -15,7 +15,6 @@ import { getAvatarUrl, isAxiosUnprocessableEntityError } from 'src/utils/utils'
 import { ErrorResponse } from 'src/types/utils.type'
 import config from 'src/constants/config'
 import InputFile from 'src/components/InputFile'
-import AvatarChanger from 'src/components/AvatarChanger'
 import ModelChanger from 'src/components/AvatarChanger/ModelChanger'
 import ModalChanger from 'src/components/AvatarChanger/ModelChanger'
 

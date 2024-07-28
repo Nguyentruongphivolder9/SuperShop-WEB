@@ -1,4 +1,4 @@
-import { AuthResponse, TypingEmailResponse, WaitingForEmailResponse } from 'src/types/auth.type'
+import { AuthResponse, google_Success_Request_Url_Authorization, TypingEmailResponse, WaitingForEmailResponse } from 'src/types/auth.type'
 import http from 'src/utils/http'
 import { FormDataRegister, FormWaitingForEmailVerify } from 'src/components/RegisterForms/Registers'
 import { toast } from 'react-toastify'
@@ -9,7 +9,7 @@ export const URL_LOGOUT = 'account/account-logout'
 export const URL_REFRESH_TOKEN = 'refresh-access-token'
 export const URL_EMAIL_VERIFICATION = 'auth/send-email'
 export const URL_WAITING_FOR_EMAIL_RESPONSE = 'auth/waiting-for-email-response'
-
+export const URL_GOOGLE_AUTHORIZATION_URL_REQUEST = 'oauth/oauth-2-user/url'
 export type FinalRegisterForm = {
   email?: string | undefined
   password: string
@@ -25,6 +25,9 @@ type LogoutRequest = {
 }
 
 const authApi = {
+   requestGoogleAuthorizationUrl() {
+    return http.get<google_Success_Request_Url_Authorization>(`${URL_GOOGLE_AUTHORIZATION_URL_REQUEST}`);
+  },
   waitingForEmailResponse(body: FormWaitingForEmailVerify) {
     return http.post<WaitingForEmailResponse>(`${URL_WAITING_FOR_EMAIL_RESPONSE}`, body)
   },
@@ -39,7 +42,6 @@ const authApi = {
   },
   logout(body: LogoutRequest) {
     const token = localStorage.getItem('accessToken')
-    console.log(token)
     if (token === null) {
       toast.error('Thất bại trong việc đăng suất, thử lại trong giây lát')
       return Promise.reject(new Error('No access token found'))
