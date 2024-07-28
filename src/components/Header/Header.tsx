@@ -2,13 +2,16 @@ import { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AppContext } from 'src/contexts/app.context'
 import NavHeader from '../NavHeader'
-
+import Popover from '../Popover'
+import { formatCurrency } from 'src/utils/utils'
+const MAX_PURCHASES = 5
 export default function Header() {
+  const purchasesInCart: any[] = []
   return (
     <div className='sticky top-0 z-30 pb-5 bg-[linear-gradient(-180deg,#00BFFF,#0099FF)] text-white'>
       <div className='container'>
         <NavHeader />
-        <div className='grid grid-cols-12 gap-4 mt-4 items-end'>
+        <div className='grid grid-cols-12 gap-4 mt-1 items-end'>
           <Link to={'/'} className='col-span-2'>
             <svg viewBox='0 0 192 65' className='h-11 w-full lg:h-11 fill-white text-cyan-500'>
               <g fillRule='evenodd'>
@@ -16,7 +19,7 @@ export default function Header() {
               </g>
             </svg>
           </Link>
-          <form className='col-span-8'>
+          <form className='col-span-9'>
             <div className='bg-white rounded-sm p-1 flex'>
               <input
                 type='text'
@@ -41,7 +44,77 @@ export default function Header() {
               </button>
             </div>
           </form>
-          <div className='col-span-2 justify-self-center'></div>
+          <div className='col-span-1 justify-self-center'>
+            <Popover
+              renderPopover={
+                <div className='relative max-w-[400px] text-sm rounded-sm border border-gray-200 bg-white shadow-md'>
+                  {purchasesInCart && purchasesInCart.length > 0 ? (
+                    <div className='p-2'>
+                      <div className='text-gray capitalize'>Sản phẩm mới thêm</div>
+                      <div className='mt-5'>
+                        {purchasesInCart.slice(0, MAX_PURCHASES).map((purchase) => (
+                          <div className='mt-2 py-2 flex hover:bg-gray-100' key={purchase._id}>
+                            <div className='flex-shrink-0'>
+                              <img
+                                src={purchase.product.image}
+                                alt={purchase.product.name}
+                                className='w-11 h-11 object-cover r'
+                              />
+                            </div>
+                            <div className='flex-grow ml-2 overflow-hidden'>
+                              <div className='truncate'>{purchase.product.name}</div>
+                            </div>
+                            <div className='ml-2 flex-shrink-0'>
+                              <span className='text-orange'>₫{formatCurrency(purchase.product.price)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className='flex mt-6 items-center justify-between'>
+                        <div className='capitalize text-xs text-gray-500'>
+                          {/* {purchasesInCart.length > MAX_PURCHASES ? purchasesInCart.length - MAX_PURCHASES : ''} Thêm
+                          vào giỏ hàng */}
+                        </div>
+                        <Link
+                          to={''}
+                          className='capitalize bg-orange hover:opacity-[0.85] py-2 px-4 rounded-sm text-white'
+                        >
+                          Xem giỏ hàng
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className='flex h-[300px] w-[300px] flex-col items-center justify-center p-2'>
+                      <img src={''} alt='no purchase' className='h-24 w-24' />
+                      <div className='mt-3 capitalize'>Chưa có sản phẩm</div>
+                    </div>
+                  )}
+                </div>
+              }
+            >
+              <Link to='' className='relative'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  strokeWidth={1.5}
+                  stroke='currentColor'
+                  className='w-8 h-8'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z'
+                  />
+                </svg>
+                {/* {purchasesInCart && purchasesInCart.length > 0 && (
+                  <span className='absolute top-0 right-0 translate-x-1/2 -translate-y-[30%] rounded-full py-[1px] px-[9px] text-xs bg-white text-orange'>
+                    {purchasesInCart?.length}
+                  </span>
+                )} */}
+              </Link>
+            </Popover>
+          </div>
         </div>
       </div>
     </div>

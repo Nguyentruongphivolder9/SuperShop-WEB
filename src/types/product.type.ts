@@ -1,30 +1,23 @@
+import { CategoryResponse } from './category.type'
+
 export interface Product {
-  _id: string
-  images: string[]
-  price: number
-  rating: number
-  price_before_discount: number
-  quantity: number
-  sold: number
-  view: number
+  id: string
+  shopId: string
+  categoryId: string
   name: string
+  price: number
+  stockQuantity: number
+  sold: number
+  ratingStart: number
   description: string
-  category: {
-    _id: string
-    name: string
-  }
-  image: string
+  conditionProduct: string
+  isVariant: boolean
+  isActive: boolean
+  productImages: ProductImagesResponse[]
+  variantsGroup: VariantsGroupResponse[]
+  productVariants: ProductVariantsResponse[]
   createdAt: string
   updatedAt: string
-}
-
-export interface ProductList {
-  products: Product[]
-  pagination: {
-    page: number
-    limit: number
-    page_size: number
-  }
 }
 
 export interface ProductListConfig {
@@ -42,14 +35,15 @@ export interface ProductListConfig {
 
 export interface ProductRequest {
   name: string
+  categoryId: string
   price?: number
   stockQuantity?: number
   description?: string
   conditionProduct: string
   isVariant: boolean
   isActive: boolean
-  productImages: ProductImagesRequest[]
-  productVariants?: ProductVariantsRequest[]
+  productImages: PreviewImagesResponse[]
+  productVariants?: ProductVariantsResponse[]
   variantsGroup?: VariantsGroupRequest[]
 }
 
@@ -60,15 +54,10 @@ export interface VariantsGroupRequest {
   variants: VariantsRequest[]
 }
 
-export interface ProductImagesRequest {
-  id: string
-  imageUrl: string
-}
-
 export interface VariantsRequest {
   id: string
-  imageUrl?: string | null | undefined
   name: string
+  variantImage?: PreviewImagesResponse
 }
 
 export interface ProductVariantsRequest {
@@ -80,12 +69,37 @@ export interface ProductVariantsRequest {
   variantsGroup2Id?: string
   variant2Id?: string
 }
+
 export interface PreviewImagesResponse {
   id: string
-  preImageUrl: string
+  imageUrl: string
 }
+
 export interface ProductImagesResponse {
   id: string
   imageUrl: string
   isPrimary: boolean
+}
+
+export interface VariantsGroupResponse {
+  id: string
+  name: string
+  isPrimary: boolean
+  isActive: boolean
+  variants: VariantsResponse[]
+}
+
+export interface VariantsResponse {
+  id: string
+  name: string
+  imageUrl?: string | null | undefined
+  isActive: boolean
+}
+
+export interface ProductVariantsResponse {
+  id: string
+  price: number
+  stockQuantity: number
+  variant1: VariantsResponse
+  variant2: VariantsResponse
 }

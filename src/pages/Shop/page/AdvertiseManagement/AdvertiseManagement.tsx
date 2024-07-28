@@ -1,14 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import BoxData from 'src/pages/Shop/components/BoxData'
-import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-/* eslint-disable jsx-a11y/label-has-associated-control */
-import { useState } from 'react'
 
 export default function AdvertiseManagement() {
-  const [dateRange, setDateRange] = useState([null, null])
-  const [startDate, endDate] = dateRange
-
   return (
     <div>
       <div className='relative border border-blue isolate overflow-hidden bg-white rounded-lg py-4 '>
@@ -35,18 +29,7 @@ export default function AdvertiseManagement() {
       <div className='flex justify-between'>
         <h2 className='text-xl font-bold tracking-tight text-black p-2  '> All Ads Performance : </h2>
         <div className='flex p-2'>
-          <div>
-            <DatePicker
-              selectsRange={true}
-              // startDate={startDate}
-              // endDate={endDate}
-              // onChange={(update) => {
-              //   setDateRange(update)
-              // }}
-              withPortal
-              className='py-2.5 px-3 me-2 mb-2 text-gray-900 bg-inheritance rounded-lg border border-black bg-white '
-            />
-          </div>
+          <div></div>
           <button
             type='button'
             className='py-2.5 px-3 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-inheritance rounded-lg border border-black hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700'

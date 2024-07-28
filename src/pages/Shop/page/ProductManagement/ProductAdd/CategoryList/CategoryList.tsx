@@ -1,11 +1,139 @@
+import { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from 'src/components/Button'
+import NoData from 'src/components/NoData'
+import { AppContext } from 'src/contexts/app.context'
+import { CategoryResponse } from 'src/types/category.type'
+import { UseFormSetValue } from 'react-hook-form'
+import { FormDataProduct } from 'src/contexts/productAdd.context'
+import { formatText } from 'src/utils/utils'
+import CategoryItem from 'src/components/CategoryItem'
 
 interface Props {
   handlerShowCategoryList: () => void
+  setCategoryId: UseFormSetValue<FormDataProduct>
+  setCategoryValue: (value: string) => void
+  categoryValue: string
 }
 
-export default function CategoryList({ handlerShowCategoryList }: Props) {
+export default function CategoryList({
+  handlerShowCategoryList,
+  setCategoryId,
+  setCategoryValue,
+  categoryValue
+}: Props) {
+  const { categories } = useContext(AppContext)
+  const [categoriesData, setCategoriesData] = useState<CategoryResponse[]>(categories || [])
+  const [categoriesLevel1, setCategoriesLevel1] = useState<CategoryResponse[]>([])
+  const [categoriesLevel2, setCategoriesLevel2] = useState<CategoryResponse[]>([])
+  const [categoriesLevel3, setCategoriesLevel3] = useState<CategoryResponse[]>([])
+  const [categoriesLevel4, setCategoriesLevel4] = useState<CategoryResponse[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string[]>(['', '', '', '', ''])
+  const [selectedCategoryIdForSubmit, setSelectedCategoryIdForSubmit] = useState<string>('')
+  const [isSubmit, setIsSubmit] = useState<boolean>(false)
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>(categoryValue || '')
+  const [searchValue, setSearchValue] = useState<string>('')
+
+  useEffect(() => {
+    if (categoryValue && categories) {
+      const categoryParts = categoryValue.split(' > ')
+      const newSelectedCategory = ['', '', '', '', '']
+
+      let currentCategories = categories
+
+      categoryParts.forEach((part, index) => {
+        newSelectedCategory[index] = part
+
+        const category = currentCategories.find((category) => category.name === part)
+        if (category && category.categoriesChild) {
+          handlerUpdateCategoriesChild(category, index)
+          currentCategories = category.categoriesChild
+        }
+      })
+
+      setIsSubmit(true)
+      setSelectedCategory(newSelectedCategory)
+    }
+  }, [categoryValue, categories])
+
+  useEffect(() => {
+    if (searchValue && categories) {
+      const searchCategory = (category: CategoryResponse, searchValue: string): boolean => {
+        if (category.name.toUpperCase().includes(searchValue)) return true
+
+        if (category.categoriesChild) {
+          return category.categoriesChild.some((child) => searchCategory(child, searchValue))
+        }
+
+        return false
+      }
+
+      const results: CategoryResponse[] = categories?.filter((category) => {
+        return searchCategory(category, searchValue.toUpperCase())
+      })
+
+      setCategoriesLevel1([])
+      setCategoriesLevel2([])
+      setCategoriesLevel2([])
+      setCategoriesLevel4([])
+      setCategoriesData(results)
+    } else {
+      setCategoriesData(categories || [])
+    }
+  }, [searchValue, categories])
+
+  const handleCategoryClick = (category: CategoryResponse, level: number) => {
+    setIsSubmit(false)
+    const newSelectedCategory = [...selectedCategory]
+
+    newSelectedCategory[level] = category.name
+    for (let i = level + 1; i < newSelectedCategory.length; i++) {
+      newSelectedCategory[i] = ''
+    }
+    setSelectedCategory(newSelectedCategory)
+
+    if (!category.isChild) {
+      setIsSubmit(true)
+      setSelectedCategoryIdForSubmit(category.id)
+    }
+
+    setSelectedCategoryName(newSelectedCategory.filter((name) => name !== '').join(' > '))
+    handlerUpdateCategoriesChild(category, level)
+  }
+
+  const handlerUpdateCategoriesChild = (category: CategoryResponse, level: number) => {
+    switch (level) {
+      case 0:
+        setCategoriesLevel1(category.categoriesChild || [])
+        setCategoriesLevel2([])
+        setCategoriesLevel2([])
+        setCategoriesLevel4([])
+        break
+      case 1:
+        setCategoriesLevel2(category.categoriesChild || [])
+        setCategoriesLevel3([])
+        setCategoriesLevel4([])
+        break
+      case 2:
+        setCategoriesLevel3(category.categoriesChild || [])
+        setCategoriesLevel4([])
+        break
+      case 3:
+        setCategoriesLevel4(category.categoriesChild || [])
+        break
+      default:
+        break
+    }
+  }
+
+  const handlerSubmitCategory = () => {
+    if (isSubmit) {
+      setCategoryValue(selectedCategoryName)
+      setCategoryId('categoryId', selectedCategoryIdForSubmit)
+      handlerShowCategoryList()
+    }
+  }
+
   return (
     <div className='z-50 bottom-0 top-0 left-0 right-0 fixed overflow-hidden bg-[#00000066]'>
       <div className='absolute top-10 bottom-10 left-0 right-0 flex justify-center items-center'>
@@ -21,6 +149,7 @@ export default function CategoryList({ handlerShowCategoryList }: Props) {
                     <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between w-full cursor-pointer'>
                       <input
                         type='text'
+                        onChange={(e) => setSearchValue(formatText(e.target.value))}
                         className='text-sm text-[#333333] w-full border-none outline-none pr-3 placeholder:text-[#999999]'
                         placeholder='Please input least 1 character'
                       />
@@ -50,90 +179,90 @@ export default function CategoryList({ handlerShowCategoryList }: Props) {
                   </div>
                 </div>
                 <div className='relative overflow-x-auto mt-4 rounded-sm'>
-                  <div className='w-[1200px] py-3 relative flex flex-row bg-white'>
-                    <ul className='max-h-80 flex-1 overflow-y-auto scrollbar-webkit scrollbar-thin'>
-                      <li className='leading-8 px-4 flex flex-row justify-between items-center text-[#333333] cursor-pointer'>
-                        <p className='line-clamp-1 flex-1'>
-                          Tìm hiểu thêm về ngành hàng và thuộc tính ngành hàng của Shopee
-                        </p>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          strokeWidth={1.5}
-                          stroke='currentColor'
-                          className='size-4'
-                        >
-                          <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
-                        </svg>
-                      </li>
-                    </ul>
-                    <ul className='h-80 flex-1 overflow-y-auto border-l-2'>
-                      <li className='leading-8 px-4 flex flex-row justify-between items-center text-[#333333]'>
-                        <span>Men Shoes</span>{' '}
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          strokeWidth={1.5}
-                          stroke='currentColor'
-                          className='size-4'
-                        >
-                          <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
-                        </svg>
-                      </li>
-                    </ul>
-                    <ul className='h-80 flex-1 overflow-y-auto border-l-2'>
-                      <li className='leading-8 px-4 flex flex-row justify-between items-center text-[#333333]'>
-                        <span>Men Shoes</span>{' '}
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          strokeWidth={1.5}
-                          stroke='currentColor'
-                          className='size-4'
-                        >
-                          <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
-                        </svg>
-                      </li>
-                    </ul>
-                    <ul className='h-80 flex-1 overflow-y-auto border-l-2'>
-                      <li className='leading-8 px-4 flex flex-row justify-between items-center text-[#333333]'>
-                        <span>Men Shoes</span>{' '}
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          strokeWidth={1.5}
-                          stroke='currentColor'
-                          className='size-4'
-                        >
-                          <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
-                        </svg>
-                      </li>
-                    </ul>
-                    <ul className='h-80 flex-1 overflow-y-auto border-l-2'>
-                      <li className='leading-8 px-4 flex flex-row justify-between items-center text-[#333333]'>
-                        <span>Men Shoes</span>{' '}
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          strokeWidth={1.5}
-                          stroke='currentColor'
-                          className='size-4'
-                        >
-                          <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
-                        </svg>
-                      </li>
-                    </ul>
-                  </div>
+                  {categoriesData ? (
+                    <div className='w-[1200px] py-3 relative flex flex-row bg-white'>
+                      <ul className='h-80 flex-1 overflow-y-auto scrollbar-webkit scrollbar-thin'>
+                        {categoriesData.map((category, index) => (
+                          <li key={index}>
+                            <CategoryItem
+                              category={category}
+                              handleCategoryClick={handleCategoryClick}
+                              selectedCategory={selectedCategory}
+                              level={0}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                      <ul className='h-80 flex-1 overflow-y-auto scrollbar-webkit scrollbar-thin border-l-2'>
+                        {categoriesLevel1 &&
+                          categoriesLevel1.map((category, index) => (
+                            <li key={index}>
+                              <CategoryItem
+                                category={category}
+                                handleCategoryClick={handleCategoryClick}
+                                selectedCategory={selectedCategory}
+                                level={1}
+                              />
+                            </li>
+                          ))}
+                      </ul>
+                      <ul className='h-80 flex-1 overflow-y-auto scrollbar-webkit scrollbar-thin border-l-2'>
+                        {categoriesLevel2 &&
+                          categoriesLevel2.map((category, index) => (
+                            <li key={index}>
+                              <CategoryItem
+                                category={category}
+                                handleCategoryClick={handleCategoryClick}
+                                selectedCategory={selectedCategory}
+                                level={2}
+                              />
+                            </li>
+                          ))}
+                      </ul>
+                      <ul className='h-80 flex-1 overflow-y-auto scrollbar-webkit scrollbar-thin border-l-2'>
+                        {categoriesLevel3 &&
+                          categoriesLevel3.map((category, index) => (
+                            <li key={index}>
+                              <CategoryItem
+                                category={category}
+                                handleCategoryClick={handleCategoryClick}
+                                selectedCategory={selectedCategory}
+                                level={3}
+                              />
+                            </li>
+                          ))}
+                      </ul>
+                      <ul className='h-80 flex-1 overflow-y-auto scrollbar-webkit scrollbar-thin border-l-2'>
+                        {categoriesLevel4 &&
+                          categoriesLevel4.map((category, index) => (
+                            <li key={index}>
+                              <CategoryItem
+                                category={category}
+                                handleCategoryClick={handleCategoryClick}
+                                selectedCategory={selectedCategory}
+                                level={4}
+                              />
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className='h-96'>
+                      <NoData />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             <div className='flex flex-row  justify-between items-center p-6 '>
-              <div className='text-sm text-[#999999]'>The currently selected :No category has been chosen</div>
+              <div className='text-sm text-[#666666]'>
+                <span>The currently selected: </span>
+                {selectedCategoryName ? (
+                  <span className='text-[#333333] font-bold'>{selectedCategoryName}</span>
+                ) : (
+                  'No category has been chosen'
+                )}
+              </div>
               <div className='flex flex-row gap-5'>
                 <Button
                   onClick={handlerShowCategoryList}
@@ -141,7 +270,11 @@ export default function CategoryList({ handlerShowCategoryList }: Props) {
                 >
                   Cancel
                 </Button>
-                <button className='text-sm border border-solid border-gray-300 rounded-md px-4 py-2 bg-blue text-white'>
+                <button
+                  type='button'
+                  onClick={handlerSubmitCategory}
+                  className={`text-sm border border-solid border-gray-300 rounded-md px-4 py-2 bg-blue text-white ${!isSubmit && 'cursor-not-allowed'}`}
+                >
                   Confirm
                 </button>
               </div>

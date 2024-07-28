@@ -34,7 +34,7 @@ const authApi = {
   verifyEmail(body: { email: string }) {
     return http.post<TypingEmailResponse>(`${URL_EMAIL_VERIFICATION}`, body)
   },
-  registerAccount(body : FinalRegisterForm) {
+  registerAccount(body: FinalRegisterForm) {
     return http.post<AuthResponse>(`${URl_REGISTER}`, body)
   },
   login(body: { email: string; password: string }) {

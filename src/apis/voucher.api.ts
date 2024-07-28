@@ -8,6 +8,15 @@ const voucherApi = {
   },
   getVouchers() {
     return http.get<SuccessResponse<PaginationVoucherResponse>>('vouchers')
+  },
+  async getVoucher(id: string) {
+    return http.get<SuccessResponse<VoucherResponse>>(`vouchers/${id}`)
+  },
+  updateVoucher(formData: { id: string; body: VoucherRequest }) {
+    return http.patch<SuccessResponse<VoucherResponse>>(`vouchers/${formData.id}`, formData.body)
+  },
+  deleteVoucher(id: string) {
+    return http.delete<SuccessResponse<null>>(`vouchers/${id}`)
   }
 }
 

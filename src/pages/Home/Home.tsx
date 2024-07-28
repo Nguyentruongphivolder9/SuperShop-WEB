@@ -1,12 +1,22 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import productApi from 'src/apis/product.api'
 import BannerSlider from 'src/components/BannerBigSlider'
 import BannerSmallSlider from 'src/components/BannerSmallSlider'
 import CategoriesSlider from 'src/components/CategoriesSlider'
 import ChipTabs from 'src/components/ChipTabs/ChipTabs'
 import Product from 'src/components/Product'
 import ProductsSlider from 'src/components/ProductsSlider'
+import path from 'src/constants/path'
+import useQueryConfig from 'src/hooks/useQueryConfig'
+import { ProductListConfig } from 'src/types/product.type'
 
 export default function Home() {
+  const { data: productsData } = useQuery({
+    queryKey: ['dailyDiscoverProduct'],
+    queryFn: () => productApi.getProducts()
+  })
+
   return (
     <div className='bg-[#efefef]'>
       <div className='w-full pt-6'>
@@ -46,145 +56,23 @@ export default function Home() {
           <div className='h-1 w-full bg-blue'></div>
           <div className='w-full bg-transparent mt-2'>
             <div className='grid grid-cols-12 gap-2'>
-              <div className='col-span-4 h-96 rounded-md overflow-hidden bg-slate-400'>
+              <div className='col-span-4 h-[360px] rounded-md overflow-hidden bg-slate-400'>
                 <BannerSmallSlider />
               </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
-              <div className='relative group h-96 col-span-2 rounded-sm overflow-hidden'>
-                <Product />
-                <div className='absolute group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
-                  <Link className='h-full w-full flex justify-center items-center text-white' to={'#'}>
-                    Find Similar
-                  </Link>
-                </div>
-              </div>
+              {productsData?.data.body?.content &&
+                productsData?.data.body?.content.map((product, index) => (
+                  <div key={index} className='relative group h-[360px] col-span-2 rounded-sm overflow-hidden'>
+                    <Product product={product} />
+                    <div className='absolute z-10 group-hover:flex h-7 w-full bottom-0 left-0 bg-blue hidden'>
+                      <Link
+                        className='h-full w-full flex justify-center items-center text-white'
+                        to={path.recommendationDaily}
+                      >
+                        Find Similar
+                      </Link>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
           <div className='w-full h-10 flex items-center justify-center mt-4'>

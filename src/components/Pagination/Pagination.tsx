@@ -1,11 +1,11 @@
 import classNames from 'classnames'
 import { Link, createSearchParams } from 'react-router-dom'
-import path from 'src/constants/path'
 import { QueryConfig } from 'src/hooks/useQueryConfig'
 
 interface Props {
   queryConfig: QueryConfig
   pageSize: number
+  path: string
 }
 /**
 Với range = 2 áp dụng cho khoảng cách đầu, cuối và xung quanh current_page
@@ -28,7 +28,7 @@ Với range = 2 áp dụng cho khoảng cách đầu, cuối và xung quanh curr
  */
 
 const RANGE = 2
-export default function Pagination({ queryConfig, pageSize }: Props) {
+export default function Pagination({ queryConfig, pageSize, path }: Props) {
   const page = Number(queryConfig.page)
   const renderPagnation = () => {
     let dotAfter = false
@@ -73,7 +73,7 @@ export default function Pagination({ queryConfig, pageSize }: Props) {
         return (
           <Link
             to={{
-              pathname: path.home,
+              pathname: path,
               search: createSearchParams({
                 ...queryConfig,
                 page: pageNumber.toString()
@@ -97,7 +97,7 @@ export default function Pagination({ queryConfig, pageSize }: Props) {
       ) : (
         <Link
           to={{
-            pathname: path.home,
+            pathname: path,
             search: createSearchParams({
               ...queryConfig,
               page: (page - 1).toString()
@@ -114,7 +114,7 @@ export default function Pagination({ queryConfig, pageSize }: Props) {
       ) : (
         <Link
           to={{
-            pathname: path.home,
+            pathname: path,
             search: createSearchParams({
               ...queryConfig,
               page: (page + 1).toString()

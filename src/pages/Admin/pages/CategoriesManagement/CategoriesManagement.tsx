@@ -1,12 +1,108 @@
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Pagination from 'src/components/Pagination'
-import useQueryConfig from 'src/hooks/useQueryConfig'
+import useQueryConfig, { QueryConfig } from 'src/hooks/useQueryConfig'
 import CreateCategory from './CreateCategory'
+import { AppContext } from 'src/contexts/app.context'
+import { CategoryResponse } from 'src/types/category.type'
+import path from 'src/constants/path'
+
+interface CategoryModelTable {
+  id: string
+  categoryNameLevel1: string
+  categoryNameLevel2?: string
+  categoryNameLevel3?: string
+  categoryNameLevel4?: string
+  categoryNameLevel5?: string
+}
 
 export default function CategoriesManagement() {
+  const { categories } = useContext(AppContext)
   const queryConfig = useQueryConfig()
   const [isDisplayCateList, setIsDisplayCateList] = useState(false)
+  const [categoryData, setCategoryData] = useState<CategoryModelTable[]>([])
+
+  useEffect(() => {
+    setCategoryData([])
+    let categoryNameLevel1: string
+    let categoryNameLevel2: string
+    let categoryNameLevel3: string
+    let categoryNameLevel4: string
+    let categoryNameLevel5: string
+    const categoryList: CategoryModelTable[] = []
+    const managerCategory = (categoriesChild: CategoryResponse[], level: number) => {
+      if (categoriesChild) {
+        categoriesChild.forEach((category) => {
+          switch (level) {
+            case 2:
+              categoryNameLevel2 = category.name
+              categoryNameLevel3 = ''
+              categoryNameLevel4 = ''
+              categoryNameLevel5 = ''
+              break
+            case 3:
+              categoryNameLevel3 = category.name
+              categoryNameLevel4 = ''
+              categoryNameLevel5 = ''
+              break
+            case 4:
+              categoryNameLevel4 = category.name
+              categoryNameLevel5 = ''
+              break
+            case 5:
+              categoryNameLevel5 = category.name
+              break
+
+            default:
+              break
+          }
+
+          if (category.isChild) {
+            if (category.categoriesChild) {
+              managerCategory(category.categoriesChild, ++level)
+            }
+          } else {
+            const newCategoryModelTable: CategoryModelTable = {
+              id: category.id,
+              categoryNameLevel1: categoryNameLevel1,
+              categoryNameLevel2: categoryNameLevel2,
+              categoryNameLevel3: categoryNameLevel3,
+              categoryNameLevel4: categoryNameLevel4,
+              categoryNameLevel5: categoryNameLevel5
+            }
+
+            categoryList.push(newCategoryModelTable)
+            // setCategoryData((prev) => [...prev, newCategoryModelTable])
+          }
+        })
+      }
+    }
+
+    if (categories) {
+      categories.forEach((category) => {
+        if (category.isChild) {
+          categoryNameLevel1 = category.name
+          if (category.categoriesChild) {
+            managerCategory(category.categoriesChild, 2)
+          }
+        } else {
+          const newCategoryModelTable: CategoryModelTable = {
+            id: category.id,
+            categoryNameLevel1: category.name,
+            categoryNameLevel2: '',
+            categoryNameLevel3: '',
+            categoryNameLevel4: '',
+            categoryNameLevel5: ''
+          }
+
+          categoryList.push(newCategoryModelTable)
+          // setCategoryData((prev) => [...prev, newCategoryModelTable])
+        }
+      })
+
+      setCategoryData(categoryList)
+    }
+  }, [categories])
 
   const handlerShowCategoryList = () => {
     if (isDisplayCateList) {
@@ -23,8 +119,8 @@ export default function CategoriesManagement() {
       {isDisplayCateList && <CreateCategory handlerShowCategoryList={handlerShowCategoryList} />}
       <div className='flex flex-col'>
         <form action='' method='get'>
-          <div className='flex items-center gap-2 h-7'>
-            <div className='bg-white rounded-sm p-1 flex items-center flex-row justify-between flex-1 shadow'>
+          <div className='flex items-center gap-2 h-8'>
+            <div className='bg-white h-full rounded-sm p-1 flex items-center flex-row justify-between flex-1 shadow'>
               <div className='text-sm text-[#999999]'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
@@ -84,7 +180,7 @@ export default function CategoriesManagement() {
                     Categories 5
                   </th>
                   <th scope='col' className='flex-1 px-6 py-3'>
-                    Create Date
+                    Category Code
                   </th>
                   <th scope='col' className='flex-1 px-6 py-3'>
                     Action
@@ -92,50 +188,46 @@ export default function CategoriesManagement() {
                 </tr>
               </thead>
               <tbody>
-                <tr className='flex odd:bg-white even:bg-gray-50 border-b'>
-                  <td className='flex-1 px-6 py-4 items-center flex'>Silver Categories 3 Categories 3 Cate</td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>Silver</td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>Laptop</td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>Laptop</td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>$2999</td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>$2999</td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <Link to='#' className='font-medium text-blue-600 hover:underline'>
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
-                <tr className='flex odd:bg-white even:bg-gray-50 border-b'>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <p className='line-clamp-2'>Silver Categories 3rrfsf Categoffries 3 Cate</p>
-                  </td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <p className='line-clamp-2'>jhkjdhfs</p>
-                  </td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <p className='line-clamp-2'>jhkjdhfs</p>
-                  </td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <p className='line-clamp-2'>jhkjdhfs</p>
-                  </td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <p className='line-clamp-2'>jhkjdhfs</p>
-                  </td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <p className='line-clamp-2'>jhkjdhfs</p>
-                  </td>
-                  <td className='flex-1 px-6 py-4 items-center flex'>
-                    <Link to='#' className='font-medium text-blue-600 hover:underline'>
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
+                {categoryData &&
+                  categoryData
+                    .slice(
+                      Number.parseInt(queryConfig.page!) * Number.parseInt(queryConfig.limit!) -
+                        Number.parseInt(queryConfig.limit!),
+                      Number.parseInt(queryConfig.page!) * Number.parseInt(queryConfig.limit!)
+                    )
+                    .map((item, index) => (
+                      <tr key={index} className='flex odd:bg-white even:bg-gray-50 border-b'>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <p className={'line-clamp-2'}>{item.categoryNameLevel1 || '--'}</p>
+                        </td>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <p className={'line-clamp-2'}>{item.categoryNameLevel2 || '--'}</p>
+                        </td>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <p className={'line-clamp-2'}>{item.categoryNameLevel3 || '--'}</p>
+                        </td>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <p className={'line-clamp-2'}>{item.categoryNameLevel4 || '--'}</p>
+                        </td>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <p className={'line-clamp-2'}>{item.categoryNameLevel5 || '--'}</p>
+                        </td>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <p className='line-clamp-2'>{item.id}</p>
+                        </td>
+                        <td className='flex-1 px-6 py-4 items-center flex'>
+                          <Link to='#' className='font-medium text-blue-600 hover:underline'>
+                            Edit
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
             <Pagination
               queryConfig={queryConfig}
-              // pageSize={productsData.data.data.pagination.page_size}
-              pageSize={20}
+              pageSize={Math.ceil(categoryData.length / Number.parseInt(queryConfig.limit!))}
+              path={path.adminCategories}
             />
           </div>
         </div>
