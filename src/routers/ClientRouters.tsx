@@ -34,7 +34,8 @@ import RecommendationDaily from 'src/pages/RecommendationDaily'
 
 import VoucherEdit from 'src/pages/Shop/page/VoucherShop/pages/VoucherEdit'
 import { VoucherProvider } from 'src/contexts/voucher.context'
-
+import ProductEdit from 'src/pages/Shop/page/ProductManagement/ProductEdit'
+import { ProductEditProvider } from 'src/contexts/productEdit.context'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext) //
@@ -172,6 +173,14 @@ const ClientRoutes = [
           {
             path: path.voucherShopEdit,
             element: <VoucherEdit></VoucherEdit>
+          },
+          {
+            path: path.productEdit,
+            element: (
+              <ProductEditProvider>
+                <ProductEdit></ProductEdit>
+              </ProductEditProvider>
+            )
           }
         ]
       },

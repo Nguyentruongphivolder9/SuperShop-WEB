@@ -65,49 +65,6 @@ export default function TipTapMenuBar({ editor }: Props) {
               </g>
             </svg>
           </button>
-          {/* <button
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={`${
-              editor.isActive('bulletList') ? 'is-active bg-gray-300' : ''
-            } border text-md text-[#333333] h-8 w-8 flex items-center justify-center border-gray-300 rounded-md shadow`}
-            type='button'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth={1.5}
-              stroke='currentColor'
-              className='size-5'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z'
-              />
-            </svg>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={`${
-              editor.isActive('orderedList') ? 'is-active bg-gray-300' : ''
-            } border text-md text-[#333333] h-8 w-8 flex items-center justify-center border-gray-300 rounded-md shadow`}
-            type='button'
-          >
-            <svg
-              className='icon w-5 h-5'
-              width='24'
-              height='24'
-              xmlns='http://www.w3.org/2000/svg'
-              fill='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <g>
-                <path fill='none' d='M0 0h24v24H0z'></path>
-                <path d='M8 4h13v2H8V4zM5 3v3h1v1H3V6h1V4H3V3h2zM3 14v-2.5h2V11H3v-1h3v2.5H4v.5h2v1H3zm2 5.5H3v-1h2V18H3v-1h3v4H3v-1h2v-.5zM8 11h13v2H8v-2zm0 7h13v2H8v-2z'></path>
-              </g>
-            </svg>
-          </button> */}
         </div>
         <div className='flex items-center gap-2'>
           <button

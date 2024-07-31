@@ -13,7 +13,7 @@ export default function Product({ product }: Props) {
   return (
     <Link
       className='h-full w-full relative'
-      to={`${path.home + 'products/'}${generateNameId({ name: `${product.name}`, id: `${product.id}` })}`}
+      to={`${path.home + 'products/'}${generateNameId({ name: product.name, id: product.id, shopId: product.shopId })}`}
     >
       <div className='absolute w-full h-full top-0 left-0 hover:border hover:border-blue z-10'></div>
       <div className='overflow-hidden w-full h-full border rounded-sm bg-white'>

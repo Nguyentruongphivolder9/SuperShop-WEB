@@ -1,9 +1,9 @@
 import { ProductVariantsRequest, VariantsGroupRequest } from 'src/types/product.type'
-import InputValueOfVariation from '../InputValueOfVariation'
 import { useContext } from 'react'
 import { generateUniqueId } from 'src/utils/utils'
 import { useFieldArray, useWatch } from 'react-hook-form'
-import { ProductAddContext } from 'src/contexts/productAdd.context'
+import InputUpdateVariation from '../InputUpdateVariation'
+import { ProductEditContext } from 'src/contexts/productEdit.context'
 
 interface Props {
   indexVariantsGroup: number
@@ -12,8 +12,8 @@ interface Props {
   isPrimary: boolean
 }
 
-export default function VariantGroup({ handlerRemoveVariations, isPrimary, data, indexVariantsGroup }: Props) {
-  const { productMethods } = useContext(ProductAddContext)
+export default function UpdateVariantGroup({ handlerRemoveVariations, isPrimary, data, indexVariantsGroup }: Props) {
+  const { productEditMethods } = useContext(ProductEditContext)
 
   const {
     register,
@@ -21,7 +21,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
     getValues,
     watch,
     formState: { errors }
-  } = productMethods
+  } = productEditMethods
 
   const {
     fields: arraysVariants,
@@ -31,11 +31,6 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
     control,
     name: `variantsGroup.${indexVariantsGroup}.variants`
   })
-
-  // const arraysVariantsGroupTest = useWatch({
-  //   control,
-  //   name: `variantsGroup.${indexVariantsGroup}.variants`
-  // })
 
   const { append: appendProductVariants, replace: replaceProductVariants } = useFieldArray({
     control,
@@ -117,6 +112,7 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
     } else {
       if (arraysVariants.length > 1) {
         removeVariants(index)
+
         if (data.isPrimary) {
           replaceProductVariants(
             productVariants?.filter((pv) => pv.variant1Id != variantId) as ProductVariantsRequest[]
@@ -175,10 +171,10 @@ export default function VariantGroup({ handlerRemoveVariations, isPrimary, data,
       </div>
       <div className='mt-4 grid grid-cols-2 gap-3'>
         {arraysVariants.map((variant, index) => (
-          <InputValueOfVariation
+          <InputUpdateVariation
+            key={index}
             indexVariantsGroup={indexVariantsGroup}
             indexVariants={index}
-            key={variant.id}
             isPrimary={isPrimary}
             sizeVariants={arraysVariants.length}
             handlerRemoveVariant={handlerRemoveVariant}
