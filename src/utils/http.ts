@@ -108,7 +108,7 @@ export class Http {
     )
   }
 
-  private handleRefreshToken() {
+  private handleRefreshToken(): Promise<string> {
     return this.instance
       .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, {
         refresh_token: this.refreshToken

@@ -48,6 +48,26 @@ type SubRegisterProps = {
 
 
 function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevStep }: SubRegisterProps) {
+    //Register với Google 
+
+    const googleRequestAuthorizationUrlMutation = useMutation({
+        mutationFn: () => authApi.requestGoogleAuthorizationUrl(),
+        onSuccess: (data) => {
+            const authorizationUrl = data.data.body.Url;
+            window.location.href = authorizationUrl;
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    });
+
+    const handleGoogleRequestAuthorization = async () => {
+        try {
+            await googleRequestAuthorizationUrlMutation.mutateAsync();
+        } catch (error) {
+            console.error('Error requesting Google authorization URL:', error);
+        }
+    };
     const { setIsAuthenticated, setProfile, profile } = useContext(AppContext);
     const [email, setEmail] = useState<FormDataEmail>({
         email: ''
@@ -145,10 +165,13 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     <img src={facebook} alt="Facebook" className="w-7 h-7" />
                     <span className="ml-1 text-gray-700 text-md">Facebook</span>
                 </button>
-                <button className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100">
-                    <img src={google} alt="Google" className="w-7 h-7" />
-                    <span className="ml-1 text-gray-700 text-md">Google</span>
-                </button>
+                <a
+                    className='flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer'
+                    onClick={handleGoogleRequestAuthorization}
+                >
+                    <img src={google} alt='Google' className='w-7 h-7' />
+                    <span className='ml-1 text-gray-700 text-md'>Google</span>
+                </a>
             </div>
 
             <div className='mt-8 text-center'>
@@ -183,9 +206,10 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
     };
     const userInforMutation = useMutation({
         mutationFn: async (body: FormDataRegister) => {
-            const { birth_day, confirm_password, ...rest } = body;
+            const { birth_day, confirm_password, phone, ...rest } = body;
             const dataToSend: FinalRegisterForm = {
                 ...rest,
+                phone_number: phone.toString(),
                 birth_day: birth_day.toISOString()
             };
             return await authApi.registerAccount(dataToSend);
@@ -373,12 +397,12 @@ const WatingForVerifyCation = ({ handleSetIsAuthenticated, handleSetProfile, use
     const loginMutation = useMutation({
         mutationFn: ({ email, password }: { email: string, password: string }) => authApi.login({ email, password }),
         onSuccess: (data) => {
-            handleSetIsAuthenticated?.(true);
-            const userProfile = parseJwt(data.data.body.accessToken);
-            handleSetProfile?.(userProfile);
-            handleSetIsWaitingForRegistration?.(true);
-            toast.success("Đăng kí tài khoản thành công. Chuyển hướng sau 3 giây...");
             setTimeout(() => {
+                handleSetIsAuthenticated?.(true);
+                const userProfile = parseJwt(data.data.body.accessToken);
+                handleSetProfile?.(userProfile);
+                handleSetIsWaitingForRegistration?.(true);
+                toast.success("Đăng kí tài khoản thành công.");
                 navigate('/');
             }, 3000);
         },
@@ -391,34 +415,34 @@ const WatingForVerifyCation = ({ handleSetIsAuthenticated, handleSetProfile, use
         if (userInfor?.password && userInfor?.email) {
             loginMutation.mutate({ email: userInfor.email, password: userInfor.password });
         }
-    }, [userInfor, loginMutation]);
+    }, [userInfor]);
     return (
         <>
-        {!is_form_completed ? (
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-100 rounded-lg shadow-md">
-                <img src={planeGif} alt="Loading" className="w-60 h-40 mb-4 rounded-lg" />
-                <p className="text-lg font-semibold mb-4 text-center">Tài khoản đang được xác thực...</p>
-                <p className="text-sm text-center">Vui lòng đợi trong giây lát</p>
-            </div>
-        ) : (
-            <div className="bg-green-500 p-6 rounded-lg shadow-lg text-center">
-                <svg className="animate-bounce mx-auto w-20 h-20 bg-white rounded-full text-green-500 p-3 shadow-md" fill="none" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="16" stroke="currentColor" strokeWidth="12" fill="none" />
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="3"
-                        stroke="currentColor"
-                        d="M8 12l4 3 5-8"
-                    />
-                </svg>
-                <div className="bg-white w-full rounded-lg p-4 mt-4">
-                    <p className="text-lg text-green-500 font-semibold">Tài khoản đăng kí thành công</p>
-                    <p className="text-sm text-green-500">Chuyển hướng về trang trước đó...</p>
+            {!is_form_completed ? (
+                <div className="flex flex-col items-center justify-center p-4 bg-gray-100 rounded-lg shadow-md">
+                    <img src={planeGif} alt="Loading" className="w-60 h-40 mb-4 rounded-lg" />
+                    <p className="text-lg font-semibold mb-4 text-center">Tài khoản đang được xác thực...</p>
+                    <p className="text-sm text-center">Vui lòng đợi trong giây lát</p>
                 </div>
-            </div>
-        )}
-    </>
+            ) : (
+                <div className="bg-green-500 p-6 rounded-lg shadow-lg text-center">
+                    <svg className="animate-bounce mx-auto w-20 h-20 bg-white rounded-full text-green-500 p-3 shadow-md" fill="none" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="16" stroke="currentColor" strokeWidth="12" fill="none" />
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="3"
+                            stroke="currentColor"
+                            d="M8 12l4 3 5-8"
+                        />
+                    </svg>
+                    <div className="bg-white w-full rounded-lg p-4 mt-4">
+                        <p className="text-lg text-green-500 font-semibold">Tài khoản đăng kí thành công</p>
+                        <p className="text-sm text-green-500">Chuyển hướng về trang trước đó...</p>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

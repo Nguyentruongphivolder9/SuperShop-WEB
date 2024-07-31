@@ -128,10 +128,10 @@ export default function NavHeader() {
               <img
                 src={profile?.avatarUrl || getAvatarUrl(profile?.email)}
                 alt='avatar'
-                className='w-6 h-6 rounded-full object-cover'
+                className='w-7 h-7 rounded-full object-cover'
               />
               <div className='flex flex-col'>
-                <span className='text-sm font-semibold'>{profile?.fullName}</span>
+                <span className=''>{profile?.userName}</span>
               </div>
             </div>
           </Popover>

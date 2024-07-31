@@ -3,36 +3,38 @@ import ImageCropper from "./ImageCropper";
 import { useState } from "react";
 
 export type ModalChangerProps = {
-
     updateAvatar: any,
     closeModal: boolean,
     handleCloseModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function ModalChanger({ updateAvatar, closeModal, handleCloseModal }: ModalChangerProps) {
-    if(closeModal === true) return;
+    if (closeModal === true) return;
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            aria-labelledby="crop-image-dialog"
-            role="dialog"
-            aria-modal="true"
-        >
-            <div className="fixed inset-0 bg-cyan-100 bg-opacity-70 backdrop-blur-sm transition-opacity"></div>
-            <div className="relative z-10 w-full max-w-lg p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-xl">
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        aria-labelledby="crop-image-dialog"
+        role="dialog"
+        aria-modal="true"
+    >
+        <div className="fixed inset-0 bg-cyan-100 bg-opacity-70 backdrop-blur-sm transition-opacity" onClick={() => {handleCloseModal(true)}}></div>
+        <div className="relative z-10 w-full max-w-4xl p-6 sm:p-8 lg:p-10 bg-white rounded-2xl shadow-xl flex flex-col">
+            <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
+                <h2 className="text-2xl font-semibold text-gray-700">Thay đổi ảnh đại diện</h2>
                 <button
                     type="button"
-                    className="absolute top-4 right-4 rounded-full p-2 text-gray-400 hover:bg-gray-200 focus:outline-none"
+                    className="rounded-full p-2 text-gray-500 hover:bg-gray-200 focus:outline-none transition"
                     onClick={() => handleCloseModal(true)}
                 >
-                    <span className="sr-only">Close menu</span>
                     <CloseIcon />
                 </button>
-                <div className="mt-4 sm:mt-6 lg:mt-8">
-                    <ImageCropper />
-                </div>
+            </div>
+            <div className="flex-grow mt-4 sm:mt-6 lg:mt-8">
+                <ImageCropper />
             </div>
         </div>
+    </div>
+    
     );
 }
 

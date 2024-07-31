@@ -1,8 +1,8 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation } from '@tanstack/react-query';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import authApi from 'src/apis/auth.api';
 import Button from 'src/components/Button';
 import Input from 'src/components/Input';
@@ -10,7 +10,7 @@ import { AppContext } from 'src/contexts/app.context';
 import { ErrorResponse } from 'src/types/utils.type';
 import { schema, Schema } from 'src/utils/rules';
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils';
-import { parseJwt, setProfileToLS } from 'src/utils/auth';
+import { parseJwt, setAccessTokenToLS, setProfileToLS } from 'src/utils/auth';
 import facebookSvg from '../../assets/logoSvg/faceBookSvg.svg';
 import googleSvg from '../../assets/logoSvg/googleSvg.svg';
 import { toast } from 'react-toastify';
@@ -22,7 +22,7 @@ const loginSchema = schema.pick(['email', 'password']);
 export default function Login() {
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
   const navigate = useNavigate();
-  const [googleAuthorizationUrl, setGoogleAuthorizationUrl] = useState<string | null>(null);
+  const location = useLocation();
 
   const {
     register,
@@ -37,7 +37,7 @@ export default function Login() {
     mutationFn: (body: FormData) => authApi.login(body),
     onSuccess: (data) => {
       setIsAuthenticated(true);
-      setProfile(parseJwt(data.data.body.accessToken))
+      setProfile(parseJwt(data.data.body.accessToken));
       setProfileToLS(parseJwt(data.data.body.accessToken));
       const userLogin: User = parseJwt(data.data.body.accessToken);
       toast.success(`Logged in successfully. Welcome ${userLogin.userName}`);
@@ -63,25 +63,44 @@ export default function Login() {
     mutationFn: () => authApi.requestGoogleAuthorizationUrl(),
     onSuccess: (data) => {
       const authorizationUrl = data.data.body.Url;
-      setGoogleAuthorizationUrl(authorizationUrl);
+      window.location.href = authorizationUrl;
     },
     onError: (error) => {
-      console.log(error)
+      console.log(error);
     }
   });
 
   const handleGoogleRequestAuthorization = async () => {
     try {
       await googleRequestAuthorizationUrlMutation.mutateAsync();
-      if (googleAuthorizationUrl) {
-        window.location.href = googleAuthorizationUrl;
-      } else {
-        console.error('No Google authorization URL received');
-      }
     } catch (error) {
       console.error('Error requesting Google authorization URL:', error);
     }
   };
+
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const token = urlParams.get('token');
+    const refreshToken = urlParams.get('refreshToken');
+    if (token && refreshToken) {
+      const userProfile = parseJwt(token);
+
+      if (userProfile) {
+        setIsAuthenticated(true);
+        localStorage.setItem('accessToken', token);
+        localStorage.setItem('refreshToken', refreshToken);
+        setProfile(userProfile);
+        setProfileToLS(userProfile);
+        setAccessTokenToLS(token);
+
+        toast.success(`Logged in successfully. Welcome ${userProfile.userName}`);
+        navigate(location.state?.from || "/")
+      } else {
+        toast.error('Failed to parse JWT token.');
+      }
+    }
+  }, []);
 
   const onSubmit = handleSubmit((data) => {
     loginMutation.mutate(data);
@@ -111,20 +130,22 @@ export default function Login() {
                 placeholder='Nhập mật khẩu của bạn'
                 autoComplete='on'
               />
-              <div className="flex items-center justify-between mt-6 mb-6">
-                <hr className="w-4/12 border-gray-300" />
-                <span className="text-gray-500 text-md">Hoặc</span>
-                <hr className="w-4/12 border-gray-300" />
+              <div className='flex items-center justify-between mt-6 mb-6'>
+                <hr className='w-4/12 border-gray-300' />
+                <span className='text-gray-500 text-md'>Hoặc</span>
+                <hr className='w-4/12 border-gray-300' />
               </div>
-              <div className="flex space-x-2 mt-2">
-                <a className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100 ">
-                  <img src={facebookSvg} alt="Facebook" className="w-7 h-7" />
-                  <span className="ml-1 text-gray-700 text-md">Facebook</span>
+              <div className='flex space-x-2 mt-2'>
+                <a className='flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100 '>
+                  <img src={facebookSvg} alt='Facebook' className='w-7 h-7' />
+                  <span className='ml-1 text-gray-700 text-md'>Facebook</span>
                 </a>
-                <a className="flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
-                  onClick={handleGoogleRequestAuthorization}>
-                  <img src={googleSvg} alt="Google" className="w-7 h-7" />
-                  <span className="ml-1 text-gray-700 text-md">Google</span>
+                <a
+                  className='flex items-center justify-center w-full py-2 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer'
+                  onClick={handleGoogleRequestAuthorization}
+                >
+                  <img src={googleSvg} alt='Google' className='w-7 h-7' />
+                  <span className='ml-1 text-gray-700 text-md'>Google</span>
                 </a>
               </div>
               <div className='mt-3'>

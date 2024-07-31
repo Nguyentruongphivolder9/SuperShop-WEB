@@ -1,6 +1,10 @@
+import { useContext } from 'react';
 import { Link } from 'react-router-dom'
+import { AppContext } from 'src/contexts/app.context';
+import { getAvatarUrl } from 'src/utils/utils';
 
 export default function HeaderShop() {
+  const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext);
   return (
     <div className='h-14 fixed w-full bg-white z-20'>
       <div className='h-full flex flex-row justify-between items-center shadow-[0_1px_4px_0_rgba(74,74,78,.12)]'>
@@ -63,14 +67,16 @@ export default function HeaderShop() {
           <div className='flex flex-row gap-1 items-center px-4 py-1 h-full'>
             <div className='w-8 h-8 mr-2 flex-shrink-0'>
               <img
-                src='https://cf.shopee.vn/file/5e43c09b3e295847ff5d41456d032beb'
+                src={profile?.avatarUrl || getAvatarUrl(profile?.email)}
                 alt='avatar'
-                className='w-full h-full object-cover rounded-full'
+                className='w-8 h-8 rounded-full object-cover'
               />
             </div>
             <div className='flex flex-row gap-1 items-center'>
-              <span className='text-sm'>ngocnhi25</span>
-              <svg
+              <div className='flex flex-col'>
+                <span className='text-sm'>{profile?.userName}</span>
+              </div>             
+               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 fill='none'
                 viewBox='0 0 24 24'

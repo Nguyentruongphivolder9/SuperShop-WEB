@@ -15,9 +15,9 @@ export type FinalRegisterForm = {
   password: string
   user_name: string
   full_name: string
-  phone: string
   gender: string
   address?: string | undefined
+  phone_number:string
   birth_day: string
 }
 type LogoutRequest = {
