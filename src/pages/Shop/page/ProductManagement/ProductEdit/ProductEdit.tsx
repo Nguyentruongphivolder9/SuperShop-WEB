@@ -11,11 +11,9 @@ import {
 import { sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import ImageItem from '../../../components/ImageItem'
 import CategoryList from '../../../components/CategoryList'
-import { Link, Navigate } from 'react-router-dom'
-import VariationsForm from './VariationsForm'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { generateUniqueId } from 'src/utils/utils'
 import { Controller, FormProvider, useFieldArray, useWatch } from 'react-hook-form'
-import Button from 'src/components/Button'
 import {
   PreviewImagesResponse,
   ProductVariantsRequest,
@@ -23,17 +21,22 @@ import {
   VariantsRequest
 } from 'src/types/product.type'
 import productApi from 'src/apis/product.api'
-import { useMutation } from '@tanstack/react-query'
-import { FormDataProduct, ProductAddContext } from 'src/contexts/productAdd.context'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import config from 'src/constants/config'
 import { useDisclosure } from '@mantine/hooks'
-import { Popover, Select } from '@mantine/core'
+import { Button, Modal, Popover, Select } from '@mantine/core'
 import ContainerModal from 'src/components/ContainerModal'
 import TipTapEditor from 'src/pages/Shop/components/TipTapEditor'
+import { AppContext } from 'src/contexts/app.context'
+import { CategoryResponse } from 'src/types/category.type'
+import { FormDataEditProduct, ProductEditContext } from 'src/contexts/productEdit.context'
+import UpdateVariationsForm from './UpdateVariationsForm'
 import path from 'src/constants/path'
-import ButtonCancel from 'src/pages/Shop/components/ButtonCancel'
-export default function ProductAdd() {
+import ButtonDelete from './ButtonDelete'
+import ButtonCancel from '../../../components/ButtonCancel'
+
+export default function ProductEdit() {
   const fileInputImagesRef = useRef<HTMLInputElement>(null)
   const [images, setImages] = useState<PreviewImagesResponse[]>([])
   const [isDisplayCateList, setIsDisplayCateList] = useState(false)
@@ -45,8 +48,11 @@ export default function ProductAdd() {
   const [isSaveAndPublish, setIsSaveAndPublish] = useState<boolean>(false)
   const [applyPrice, setApplyPrice] = useState<number>(0)
   const [applyStock, setApplyStock] = useState<number>(0)
-  const { productMethods } = useContext(ProductAddContext)
+  const { productEditMethods } = useContext(ProductEditContext)
   const [opened, { close, open }] = useDisclosure(false)
+  const { nameId } = useParams()
+  const { categories } = useContext(AppContext)
+  const navigator = useNavigate()
 
   const {
     register,
@@ -58,7 +64,7 @@ export default function ProductAdd() {
     getValues,
     clearErrors,
     setError
-  } = productMethods
+  } = productEditMethods
 
   const {
     fields: fieldsVariantsGroup,
@@ -102,8 +108,8 @@ export default function ProductAdd() {
     name: 'productImages'
   })
 
-  const productCreateMutation = useMutation({
-    mutationFn: productApi.productCreate
+  const productUpdateMutation = useMutation({
+    mutationFn: productApi.productUpdate
   })
 
   const preCheckImageCreateMutation = useMutation({
@@ -112,6 +118,105 @@ export default function ProductAdd() {
   const preCheckImageDeleteMutation = useMutation({
     mutationFn: productApi.preCheckImageInfoProRemove
   })
+
+  const { data: ProductEditData } = useQuery({
+    queryKey: ['productByIdEdit', nameId],
+    queryFn: () => productApi.getProductByIdForEdit(nameId!),
+    enabled: !!nameId
+  })
+  const productEdit = ProductEditData?.data.body
+
+  useEffect(() => {
+    if (productEdit) {
+      setValue('id', productEdit.id)
+      setValue('shopId', productEdit.shopId)
+      setValue('name', productEdit.name)
+      setValue('price', productEdit.price)
+      setValue('stockQuantity', productEdit.stockQuantity)
+      setValue('description', productEdit.description)
+      setValue('isVariant', productEdit.isVariant)
+      setValue('isActive', productEdit.isActive)
+      setValue('conditionProduct', productEdit.conditionProduct)
+      if (productEdit.variantsGroup && productEdit.variantsGroup.length > 0) {
+        setIsDisplayFormVariations(true)
+      }
+      setValue(
+        'variantsGroup',
+        productEdit.variantsGroup
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            isPrimary: item.isPrimary,
+            variants: item.variants.map((variant) => ({
+              id: variant.id,
+              name: variant.name,
+              variantImage: {
+                id: '',
+                imageUrl: variant.imageUrl
+              }
+            }))
+          }))
+          .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+      )
+      setValue(
+        'productImages',
+        productEdit.productImages
+          .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+          .map((item) => ({
+            id: item.id,
+            imageUrl: item.imageUrl
+          }))
+      )
+      setImages(productEdit.productImages.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)))
+      setValue(
+        'productVariants',
+        productEdit.productVariants.map((item) => ({
+          id: item.id,
+          price: item.price,
+          stockQuantity: item.stockQuantity,
+          variantsGroup1Id:
+            productEdit.variantsGroup.find((itemGroup) =>
+              itemGroup.variants.some((variant) => variant.id == item.variant1.id)
+            )?.id ?? '',
+          variant1Id: item.variant1.id,
+          variantsGroup2Id:
+            productEdit.variantsGroup.find((itemGroup) =>
+              itemGroup.variants.some((variant) => variant.id == item.variant2.id)
+            )?.id ?? '',
+          variant2Id: item.variant2.id
+        }))
+      )
+      setValue('categoryId', productEdit.categoryId)
+      if (productEdit.categoryId && categories) {
+        const newSelectedCategory = ['', '', '', '', '']
+
+        const findCategoryName = (category: CategoryResponse, id: string, level: number): boolean => {
+          if (category.id == id) {
+            newSelectedCategory[level] = category.name
+            return true
+          } else {
+            if (category.categoriesChild) {
+              const isCate = category.categoriesChild.some((child) => findCategoryName(child, id, level + 1))
+              if (isCate) {
+                newSelectedCategory[level] = category.name
+              }
+              return isCate
+            }
+          }
+          return false
+        }
+        for (let i = 0; i < categories.length; i++) {
+          const isCate = findCategoryName(categories[i], productEdit.categoryId, 0)
+
+          if (isCate) {
+            newSelectedCategory[0] = categories[i].name
+          }
+        }
+
+        setCategoryValue(newSelectedCategory.filter((name) => name !== '').join(' > '))
+      }
+    }
+  }, [productEdit, categories])
 
   useEffect(() => {
     setImages(productImagesWatch as PreviewImagesResponse[])
@@ -352,11 +457,12 @@ export default function ProductAdd() {
   const onSubmitDelist = handleSubmit(async (data) => {
     data.isActive = false
     try {
-      const createProRes = await productCreateMutation.mutateAsync(data as FormDataProduct)
-      if (createProRes.data.statusCode === 201) {
-        toast.success(createProRes.data.message)
-        return <Navigate to={path.productManagementAll} />
+      const updateProRes = await productUpdateMutation.mutateAsync(data as FormDataEditProduct)
+      if (updateProRes.data.statusCode === 200) {
+        toast.success(updateProRes.data.message)
+        navigator(path.productManagementAll)
       }
+      setIsSaveAndDelist(false)
     } catch (error) {
       console.log(error)
     }
@@ -365,11 +471,12 @@ export default function ProductAdd() {
   const onSubmitPublish = handleSubmit(async (data) => {
     data.isActive = true
     try {
-      const createProRes = await productCreateMutation.mutateAsync(data as FormDataProduct)
-      if (createProRes.data.statusCode === 201) {
-        toast.success(createProRes.data.message)
-        return <Navigate to={path.productManagementAll} />
+      const updateProRes = await productUpdateMutation.mutateAsync(data as FormDataEditProduct)
+      if (updateProRes.data.statusCode === 200) {
+        toast.success(updateProRes.data.message)
+        navigator(path.productManagementAll)
       }
+      setIsSaveAndPublish(false)
     } catch (error) {
       console.log(error)
     }
@@ -377,7 +484,6 @@ export default function ProductAdd() {
 
   const handleSubmitSaveProduct = (type: string) => {
     handleSubmit(async (data) => {
-      console.log(data)
       if (!Object.keys(errors).length) {
         switch (type) {
           case 'delist':
@@ -417,8 +523,25 @@ export default function ProductAdd() {
           categoryValue={categoryValue}
         />
       )}
+      {productEdit && !productEdit.isActive && (
+        <div className='flex flex-row p-4 mb-4 border border-[#ffce3d] bg-[#fff7e0]'>
+          <div className='text-[#ffce3d]'>
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' className='size-5'>
+              <path
+                fillRule='evenodd'
+                d='M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z'
+                clipRule='evenodd'
+              />
+            </svg>
+          </div>
+          <div className='ml-2'>
+            <div className='text-md text-[#333333]'>Sản phẩm đã bị ẩn</div>
+            <div className='text-sm text-[#666666] mt-1'>Sản phẩm đã bị ẩn bởi bạn.</div>
+          </div>
+        </div>
+      )}
       <div className='grid grid-cols-11 gap-4'>
-        <FormProvider {...productMethods}>
+        <FormProvider {...productEditMethods}>
           <form className='col-span-9'>
             <div className='sticky z-10 top-14 h-14 flex flex-row rounded-md bg-white items-center shadow mb-4'>
               <div className='px-4 text-sm font-normal hover:text-blue'>Basic information</div>
@@ -625,6 +748,7 @@ export default function ProductAdd() {
                     <TipTapEditor
                       control={control}
                       className={`rounded-md overflow-hidden flex flex-col border ${errors.description?.message ? 'border-[#ff4742]' : 'hover:border-[#999999]'}`}
+                      contentEdit={getValues('description')}
                     />
                     <div
                       className={`${errors.description?.message ? 'visible' : 'invisible'} mt-1 h-4 text-xs px-2 text-[#ff4742]`}
@@ -665,7 +789,7 @@ export default function ProductAdd() {
                   </div>
 
                   {isDisplayFormVariations ? (
-                    <VariationsForm
+                    <UpdateVariationsForm
                       variantsGroup={fieldsVariantsGroup as VariantsGroupRequest[]}
                       handlerAddVariations={handlerAddVariations}
                       handlerRemoveVariations={handlerRemoveVariations}
@@ -737,13 +861,13 @@ export default function ProductAdd() {
                             />
                           </div>
                         </div>
-                        <Button
+                        <button
                           className='text-white bg-blue font-medium text-sm h-9 w-36 flex items-center justify-center  rounded-md'
                           type='button'
                           onClick={() => handleApplyToAll()}
                         >
                           Apply To All
-                        </Button>
+                        </button>
                       </div>
                       <div className='w-full flex mt-3'>
                         <div className='rounded-md overflow-hidden w-full flex flex-col border-separate border-[1px] border-gray-300'>
@@ -1133,20 +1257,21 @@ export default function ProductAdd() {
             <div className='px-6 py-4 shadow-inner flex justify-end sticky bg-[#fff] bottom-0  z-10'>
               <div className='flex flex-row gap-4'>
                 <ButtonCancel />
-                <Button
+                <ButtonDelete />
+                <button
                   className='text-[#999999] bg-white text-sm h-8 w-36 flex items-center justify-center  rounded-md border border-solid border-[#999999]'
                   type='button'
                   onClick={() => handleSubmitSaveProduct('delist')}
                 >
                   Save and Delist
-                </Button>
-                <Button
+                </button>
+                <button
                   className='text-white bg-blue text-sm h-8 w-36 flex items-center justify-center  rounded-md'
                   type='button'
                   onClick={() => handleSubmitSaveProduct('publish')}
                 >
                   Save and Publish
-                </Button>
+                </button>
               </div>
             </div>
             {isSaveAndDelist && (

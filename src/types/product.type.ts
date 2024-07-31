@@ -1,5 +1,3 @@
-import { CategoryResponse } from './category.type'
-
 export interface Product {
   id: string
   shopId: string
@@ -34,7 +32,9 @@ export interface ProductListConfig {
 }
 
 export interface ProductRequest {
+  id?: string
   name: string
+  shopId?: string
   categoryId: string
   price?: number
   stockQuantity?: number
@@ -85,7 +85,6 @@ export interface VariantsGroupResponse {
   id: string
   name: string
   isPrimary: boolean
-  isActive: boolean
   variants: VariantsResponse[]
 }
 

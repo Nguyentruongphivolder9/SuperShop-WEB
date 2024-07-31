@@ -21,8 +21,6 @@ export default function CategoryParentList({ setCategoryId, setCategoryValue, ca
   const [selectedCategory, setSelectedCategory] = useState<string[]>(['', '', '', ''])
   const [searchValue, setSearchValue] = useState<string>('')
 
-  console.log(categories)
-
   useEffect(() => {
     if (categoryValue && categories) {
       const categoryParts = categoryValue.split(' > ')

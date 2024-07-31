@@ -26,10 +26,10 @@ export default function ProductDetail() {
   const [buyCount, setBuyCount] = useState(1)
   const { nameId } = useParams()
 
-  const id = getIdFromNameId(nameId as string)
+  const proInfo = getIdFromNameId(nameId as string)
   const { data: ProductDetailData } = useQuery({
-    queryKey: ['productById', id],
-    queryFn: () => productApi.getProductById(id)
+    queryKey: ['productById', proInfo],
+    queryFn: () => productApi.getProductById(proInfo.id, proInfo.shopId)
   })
 
   const [activeImage, setActiveImage] = useState<string>('')
