@@ -9,7 +9,8 @@ const handlePriceProductYup = (refBoolean: string) => {
   return yup
     .number()
     .transform((value, originalValue) => {
-      return originalValue.trim() === '' ? null : value
+      return originalValue == '' ? null : value
+      // return originalValue.trim() === '' ? null : value
     })
     .when(refBoolean, {
       is: true,
@@ -25,7 +26,8 @@ const handleStockQuantityProductYup = (refString: string) => {
   return yup
     .number()
     .transform((value, originalValue) => {
-      return originalValue.trim() === '' ? null : value
+      return originalValue == '' ? null : value
+      // return originalValue.trim() === '' ? null : value
     })
     .when(refString, {
       is: true,
@@ -37,14 +39,33 @@ const handleStockQuantityProductYup = (refString: string) => {
           .min(MIN_STOCK_VALUE, 'The value should be at least: ' + MIN_STOCK_VALUE)
     })
 }
+const handleEditStockQuantityProductYup = (refString: string) => {
+  return yup
+    .number()
+    .transform((value, originalValue) => {
+      return originalValue == '' ? null : value
+      // return originalValue.trim() == '' ? null : value
+    })
+    .when(refString, {
+      is: true,
+      then: (schema) => schema.notRequired().nullable(),
+      otherwise: (schema) =>
+        schema
+          .required('This field cannot be empty')
+          .max(MAX_STOCK_VALUE, 'Stock has exceeded maximum value: ' + MAX_STOCK_VALUE)
+          .min(0, 'The value should be at least: ' + 0)
+    })
+}
 
 export const productSchema = yup.object({
+  id: yup.string().nullable(),
   name: yup
     .string()
     .trim()
     .required('This field cannot be empty')
     .min(10, 'Your product title is too short. Please input at least 10 characters.'),
   categoryId: yup.string().required('This field cannot be empty'),
+  shopId: yup.string().nullable(),
   price: handlePriceProductYup('isVariant') as yup.NumberSchema<number | undefined, yup.AnyObject, undefined, ''>,
   stockQuantity: handleStockQuantityProductYup('isVariant') as yup.NumberSchema<
     number | undefined,
@@ -179,4 +200,37 @@ export const productSchema = yup.object({
     })
 })
 
+export const productEditSchema = productSchema.shape({
+  id: yup.string().required('This field cannot be empty'),
+  shopId: yup.string().required('This field cannot be empty'),
+  stockQuantity: handleEditStockQuantityProductYup('isVariant') as yup.NumberSchema<
+    number | undefined,
+    yup.AnyObject,
+    undefined,
+    ''
+  >,
+  productVariants: yup.array().of(
+    yup.object({
+      id: yup.string().required('This field cannot be empty'),
+      price: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
+        .required('This field cannot be empty')
+        .max(MAX_PRICE_VALUE, 'Price has exceeded maximum value: ' + MAX_PRICE_VALUE)
+        .min(MIN_PRICE_VALUE, 'The value should be at least: ' + MIN_PRICE_VALUE),
+      stockQuantity: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
+        .required('This field cannot be empty')
+        .max(MAX_STOCK_VALUE, 'Stock has exceeded maximum value: ' + MAX_STOCK_VALUE)
+        .min(0, 'The value should be at least: ' + 0),
+      variantsGroup1Id: yup.string().required('This field cannot be empty'),
+      variant1Id: yup.string().required('This field cannot be empty'),
+      variantsGroup2Id: yup.string().nullable(),
+      variant2Id: yup.string().nullable()
+    })
+  )
+})
+
 export type ProductSchema = yup.InferType<typeof productSchema>
+export type ProductEditSchema = yup.InferType<typeof productEditSchema>
