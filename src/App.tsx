@@ -4,7 +4,7 @@ import useRouteElement from './useRouteElement'
 import { useContext, useEffect } from 'react'
 import { localStorageEventTarget } from './utils/auth'
 import { AppContext } from './contexts/app.context'
-import "react-image-crop/dist/ReactCrop.css";
+import 'react-image-crop/dist/ReactCrop.css'
 function App() {
   const routeElement = useRouteElement()
   const { reset } = useContext(AppContext)

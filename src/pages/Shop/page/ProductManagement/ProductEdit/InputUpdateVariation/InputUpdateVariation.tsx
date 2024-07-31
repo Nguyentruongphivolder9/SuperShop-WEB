@@ -5,13 +5,13 @@ import { useContext, useRef, useState } from 'react'
 import productApi from 'src/apis/product.api'
 import config from 'src/constants/config'
 import { AppContext } from 'src/contexts/app.context'
-import { ProductAddContext } from 'src/contexts/productAdd.context'
 import { PreviewImagesResponse } from 'src/types/product.type'
+import { ProductEditContext } from 'src/contexts/productEdit.context'
 
 interface Props {
   indexVariants: number
   indexVariantsGroup: number
-  handlerRemoveVariant: (index: number, variantId: string) => void
+  handlerRemoveVariant: (index: number, id: string) => void
   isPrimary: boolean
   sizeVariants: number
 }
@@ -22,27 +22,30 @@ interface ErrorModelImage {
   errorSize: string
 }
 
-export default function InputValueOfVariation({
+export default function InputUpdateVariation({
   handlerRemoveVariant,
   indexVariants,
   isPrimary,
   indexVariantsGroup,
   sizeVariants
 }: Props) {
-  const fileInputImagesRef = useRef<HTMLInputElement>(null)
-  const { productMethods } = useContext(ProductAddContext)
-  const { setChildrenModal, setIsModal } = useContext(AppContext)
-  const [imageVariant, setImageVariant] = useState<PreviewImagesResponse | null>(null)
-  const [opened, { close, open }] = useDisclosure(false)
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
-
+  const { productEditMethods } = useContext(ProductEditContext)
   const {
     register,
     watch,
     setValue,
     getValues,
     formState: { errors }
-  } = productMethods
+  } = productEditMethods
+  const fileInputImagesRef = useRef<HTMLInputElement>(null)
+  const { setChildrenModal, setIsModal } = useContext(AppContext)
+  const [imageVariant, setImageVariant] = useState<PreviewImagesResponse | null>(
+    (getValues(
+      `variantsGroup.${indexVariantsGroup}.variants.${indexVariants}.variantImage`
+    ) as PreviewImagesResponse) ?? null
+  )
+  const [opened, { close, open }] = useDisclosure(false)
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
 
   const preCheckImageCreateMutation = useMutation({
     mutationFn: productApi.preCheckImageInfoProCreate
@@ -149,7 +152,10 @@ export default function InputValueOfVariation({
         id: '',
         imageUrl: ''
       }
-      await preCheckImageDeleteMutation.mutateAsync(id)
+
+      if (id != '' && id != null && id != undefined) {
+        await preCheckImageDeleteMutation.mutateAsync(id)
+      }
       setValue(`variantsGroup.${indexVariantsGroup}.variants.${indexVariants}.variantImage`, variantImage)
       setImageVariant(null)
     } catch (error) {
@@ -180,7 +186,7 @@ export default function InputValueOfVariation({
     <div className='col-span-1'>
       <div className='col-span-1 flex flex-row gap-1 h-9'>
         {isPrimary ? (
-          imageVariant ? (
+          imageVariant && imageVariant?.imageUrl != null && imageVariant.imageUrl != '' ? (
             <Popover position='right' withArrow shadow='md' opened={opened} offset={3}>
               <Popover.Target>
                 <div

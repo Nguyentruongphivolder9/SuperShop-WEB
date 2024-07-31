@@ -46,13 +46,14 @@ const removeSpecialCharacter = (str: string) => {
 
 // export const removeBakcSpaceCharacter = (str: string)
 
-export const generateNameId = ({ name, id }: { name: string; id: string }) => {
-  return removeSpecialCharacter(name).replace(/\s/g, '-') + `-i.${id}`
+export const generateNameId = ({ name, id, shopId }: { name: string; id: string; shopId: string }) => {
+  return removeSpecialCharacter(name).replace(/\s/g, '-') + `-i.${id}.${shopId}`
 }
 
 export const getIdFromNameId = (nameId: string) => {
   const arr = nameId.split('-i.')
-  return arr[arr.length - 1]
+  const productInfo = arr[1].split('.')
+  return { id: productInfo[0], shopId: productInfo[1] }
 }
 
 export const generateCategoryNameId = ({ name, id }: { name: string; id: string }) => {

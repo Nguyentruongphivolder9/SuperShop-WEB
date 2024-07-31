@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { createContext } from 'react'
 import { useForm, UseFormReturn } from 'react-hook-form'
-import { productSchema, ProductSchema } from 'src/utils/validations/productValidation'
+import { productSchema, ProductSchema, productEditSchema } from 'src/utils/validations/productValidation'
 
 interface ProductAddContextInterface {
   productMethods: UseFormReturn<FormDataProduct>
@@ -19,6 +19,7 @@ export type FormDataProduct = Pick<
   | 'productImages'
   | 'productVariants'
   | 'categoryId'
+  | 'shopId'
 >
 
 const createProductSchema = productSchema.pick([
@@ -32,7 +33,8 @@ const createProductSchema = productSchema.pick([
   'variantsGroup',
   'productImages',
   'productVariants',
-  'categoryId'
+  'categoryId',
+  'shopId'
 ])
 
 const initialProductAddContext: ProductAddContextInterface = {
@@ -44,6 +46,7 @@ export const ProductAddProvider = ({ children }: { children: React.ReactNode }) 
   const productMethods = useForm<FormDataProduct>({
     defaultValues: {
       isVariant: false,
+      shopId: null,
       productImages: [],
       variantsGroup: []
     },
