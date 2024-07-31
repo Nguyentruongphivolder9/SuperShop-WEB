@@ -1,5 +1,5 @@
-import VariantGroup from 'src/pages/Shop/page/ProductManagement/ProductAdd/VariantGroup'
 import { VariantsGroupRequest } from 'src/types/product.type'
+import UpdateVariantGroup from '../UpdateVariantGroup'
 
 interface Props {
   handlerAddVariations: () => void
@@ -7,12 +7,12 @@ interface Props {
   variantsGroup?: VariantsGroupRequest[]
 }
 
-export default function VariationsForm({ handlerAddVariations, handlerRemoveVariations, variantsGroup }: Props) {
+export default function UpdateVariationsForm({ handlerAddVariations, handlerRemoveVariations, variantsGroup }: Props) {
   return (
     <div className='col-span-9 flex flex-col gap-1'>
       {variantsGroup &&
         variantsGroup.map((variantGroup, index) => (
-          <VariantGroup
+          <UpdateVariantGroup
             key={variantGroup.id}
             indexVariantsGroup={index}
             data={variantGroup}

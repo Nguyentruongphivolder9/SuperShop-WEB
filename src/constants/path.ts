@@ -21,6 +21,7 @@ const path = {
   productManagementAll: '/shopchannel/portal/product/list/all',
   productManagementActive: '/shopchannel/portal/product/list/live/all',
   productAdd: '/shopchannel/portal/product/new',
+  productEdit: '/shopchannel/portal/product/:nameId',
   voucherShop: '/shopchannel/portal/marketing/vouchers/list',
   voucherShopAdd: '/shopchannel/portal/marketing/vouchers/new',
   voucherShopEdit: '/shopchannel/portal/marketing/vouchers/edit',
