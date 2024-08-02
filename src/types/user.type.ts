@@ -1,4 +1,4 @@
-type Role = 'USER' | 'ADMIN';
+type Role = 'USER' | 'ADMIN' | "SELLER";
 
 export interface User {
     _id: string;
@@ -14,4 +14,5 @@ export interface User {
     address: string;
     sub: string;
     userName: string;
+    fullNameChanges: number
 }

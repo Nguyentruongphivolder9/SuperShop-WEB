@@ -22,6 +22,17 @@ export default function Home() {
       <div className='w-full pt-6'>
         <BannerSlider />
       </div>
+      <div className='bg-transparent container pt-5'>
+        <div className='flex flex-col bg-white'>
+          <div className='px-4 flex items-center text-[#333333] h-14 border-b-[1px] flex justify-between'>
+            <p>DAILY FEEDs</p>
+            <Link to={'#'} className='text-sm font-medium text-blue mr-4'>
+              View all
+            </Link>          
+          </div>
+          <CategoriesSlider />
+        </div>
+      </div>
       <div className='bg-transparent container py-5'>
         <div className='flex flex-col bg-white'>
           <div className='px-4 flex items-center uppercase text-[#333333] h-14 border-b-[1px]'>Categories</div>
@@ -31,10 +42,10 @@ export default function Home() {
       <div className='bg-transparent container pb-5'>
         <div
           className='flex flex-col rounded-lg overflow-hidden bg-white'
-          // style={{
-          //   background:
-          //     'linear-gradient(rgba(255, 255, 255, 0) 22.49%, rgb(255, 255, 255) 73.49%), linear-gradient(264.03deg, rgb(220, 229, 251) -10.27%, rgb(234, 236, 255) 35.65%, rgb(213, 236, 253) 110.66%)'
-          // }}
+        // style={{
+        //   background:
+        //     'linear-gradient(rgba(255, 255, 255, 0) 22.49%, rgb(255, 255, 255) 73.49%), linear-gradient(264.03deg, rgb(220, 229, 251) -10.27%, rgb(234, 236, 255) 35.65%, rgb(213, 236, 253) 110.66%)'
+        // }}
         >
           <div className='px-4 flex items-center justify-between text-[#333333] h-14'>
             <div className='text-xl font-bold text-blue'>Categories you are interested in</div>

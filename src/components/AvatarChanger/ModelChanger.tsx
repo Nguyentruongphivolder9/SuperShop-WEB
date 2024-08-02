@@ -1,14 +1,15 @@
 import CloseIcon from "src/assets/svgs/CloseIcon";
 import ImageCropper from "./ImageCropper";
 import { useState } from "react";
+import { User } from "src/types/user.type";
 
 export type ModalChangerProps = {
-    updateAvatar: any,
+
     closeModal: boolean,
     handleCloseModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function ModalChanger({ updateAvatar, closeModal, handleCloseModal }: ModalChangerProps) {
+function ModalChanger({closeModal, handleCloseModal }: ModalChangerProps) {
     if (closeModal === true) return;
     return (
         <div

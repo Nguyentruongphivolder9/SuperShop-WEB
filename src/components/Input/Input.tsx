@@ -9,9 +9,11 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   classNameInputError?: string;
   register?: UseFormRegister<any>;
   rules?: RegisterOptions;
+  rightClearButton?: boolean
 }
 
 export default function Input({
+  rightClearButton,
   errorMessage,
   className,
   name,
@@ -28,7 +30,7 @@ export default function Input({
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
   const [dateError, setDateError] = useState('');
-
+  const [inputValue, setInputValue] = useState('');
   const registerResult = register && name ? register(name, rules) : null;
 
   const toggleEye = () => {
@@ -85,8 +87,30 @@ export default function Input({
     }
   }, [day, month, year, registerResult]);
 
+  const handleClear = () => {
+    setInputValue('');
+    if (registerResult) {
+      registerResult.onChange({
+        target: {
+          value: '',
+        }
+      });
+    }
+  };
   return (
     <div className={'relative ' + className}>
+      {rightClearButton && rest.type !== 'datetime-local' && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 hover:bg-slate-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       {rest.type !== 'datetime-local' && (
         <input
           className={`${classNameInput} ${errorMessage ? classNameInputError : ''}`}
@@ -95,7 +119,7 @@ export default function Input({
           type={handleType()}
         />
       )}
-
+      
       {rest.type === 'datetime-local' && (
         <div className="flex space-x-2">
           <select
@@ -137,6 +161,7 @@ export default function Input({
               </option>
             ))}
           </select>
+          <span>{registerResult?.name}</span>
         </div>
       )}
       {dateError && <div className={classNameError}>{dateError}</div>}

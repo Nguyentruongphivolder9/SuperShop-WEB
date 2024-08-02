@@ -124,16 +124,20 @@ export default function NavHeader() {
               </div>
             }
           >
-            <div className='flex items-center space-x-2'>
-              <img
+            <div className='relative flex items-center space-x-2'>
+             <div className='relative'>
+             <img
                 src={profile?.avatarUrl || getAvatarUrl(profile?.email)}
                 alt='avatar'
-                className='w-7 h-7 rounded-full object-cover'
+                className='w-7 h-7 rounded-full object-cover border-2 border-gray-300'
               />
-              <div className='flex flex-col'>
-                <span className=''>{profile?.userName}</span>
+              <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white rounded-full ring-2 ring-white dark:ring-gray-500"></span>
+             </div>
+              <div className='flex flex-col ml-3'>
+                <span className='text-sm font-medium'>{profile?.userName}</span>
               </div>
             </div>
+
           </Popover>
         )}
         {!isAuthenticated && (
