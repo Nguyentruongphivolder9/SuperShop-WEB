@@ -1,35 +1,17 @@
 import classNames from 'classnames'
 import { ReactNode } from 'react'
-
+import { DiscountType, VoucherType } from 'src/pages/Shop/page/VoucherShop/enums/voucherInfo.enum'
+import { VoucherResponse } from 'src/types/voucher.type'
+import { formatCurrency } from 'src/utils/utils'
+import { parseISO, differenceInDays, differenceInHours, format } from 'date-fns'
 interface Props {
-  code?: string
-  title?: string
-  secondTitle?: string
-  time?: string
-  voucherType: 'global' | 'shop' | 'shipping'
-  quantity: number
+  voucher: VoucherResponse
 }
-
-const defaultValueProps: Props = {
-  code: 'FGJWEHF45',
-  title: '12% off Capped at ₫25k',
-  secondTitle: 'Min. Spend ₫0',
-  time: 'Use in: 1 day',
-  voucherType: 'global',
-  quantity: 5
-}
-
 const defVar: {
   iconGlobalShop: ReactNode
   iconShop: ReactNode
   iconShipping: ReactNode
-  voucherType: { [key in 'global' | 'shop' | 'shipping']: string }
 } = {
-  voucherType: {
-    global: 'global',
-    shop: 'Shop',
-    shipping: 'shipping'
-  },
   iconGlobalShop: (
     <svg
       className='w-8 h-8 fill-white'
@@ -68,25 +50,45 @@ const defVar: {
   )
 }
 
-export default function VoucherBox({
-  code = defaultValueProps.code,
-  title = defaultValueProps.title,
-  secondTitle = defaultValueProps.secondTitle,
-  time = defaultValueProps.time,
-  voucherType = defaultValueProps.voucherType,
-  quantity = defaultValueProps.quantity
-}: Props) {
+// const defaultValueProps: Props = {
+//   code: 'FGJWEHF45',
+//   title: '12% off Capped at ₫25k',
+//   secondTitle: 'Min. Spend ₫0',
+//   time: 'Use in: 1 day',
+//   voucherType: 'global',
+//   discountType: 'fixed',
+//   quantity: 5
+// }
+
+function formatVoucherMessage(voucher: VoucherResponse) {
+  const cappedDiscount = voucher.maximumDiscount ? `Capped at đ${voucher.maximumDiscount}` : ''
+  return `${formatCurrency(voucher.percentageAmount)}% off ${cappedDiscount}`
+}
+
+function calculateValidTime(endDat: string) {
+  const endDate = parseISO(endDat)
+  const today = new Date()
+
+  const daysDifference = differenceInDays(endDate, today)
+  const hoursDifference = differenceInHours(endDate, today)
+
+  const formattedresult =
+    daysDifference >= 1 ? `Valid till: ${format(endDate, `dd.MM.yyyy`)}` : `Expiring: ${hoursDifference} hours left`
+  return formattedresult
+}
+
+export default function VoucherBox({ voucher }: Props) {
   return (
     <div className='relative h-[116px] rounded-sm shadow-[3px_10px_8px_rgba(0,0,0,0.1)]'>
       <div className='up_part relative flex h-full '>
         <div className='relative -l-[1px] flex items-center justify-center text-white min-w-[120px] rounded-l-sm'>
           <div className='absolute flex justify-center items-center flex-col-reverse text-sm uppercase'>
             <span className='mt-2'>
-              {voucherType === 'global' ? 'Global' : voucherType === 'shop' ? 'Shop' : 'Free Ship'}
+              {voucher.voucherType === 'global' ? 'Global' : voucher.voucherType === 'shop' ? 'Shop' : 'Free Ship'}
             </span>
-            {voucherType === 'global'
+            {voucher.voucherType === 'global'
               ? defVar.iconGlobalShop
-              : voucherType === 'shop'
+              : voucher.voucherType === 'shop'
                 ? defVar.iconShop
                 : defVar.iconShipping}
           </div>
@@ -99,7 +101,7 @@ export default function VoucherBox({
             xmlns='http://www.w3.org/1999/xlink'
           >
             <path
-              className={`${voucherType === 'shipping' ? 'fill-[#00bfa5]' : 'fill-blue'}`}
+              className={`${voucher.voucherType === 'shipping' ? 'fill-[#00bfa5]' : 'fill-blue'}`}
               fillRule='evenodd'
               clipRule='evenodd'
               d='M0 2a2 2 0 0 1 2-2h106v106H2a2 2 0 0 1-2-2v-3a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 1 0 0-6v-4a3 3 0 0 0 0-6V2Z'
@@ -109,9 +111,13 @@ export default function VoucherBox({
         </div>
         <div className='flex flex-1 border  border-l-0 border-gray-300'>
           <div className='flex flex-col flex-1 pl-3 gap-1 justify-center'>
-            <span className='text-base font-semibold '>{code}</span>
-            <span className='text-base'>{title}</span>
-            <span className='text-sm'>{secondTitle}</span>
+            <span className='text-base font-semibold '>{voucher.code}</span>
+            <span className='text-sm'>
+              {voucher.discountType === DiscountType.FIXED
+                ? `đ${formatCurrency(voucher.fixedAmount)} off`
+                : formatVoucherMessage(voucher)}
+            </span>
+            <span className='text-sm'>{`Min. Spend đ${formatCurrency(voucher.minimumTotalOrder)}`}</span>
             <div className='flex items-center'>
               <svg
                 className='w-3 h-3 fill-gray-400'
@@ -123,25 +129,24 @@ export default function VoucherBox({
               >
                 <path d='M128,26A102,102,0,1,0,230,128,102.12,102.12,0,0,0,128,26Zm0,192a90,90,0,1,1,90-90A90.1,90.1,0,0,1,128,218Zm62-90a6,6,0,0,1-6,6H128a6,6,0,0,1-6-6V72a6,6,0,0,1,12,0v50h50A6,6,0,0,1,190,128Z'></path>
               </svg>
-              <span className='text-xs font-normal text-gray-400 ml-1'>{time}</span>
+              <span className='text-xs font-normal text-gray-400 ml-1'>{calculateValidTime(voucher.endDate)}</span>
             </div>
           </div>
-          <div className='flex flex-column items-center justify-center p-3'>
+          {/* <div className='flex flex-column items-center justify-center p-3'>
             <div>
               <div
                 className={classNames(
                   'h-[33px] flex justify-center items-center text-center text-[11px] leading-none line-clamp-2 whitespace-normal break-words min-w-[3.475rem] max-w-[3.475rem]  px-[0.5rem] border  rounded-sm',
                   {
-                    'border-blue/95 text-blue/95':
-                      voucherType === defVar.voucherType.global || voucherType === defVar.voucherType.shop,
-                    'border-[#00bfa5] text-[#00bfa5]': voucherType === defVar.voucherType.shipping
+                    'border-blue/95 text-blue/95': voucher.voucherType === VoucherType.GLOBAL || VoucherType.SHOP,
+                    'border-[#00bfa5] text-[#00bfa5]': voucher.voucherType === VoucherType.SHIPPING
                   }
                 )}
               >
                 Use Later
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className='low_part mx-[0.5rem] shadow-sm bg-white h-2 relative'>
@@ -149,19 +154,19 @@ export default function VoucherBox({
           className={classNames(
             'absolute h-full min-w-[calc(120px-0.5rem)] max-w-[calc(120px-0.5rem)] z-10 border-r-[0.0625rem] border-dashed border-r-white  shadow-sm',
             {
-              'bg-blue/40': voucherType === defVar.voucherType.global || voucherType === defVar.voucherType.shop,
-              'bg-[#00bfa5]/40': voucherType === defVar.voucherType.shipping
+              'bg-blue/40': voucher.voucherType === VoucherType.GLOBAL || voucher.voucherType === VoucherType.SHOP,
+              'bg-[#00bfa5]/40': voucher.voucherType === VoucherType.SHIPPING
             }
           )}
         ></div>
       </div>
       <div
-        className={`quantity_part absolute top-2 -right-[5px] h-4 w-9 rounded-l-full rounded-tr-sm ${voucherType === defVar.voucherType.global || voucherType === defVar.voucherType.shop ? 'bg-blue' : 'bg-[#00bfa5]'} text-white`}
+        className={`quantity_part absolute top-2 -right-[5px] h-4 w-9 rounded-l-full rounded-tr-sm ${voucher.voucherType === VoucherType.GLOBAL || voucher.voucherType === VoucherType.SHOP ? 'bg-blue' : 'bg-[#00bfa5]'} text-white`}
       >
         <div className='flex justify-center items-center text-xs'>
-          x{quantity}
+          x{voucher.quantity}
           <div
-            className={`absolute top-[83%] right-1 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[4px] ${voucherType === defVar.voucherType.global || voucherType === defVar.voucherType.shop ? 'border-b-blue/50' : 'border-b-[#00bfa5]/50'}  border-b-blue/50 -rotate-45 translate-x-1/2 translate-y-1/2`}
+            className={`absolute top-[83%] right-1 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[4px] ${voucher.voucherType === VoucherType.GLOBAL || voucher.voucherType === VoucherType.SHOP ? 'border-b-blue/50' : 'border-b-[#00bfa5]/50'}  border-b-blue/50 -rotate-45 translate-x-1/2 translate-y-1/2`}
           ></div>
         </div>
       </div>

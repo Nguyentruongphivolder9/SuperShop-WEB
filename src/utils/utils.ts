@@ -4,7 +4,7 @@ import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ErrorResponse } from 'src/types/utils.type'
 import { format } from 'date-fns'
 import { ProductVariantsResponse } from 'src/types/product.type'
-
+import { ErrorServerRes } from 'src/types/utils.type'
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   // eslint-disable-next-line import/no-named-as-default-member
   return axios.isAxiosError(error)
@@ -21,6 +21,9 @@ export function isAxiosExpiredTokenError<UnauthorizedError>(error: unknown): err
     isAxiosUnauthorizedError<ErrorResponse<{ name: string; message: string }>>(error) &&
     error.response?.data.data?.name === 'EXPIRED_TOKEN'
   )
+}
+export function isAxiosBadRequestNotFoundError<ErrorServer>(error: unknown): error is AxiosError<ErrorServer> {
+  return isAxiosError<ErrorServerRes>(error) && error.response?.data?.statusCode === HttpStatusCode.NotFound
 }
 
 export function formatCurrency(currency: number) {

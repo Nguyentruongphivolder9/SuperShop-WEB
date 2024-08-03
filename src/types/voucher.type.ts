@@ -31,39 +31,12 @@ export type VoucherResponse = Voucher & {
   status: string
 }
 
-export type PaginationVoucherResponse = {
-  content: VoucherResponse[]
-  pageable: Pageable
-  metadata: Metadata
+export type VoucherInDepotResponse = {
+  code: string
+  quantity: number
+  voucher: VoucherResponse
 }
 
-interface Pageable {
-  pageNumber: number
-  pageSize: number
-  sort: {
-    empty: boolean
-    sorted: boolean
-    unsorted: boolean
-  }
-  offset: number
-  paged: boolean
-  unpaged: boolean
-}
-
-interface Sort {
-  empty: boolean
-  sorted: boolean
-  unsorted: boolean
-}
-
-interface Metadata {
-  last: boolean
-  totalPages: number
-  totalElements: number
-  size: number
-  number: number
-  sort: Sort
-  first: boolean
-  numberOfElements: number
-  empty: boolean
+export type VouchersUsedResponse = {
+  voucher: VoucherResponse
 }

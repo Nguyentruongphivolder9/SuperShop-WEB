@@ -1,4 +1,4 @@
-import { useState, useRef, useId, type ElementType } from 'react';
+import { useState, useRef, useId, type ElementType } from 'react'
 import {
   useFloating,
   FloatingPortal,
@@ -14,16 +14,16 @@ import {
   useRole,
   useInteractions,
   safePolygon
-} from '@floating-ui/react';
-import { motion, AnimatePresence } from 'framer-motion';
+} from '@floating-ui/react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Props {
-  children: React.ReactNode;
-  renderPopover: React.ReactNode;
-  className?: string;
-  as?: ElementType;
-  initialOpen?: boolean;
-  placement?: Placement;
+  children: React.ReactNode
+  renderPopover: React.ReactNode
+  className?: string
+  as?: ElementType
+  initialOpen?: boolean
+  placement?: Placement
 }
 
 export default function Popover({
@@ -34,8 +34,8 @@ export default function Popover({
   initialOpen,
   placement = 'bottom-end'
 }: Props) {
-  const [open, setOpen] = useState(initialOpen || false);
-  const arrowRef = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(initialOpen || false)
+  const arrowRef = useRef<HTMLElement>(null)
   const data = useFloating({
     open,
     onOpenChange: setOpen,
@@ -43,15 +43,16 @@ export default function Popover({
     whileElementsMounted: autoUpdate,
     transform: false,
     placement
-  });
-  const { refs, floatingStyles, context } = data;
-  const hover = useHover(context, { handleClose: safePolygon() });
-  const focus = useFocus(context);
-  const dismiss = useDismiss(context);
-  const role = useRole(context, { role: 'tooltip' });
-  const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role]);
-  const id = useId();
-
+  })
+  const { refs, floatingStyles, context } = data
+  const hover = useHover(context, { handleClose: safePolygon() })
+  const focus = useFocus(context)
+  const dismiss = useDismiss(context)
+  const role = useRole(context, { role: 'tooltip' })
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover, focus, dismiss, role])
+  const id = useId()
+  console.log(data.middlewareData.arrow?.y)
+  console.log(data.middlewareData.arrow?.x)
   return (
     <Element className={className} ref={refs.setReference} {...getReferenceProps()}>
       {children}
@@ -60,7 +61,7 @@ export default function Popover({
           {open && (
             <motion.div
               ref={refs.setFloating}
-              className="z-50 absolute top-0 left-0 mt-4 ml-4" // Adjust the positioning as needed
+              className='z-50'
               style={{
                 transformOrigin: `${data.middlewareData.arrow?.x}px top`,
                 ...floatingStyles
@@ -76,7 +77,7 @@ export default function Popover({
                 className='absolute z-40 translate-y-[-95%] border-[11px] border-x-transparent border-t-transparent border-b-white'
                 style={{
                   left: data.middlewareData.arrow?.x,
-                  top: data.middlewareData.arrow?.y 
+                  top: data.middlewareData.arrow?.y
                 }}
               />
               {renderPopover}
@@ -85,5 +86,5 @@ export default function Popover({
         </AnimatePresence>
       </FloatingPortal>
     </Element>
-  );
+  )
 }
