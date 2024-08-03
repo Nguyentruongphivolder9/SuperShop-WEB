@@ -18,6 +18,11 @@ export interface ErrorServerResponse {
     }
   }
 }
+export interface ErrorServerRes {
+  error: string
+  message: string
+  statusCode: number
+}
 
 export type NoUndefinedField<T> = {
   [P in keyof T]-?: NoUndefinedField<NonNullable<T[P]>>
