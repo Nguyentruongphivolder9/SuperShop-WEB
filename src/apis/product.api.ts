@@ -27,6 +27,12 @@ const productApi = {
   },
   preCheckImageInfoProRemove(id: string) {
     return http.delete<SuccessResponse<null>>(`preview-images/${id}`)
+  },
+  getListProductInterest() {
+    return http.get<SuccessResponse<Product[]>>(`products-interest`)
+  },
+  addToListProductInterest(productId: string, shopId: string) {
+    return http.get<SuccessResponse<Product>>(`products-interest/${productId}/shop/${shopId}`)
   }
 }
 
