@@ -4,6 +4,7 @@ import { AppContext } from 'src/contexts/app.context'
 import NavHeader from '../NavHeader'
 import Popover from '../Popover'
 import { formatCurrency } from 'src/utils/utils'
+import path from 'src/constants/path'
 const MAX_PURCHASES = 5
 export default function Header() {
   const purchasesInCart: any[] = []
@@ -84,10 +85,18 @@ export default function Header() {
                       </div>
                     </div>
                   ) : (
-                    <div className='flex h-[300px] w-[300px] flex-col items-center justify-center p-2'>
-                      <img src={''} alt='no purchase' className='h-24 w-24' />
-                      <div className='mt-3 capitalize'>Chưa có sản phẩm</div>
-                    </div>
+                    <>
+                      <div className='flex h-[300px] w-[300px] flex-col items-center justify-center p-2'>
+                        <img src={''} alt='no purchase' className='h-24 w-24' />
+                        <div className='mt-3 capitalize'>Chưa có sản phẩm</div>
+                        <Link
+                          to={path.cart}
+                          className='capitalize bg-blue hover:opacity-[0.85] py-2 px-4 rounded-sm text-white'
+                        >
+                          Xem giỏ hàng
+                        </Link>
+                      </div>
+                    </>
                   )}
                 </div>
               }

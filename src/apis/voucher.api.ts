@@ -1,5 +1,5 @@
-import { SuccessResponse } from 'src/types/utils.type'
-import { PaginationVoucherResponse, VoucherRequest, VoucherResponse } from 'src/types/voucher.type'
+import { Pagination, SuccessResponse } from 'src/types/utils.type'
+import { VoucherInDepotResponse, VoucherRequest, VoucherResponse, VouchersUsedResponse } from 'src/types/voucher.type'
 import http from 'src/utils/http'
 
 const voucherApi = {
@@ -7,7 +7,7 @@ const voucherApi = {
     return http.post<SuccessResponse<VoucherResponse>>('vouchers', body)
   },
   getVouchers() {
-    return http.get<SuccessResponse<PaginationVoucherResponse>>('vouchers')
+    return http.get<SuccessResponse<Pagination<VoucherResponse[]>>>('vouchers')
   },
   async getVoucher(id: string) {
     return http.get<SuccessResponse<VoucherResponse>>(`vouchers/${id}`)
@@ -20,4 +20,19 @@ const voucherApi = {
   }
 }
 
+const voucherDepotApi = {
+  addVoucherToDepot(body: { code: string }) {
+    return http.post<SuccessResponse<VoucherInDepotResponse>>('vouchers/depot', body)
+  },
+  getVouchersInDepot() {
+    return http.get<SuccessResponse<Pagination<VoucherInDepotResponse[]>>>('vouchers/depot')
+  }
+}
+
+const vouchersUsedApi = {
+  getVouchersUsed() {
+    return http.get<SuccessResponse<Pagination<VouchersUsedResponse[]>>>('vouchers/used')
+  }
+}
+export { voucherDepotApi, vouchersUsedApi }
 export default voucherApi

@@ -7,6 +7,11 @@ import VoucherBox from './VoucherBox'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 import * as yup from 'yup'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { voucherDepotApi } from 'src/apis/voucher.api'
+import { toast } from 'react-toastify'
+import { ErrorServerRes } from 'src/types/utils.type'
+import { isAxiosBadRequestNotFoundError } from 'src/utils/utils'
 const voucherTypeTabs = [
   { type: 'all', name: 'All' },
   { type: 'global', name: 'Global' },
@@ -14,32 +19,59 @@ const voucherTypeTabs = [
   { type: 'shipping', name: 'Free ship' }
 ]
 
-const schema = yup
-  .object({
-    code: yup.string().required()
-  })
-  .required()
+const schema = yup.object({
+  code: yup.string()
+})
 
 export default function VoucherWallet() {
+  const queryClient = useQueryClient()
   const queryParams: { type?: string } = useQueryParams()
   const type: string = queryParams.type || 'all'
   const {
     register,
     handleSubmit,
+    reset,
+    watch,
     formState: { errors },
-    watch
+    setError
   } = useForm({
+    defaultValues: {
+      code: ''
+    },
+    mode: 'onChange',
     resolver: yupResolver(schema)
   })
 
   const fieldValues = watch()
-  const isAnyFieldFFiled = Object.values(fieldValues).some((value) => value)
+  const isFieldFilled = Object.values(fieldValues).some((value) => value)
 
-  const onsubmit = handleSubmit((data) => {
-    console.log(data)
+  const { data: vouchersData } = useQuery({
+    queryKey: ['vouchersDepot'],
+    queryFn: () => voucherDepotApi.getVouchersInDepot()
   })
 
-  console.log(watch())
+  const addToDepotMutation = useMutation({
+    mutationFn: voucherDepotApi.addVoucherToDepot,
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['vouchersDepot'] })
+    }
+  })
+
+  const onsubmit = handleSubmit(async (data) => {
+    try {
+      await addToDepotMutation.mutateAsync(data as { code: string })
+      reset()
+      toast.success('Success')
+    } catch (error) {
+      console.log(error)
+      if (isAxiosBadRequestNotFoundError<ErrorServerRes>(error)) {
+        setError('code', {
+          message: error.response?.data.error,
+          type: 'server'
+        })
+      }
+    }
+  })
 
   return (
     <div className='bg-white px-8 py-6'>
@@ -67,32 +99,32 @@ export default function VoucherWallet() {
                 className='text-sx leading-none p-[0.8125rem] outline-none w-96 border border-gray-300 rounded-sm shadow-inner'
               />
               <Button
-                disabled={!isAnyFieldFFiled}
+                disabled={!isFieldFilled}
                 type='submit'
                 className={classNames(
                   'h-[2.75rem] w-[6.25rem] text-sm py-[1px] px-[6px] ml-3 transition-colors duration-300',
                   {
-                    'bg-blue text-white cursor-pointer': isAnyFieldFFiled,
-                    'bg-gray-200 cursor-default': !isAnyFieldFFiled
+                    'bg-blue text-white cursor-pointer': isFieldFilled,
+                    'bg-gray-200 cursor-auto': !isFieldFilled
                   }
                 )}
               >
                 Save
               </Button>
             </form>
-            <div className='absolute flex items-center top-[100%] left-0 w-96 p-[0.625rem] bg-[#fff9fa] border border-red-500 text-red-500 rounded-sm'>
-              <svg
-                className='w-5 h-5 fill-red-500'
-                xmlns='http://www.w3.org/2000/svg'
-                fill='#000000'
-                viewBox='0 0 256 256'
-              >
-                <path d='M164.24,100.24,136.48,128l27.76,27.76a6,6,0,1,1-8.48,8.48L128,136.48l-27.76,27.76a6,6,0,0,1-8.48-8.48L119.52,128,91.76,100.24a6,6,0,0,1,8.48-8.48L128,119.52l27.76-27.76a6,6,0,0,1,8.48,8.48ZM230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z'></path>
-              </svg>
-              <span className='ml-[0.625rem] text-xs leading-[1.2] text-red-500'>
-                This voucher is no longer in use. It may have been removed. Please try again.
-              </span>
-            </div>
+            {errors.code && (
+              <div className='absolute flex items-center top-[100%] left-0 w-96 p-[0.625rem] bg-[#fff9fa] border border-red-500 text-red-500 rounded-sm'>
+                <svg
+                  className='w-5 h-5 fill-red-500'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='#000000'
+                  viewBox='0 0 256 256'
+                >
+                  <path d='M164.24,100.24,136.48,128l27.76,27.76a6,6,0,1,1-8.48,8.48L128,136.48l-27.76,27.76a6,6,0,0,1-8.48-8.48L119.52,128,91.76,100.24a6,6,0,0,1,8.48-8.48L128,119.52l27.76-27.76a6,6,0,0,1,8.48,8.48ZM230,128A102,102,0,1,1,128,26,102.12,102.12,0,0,1,230,128Zm-12,0a90,90,0,1,0-90,90A90.1,90.1,0,0,0,218,128Z'></path>
+                </svg>
+                <span className='ml-[0.625rem] text-xs leading-[1.2] text-red-500'>{errors.code?.message}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -122,9 +154,13 @@ export default function VoucherWallet() {
       </div>
 
       <div className='grid grid-cols-2 gap-5 mt-5'>
-        <VoucherBox voucherType='global' quantity={5} />
-        <VoucherBox voucherType='shipping' quantity={10} />
-        <VoucherBox voucherType='shop' quantity={10} />
+        {vouchersData?.data.body?.content?.map((vou) => {
+          return (
+            <div key={vou.voucher.id}>
+              <VoucherBox voucher={vou.voucher} />
+            </div>
+          )
+        })}
       </div>
     </div>
   )
