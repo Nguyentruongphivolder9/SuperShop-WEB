@@ -11,7 +11,7 @@ import voucherApi from 'src/apis/voucher.api'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useContext, useMemo, useState } from 'react'
 import { StatusVoucher } from './enums/voucherInfo.enum'
-import UnderlineTabs from './components/UnderlineTabs'
+import UnderlineTabs from 'src/components/UnderlineTabs'
 
 const voucherTimeTabs = [
   { status: 'all', label: 'all' },
