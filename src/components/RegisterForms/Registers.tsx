@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation } from '@tanstack/react-query';
@@ -8,10 +8,13 @@ import { userSchema, schema, Schema, UserSchema } from '../../utils/rules';
 import authApi, { FinalRegisterForm } from '../../apis/auth.api';
 import google from "../../assets/logoSvg/googleSvg.svg";
 import facebook from "../../assets/logoSvg/faceBookSvg.svg";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { User } from 'src/types/user.type';
 import { parseJwt } from 'src/utils/auth';
+import planeGif from '../../assets/gifs/plane.gif';
+import { AppContext } from 'src/contexts/app.context';
+import { delay } from 'lodash';
 const emailVerification = schema.pick(['email']);
 type FormDataEmail = Pick<Schema, 'email'>;
 const userRegister = userSchema.pick(['user_name', 'full_name', 'gender', 'phone', 'email', 'address', 'birth_day', 'password', 'confirm_password'])
@@ -35,12 +38,17 @@ type SubRegisterProps = {
     userInfor?: FormDataRegister;
     handleSetUserInfo?: React.Dispatch<React.SetStateAction<FormDataRegister>>;
     verifyToken?: string;
-    handleSetVeifyToken?: React.Dispatch<React.SetStateAction<string>>
+    handleSetVeifyToken?: React.Dispatch<React.SetStateAction<string>>;
+    handleSetIsAuthenticated?: React.Dispatch<React.SetStateAction<boolean>>;
+    handleSetProfile?: React.Dispatch<React.SetStateAction<User | null>>;
+    profile?: User | null;
+    handleSetIsWaitingForRegistration?: React.Dispatch<React.SetStateAction<boolean>>
 };
 
 
 
 function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevStep }: SubRegisterProps) {
+    const { setIsAuthenticated, setProfile, profile } = useContext(AppContext);
     const [email, setEmail] = useState<FormDataEmail>({
         email: ''
     });
@@ -59,6 +67,7 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
     const [isVerifyEmailCompleted, setIsVerifyEmailCompleted] = useState<boolean>(false);
     const [isWaitingForEmailResponse, setIsWaitingForEmailResponse] = useState<boolean>(false);
     const [isUserInforCompleted, setIsUserInforCompleted] = useState<boolean>(false);
+    const [isWaitingForRegistration, setIsWaitingForRegistration] = useState<boolean>(false);
     return (
         <>
             <h2 className="text-2xl mb-4">Đăng ký</h2>
@@ -94,17 +103,6 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                 />
             )}
 
-
-            {current_step === 4 && (
-                <WatingForVerifyCation
-                    goToNextStep={goToNextStep}
-                    goToPrevStep={goToPrevStep}
-                    current_step={current_step}
-                    is_complete={is_complete}
-                    steps={steps}
-                />
-            )}
-
             {current_step === 3 && (
                 <UserInformation
                     goToNextStep={goToNextStep}
@@ -120,8 +118,22 @@ function Registers({ current_step, steps, is_complete, goToNextStep, goToPrevSte
                     is_form_completed={isUserInforCompleted}
                 />
             )}
-
-
+            {current_step === 4 && (
+                <WatingForVerifyCation
+                    goToNextStep={goToNextStep}
+                    goToPrevStep={goToPrevStep}
+                    current_step={current_step}
+                    is_complete={is_complete}
+                    steps={steps}
+                    //Attribute của riêng form
+                    handleSetIsAuthenticated={setIsAuthenticated}
+                    handleSetProfile={setProfile}
+                    profile={profile}
+                    userInfor={userInfo}
+                    is_form_completed={isWaitingForRegistration}
+                    handleSetIsFormCompleted={setIsWaitingForRegistration}
+                />
+            )}
             <div className="flex items-center justify-between mt-6 mb-6">
                 <hr className="w-4/12 border-gray-300" />
                 <span className="text-gray-500 text-md">Hoặc</span>
@@ -179,13 +191,11 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
             return await authApi.registerAccount(dataToSend);
         }
     });
-
     const onSubmit = handleSubmit((data: FormDataRegister) => {
-        console.log(data);
+        const passwordToSave: string = data.password;
+        const emailToSend: string | undefined = data.email;
         userInforMutation.mutate(data, {
             onSuccess: (data) => {
-                console.log(data.data.body);
-                alert('Register successful');
                 const userResponse: User = parseJwt(data.data.body.accessToken);
                 const {
                     avatarUrl,
@@ -206,10 +216,10 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
                     full_name: fullName,
                     gender: gender,
                     phone: phoneNumber,
-                    email: email,
+                    email: emailToSend,
                     address: address,
                     birth_day: birthDay,
-                    password: "",
+                    password: passwordToSave,
                     confirm_password: ""
                 });
 
@@ -357,27 +367,62 @@ const UserInformation = ({ current_step, steps, is_complete, goToNextStep, goToP
 }
 
 
-const WatingForVerifyCation = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep }: SubRegisterProps) => {
+
+const WatingForVerifyCation = ({ handleSetIsAuthenticated, handleSetProfile, userInfor, is_form_completed, handleSetIsWaitingForRegistration }: SubRegisterProps) => {
+    const navigate = useNavigate();
+    const loginMutation = useMutation({
+        mutationFn: ({ email, password }: { email: string, password: string }) => authApi.login({ email, password }),
+        onSuccess: (data) => {
+            handleSetIsAuthenticated?.(true);
+            const userProfile = parseJwt(data.data.body.accessToken);
+            handleSetProfile?.(userProfile);
+            handleSetIsWaitingForRegistration?.(true);
+            toast.success("Đăng kí tài khoản thành công. Chuyển hướng sau 3 giây...");
+            setTimeout(() => {
+                navigate('/');
+            }, 3000);
+        },
+        onError: () => {
+            toast.error("Đã có lỗi trong quá trình đăng ký, vui lòng thử lại sau giây lát.");
+        }
+    });
+
+    useEffect(() => {
+        if (userInfor?.password && userInfor?.email) {
+            loginMutation.mutate({ email: userInfor.email, password: userInfor.password });
+        }
+    }, [userInfor, loginMutation]);
     return (
         <>
-            Waiting for verification.
-            <div className='flex justify-between'>
-                <Button
-                    onClick={goToNextStep}
-                    className='flex items-center justify-center w-full text-center py-2 px-2 uppercase bg-blue text-white text-sm hover:bg-cyan-400 mr-2 mt-10'
-                >
-                    Tiếp theo
-                </Button>
-                <Button
-                    onClick={goToPrevStep}
-                    className='flex items-center justify-center w-full text-center py-2 px-2 uppercase bg-blue text-white text-sm hover:bg-cyan-400  ml-2 mt-10'
-                >
-                    Quay về
-                </Button>
+        {!is_form_completed ? (
+            <div className="flex flex-col items-center justify-center p-4 bg-gray-100 rounded-lg shadow-md">
+                <img src={planeGif} alt="Loading" className="w-60 h-40 mb-4 rounded-lg" />
+                <p className="text-lg font-semibold mb-4 text-center">Tài khoản đang được xác thực...</p>
+                <p className="text-sm text-center">Vui lòng đợi trong giây lát</p>
             </div>
-        </>
-    )
-}
+        ) : (
+            <div className="bg-green-500 p-6 rounded-lg shadow-lg text-center">
+                <svg className="animate-bounce mx-auto w-20 h-20 bg-white rounded-full text-green-500 p-3 shadow-md" fill="none" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="16" stroke="currentColor" strokeWidth="12" fill="none" />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="3"
+                        stroke="currentColor"
+                        d="M8 12l4 3 5-8"
+                    />
+                </svg>
+                <div className="bg-white w-full rounded-lg p-4 mt-4">
+                    <p className="text-lg text-green-500 font-semibold">Tài khoản đăng kí thành công</p>
+                    <p className="text-sm text-green-500">Chuyển hướng về trang trước đó...</p>
+                </div>
+            </div>
+        )}
+    </>
+    );
+};
+
+
 
 const TypingEmail = ({ current_step, steps, is_complete, goToNextStep, goToPrevStep, handleSetEmail, email, is_form_completed, handleSetIsFormCompleted, handleSetVeifyToken }: SubRegisterProps) => {
     const { register, handleSubmit, formState: { errors } } = useForm<FormDataEmail>({
@@ -457,7 +502,6 @@ const WaitingEmailVerifyCation = ({ current_step, steps, is_complete, goToNextSt
                     const data: FormWaitingForEmailVerify = { email: email?.email ?? "", token: verifyToken };
                     await waitingForEmailResponseMutation.mutateAsync(data, {
                         onSuccess: (data) => {
-                            console.log(data);
                             if (data.data.body === true) {
                                 clearInterval(interval);
                                 handleSetIsFormCompleted?.(true);

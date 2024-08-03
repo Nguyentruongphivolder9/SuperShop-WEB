@@ -3,23 +3,23 @@ import { StarterKit } from '@tiptap/starter-kit'
 import { Underline } from '@tiptap/extension-underline'
 import TipTapMenuBar from './TipTapMenuBar'
 import { Control, Controller } from 'react-hook-form'
-import { FormDataProduct } from 'src/contexts/productAdd.context'
+import { useEffect } from 'react'
 
 interface Props {
-  control: Control<FormDataProduct, any>
+  control: Control<any, any>
   className: string
+  contentEdit?: string
 }
-
-const content = ``
 const extensions = [StarterKit, Underline]
 
 export default function TipTapEditor({
   control,
-  className = 'rounded-md overflow-hidden flex flex-col border'
+  className = 'rounded-md overflow-hidden flex flex-col border',
+  contentEdit = ``
 }: Props) {
   const editor = useEditor({
     extensions,
-    content,
+    content: contentEdit,
     editorProps: {
       attributes: {
         class:
@@ -27,6 +27,12 @@ export default function TipTapEditor({
       }
     }
   })
+
+  useEffect(() => {
+    if (editor && contentEdit !== editor.getHTML()) {
+      editor.commands.setContent(contentEdit)
+    }
+  }, [contentEdit, editor])
 
   if (!editor) {
     return null

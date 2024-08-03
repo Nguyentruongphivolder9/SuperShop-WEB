@@ -5,13 +5,12 @@ import NoData from 'src/components/NoData'
 import { AppContext } from 'src/contexts/app.context'
 import { CategoryResponse } from 'src/types/category.type'
 import { UseFormSetValue } from 'react-hook-form'
-import { FormDataProduct } from 'src/contexts/productAdd.context'
 import { formatText } from 'src/utils/utils'
 import CategoryItem from 'src/components/CategoryItem'
 
 interface Props {
   handlerShowCategoryList: () => void
-  setCategoryId: UseFormSetValue<FormDataProduct>
+  setCategoryId: UseFormSetValue<any>
   setCategoryValue: (value: string) => void
   categoryValue: string
 }

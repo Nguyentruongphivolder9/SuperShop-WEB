@@ -79,22 +79,7 @@ const Stepper = ({ steps, current_step, messages, is_complete, children, goToNex
                     })}
                 </ol>
             </div>
-            {!complete && (
-                <div className="flex justify-between mt-4">
-                    <button
-                        className="px-4 py-2 bg-cyan-400 text-black rounded hover:bg-cyan-600 transition duration-300"
-                        onClick={() => handleStepChange('next')}
-                    >
-                        {current_step === steps ? 'Finish' : 'Next'}
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-cyan-400 text-black rounded hover:bg-cyan-600 transition duration-300"
-                        onClick={() => handleStepChange('prev')}
-                    >
-                        {current_step === 1 ? 'Cancel' : 'Previous'}
-                    </button>
-                </div>
-            )}
+          
             <div className="mt-6 flex justify-center items-center">{children}</div>
         </>
     );
