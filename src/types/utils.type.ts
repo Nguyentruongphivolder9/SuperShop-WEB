@@ -31,7 +31,15 @@ export type NoUndefinedField<T> = {
 export type Pagination<Data> = {
   content: Data
   pageable: Pageable
-  metadata: Metadata
+  last: boolean
+  totalPages: number
+  totalElements: number
+  size: number
+  number: number
+  sort: Sort
+  first: boolean
+  numberOfElements: number
+  empty: boolean
 }
 
 interface Pageable {
@@ -46,16 +54,4 @@ interface Sort {
   empty: boolean
   sorted: boolean
   unsorted: boolean
-}
-
-interface Metadata {
-  last: boolean
-  totalPages: number
-  totalElements: number
-  size: number
-  number: number
-  sort: Sort
-  first: boolean
-  numberOfElements: number
-  empty: boolean
 }

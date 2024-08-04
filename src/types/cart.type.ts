@@ -9,8 +9,9 @@ export interface CartItemRequest {
 
 export interface CartItemResponse {
   id: string
-  shopId: string
   quantity: number
-  productVariant: ProductVariantsResponse
+  productVariantId: string
   product: Product
+  createdAt: string
+  updatedAt: string
 }

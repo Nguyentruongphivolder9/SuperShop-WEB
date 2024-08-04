@@ -7,15 +7,24 @@ import QuantityController from 'src/components/QuantityController'
 import path from 'src/constants/path'
 import { purchasesStatus } from 'src/constants/purchase'
 import { Purchase } from 'src/types/purchase.type'
-import { formatCurrency, generateNameId } from 'src/utils/utils'
+import {
+  formatCurrency,
+  generateNameId,
+  handleImageProduct,
+  handlePriceProduct,
+  handleStockQuantityProduct
+} from 'src/utils/utils'
 import { produce } from 'immer'
 import keyBy from 'lodash/keyBy'
 import { toast } from 'react-toastify'
 import { AppContext } from 'src/contexts/app.context'
 import noProduct from 'src/assets/images/no-product.png'
+import config from 'src/constants/config'
+import VariationsPopover from './VariationsPopover'
+import { ProductVariantsResponse } from 'src/types/product.type'
 
 export default function Cart() {
-  const { extendedPurchase, setExtendedPurchase } = useContext(AppContext)
+  const { cartItems, extendedPurchase, setExtendedPurchase } = useContext(AppContext)
 
   // const { data: purchasesInCartData, refetch } = useQuery({
   //   queryKey: ['purchases', { status: purchasesStatus.inCart }],
@@ -104,7 +113,7 @@ export default function Cart() {
   //   )
   // }
 
-  // const hanldeTypeQuantity = (purchaseIndex: number) => (value: number) => {
+  // const handleTypeQuantity = (purchaseIndex: number) => (value: number) => {
   //   setExtendedPurchase(
   //     produce((draft) => {
   //       draft[purchaseIndex].buy_count = value
@@ -171,69 +180,73 @@ export default function Cart() {
             </div>
             <div className='my-3 rounded-sm bg-white p-5 shadow'>
               
-              <div className='mb-5 grid grid-cols-12 rounded-sm border border-gray-200 bg-white py-5 px-4 text-center text-sm text-gray-500 first:mt-0'>
-                <div className='col-span-6'>
-                  <div className='flex'>
-                    <div className='flex flex-shrink-0 items-center justify-center pr-3'>
-                      <input type='checkbox' className='h-5 w-5 accent-orange' />
-                    </div>
-                    <div className='flex-grow'>
+              {cartItems?.content && (
+                cartItems.content.map((item) => (
+                  <div key={item.id} className='mb-5 grid grid-cols-12 rounded-sm border border-gray-200 bg-white py-5 px-4 text-center text-sm text-gray-500 first:mt-0'>
+                    <div className='col-span-6'>
                       <div className='flex'>
-                        {/* <Link
-                          className='h-20 w-20 flex-shrink-0'
-                          to={`${path.home}${generateNameId({
-                            name: purchase.product.name,
-                            id: purchase.product._id
-                          })}`}
-                        >
-                          <img alt={purchase.product.name} src={purchase.product.image} />
-                        </Link>
-                        <div className='flex-grow px-2 pt-1 pb-2'>
-                          <Link
-                            to={`${path.home}${generateNameId({
-                              name: purchase.product.name,
-                              id: purchase.product._id
-                            })}`}
-                            className='line-clamp-2'
-                          >
-                            {purchase.product.name}
-                          </Link>
-                        </div> */}
+                        <div className='flex flex-shrink-0 items-center justify-center pr-3'>
+                          <input type='checkbox' className='h-5 w-5 accent-orange' />
+                        </div>
+                        <div className='flex-grow'>
+                          <div className='flex'>
+                            <Link
+                              className='h-20 w-20 flex-shrink-0'
+                              to={`${path.home + 'products/'}${generateNameId({ name: item.product.name, id: item.product.id, shopId: item.product.shopId })}`}
+                            >
+                              <img alt={item.product.name} src={`${config.awsURL}products/${handleImageProduct(item.product, item.productVariantId)}`} />
+                            </Link>
+                            <div className='flex-1'>
+                              <div className='w-full flex flex-row h-full'>
+                                <div className='w-7/12 h-full pt-[5px] pl-[10px] pr-4'>
+                                  <Link
+                                    to={`${path.home + 'products/'}${generateNameId({ name: item.product.name, id: item.product.id, shopId: item.product.shopId })}`}
+                                    className='line-clamp-2 text-[#000000DE] text-left'
+                                  >
+                                    {item.product.name}
+                                  </Link>
+                                </div>
+                                <div className='w-5/12 flex items-center justify-start h-full'>
+                                  <VariationsPopover product={item.product} productVariant={item.product.productVariants.find((pv) => pv.id == item.productVariantId) as ProductVariantsResponse} />
+                                </div>
+                              </div>
+                                
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className='col-span-6 flex items-center'>
+                      <div className='grid grid-cols-5 items-center'>
+                        <div className='col-span-2'>
+                          <div className='flex items-center justify-center'>
+                            <span className='text-gray-300 line-through'>
+                              {/* ₫{formatCurrency(purchase.product.price_before_discount)} */}
+                              đ450000
+                            </span>
+                            <span className='ml-3 text-[#000000DE]'>₫{formatCurrency(handlePriceProduct(item.product, item.productVariantId))}</span>
+                          </div>
+                        </div>
+                        <div className='col-span-1'>
+                          <QuantityController
+                            max={handleStockQuantityProduct(item.product, item.productVariantId)}
+                            value={item.quantity != 0 ? item.quantity : 1}
+                            classNameWrapper='flex items-center'
+                          />
+                        </div>
+                        <div className='col-span-1'>
+                          <span className='text-blue'>
+                            ₫{formatCurrency(handlePriceProduct(item.product, item.productVariantId) * item.quantity)}
+                          </span>
+                        </div>
+                        <div className='col-span-1'>
+                          <button className='bg-none text-[#000000DE] transition-colors hover:text-blue'>Delete</button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className='col-span-6'>
-                  <div className='grid grid-cols-5 items-center'>
-                    <div className='col-span-2'>
-                      <div className='flex items-center justify-center'>
-                        <span className='text-gray-300 line-through'>
-                          {/* ₫{formatCurrency(purchase.product.price_before_discount)} */}
-                          đ450000
-                        </span>
-                        {/* <span className='ml-3'>₫{formatCurrency(purchase.product.price)}</span> */}
-                        đ450000
-                      </div>
-                    </div>
-                    <div className='col-span-1'>
-                      <QuantityController
-                        max={10}
-                        value={1}
-                        classNameWrapper='flex items-center'
-                      />
-                    </div>
-                    <div className='col-span-1'>
-                      <span className='text-orange'>
-                        {/* ₫{formatCurrency(purchase.product.price * purchase.buy_count)} */}
-                        đ450000
-                      </span>
-                    </div>
-                    <div className='col-span-1'>
-                      <button className='bg-none text-black transition-colors hover:text-orange'>Xóa</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                ))
+              )}
               
             </div>
           </div>
