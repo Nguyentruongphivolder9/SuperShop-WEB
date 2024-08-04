@@ -165,10 +165,9 @@ export default function ProductDetail() {
       quantity: buyCount
     }
 
-    console.log(cartItemBody)
-
     const response = await addToCartMutation.mutateAsync(cartItemBody)
     if (response.data.statusCode === 201) {
+      setErrorSubmitted('')
       setIsModal(true)
       setChildrenModal(
         <div className='w-[400px] bg-white rounded-md shadow h-auto'>
@@ -381,14 +380,14 @@ export default function ProductDetail() {
                       <line fill='none' strokeLinecap='round' strokeMiterlimit={10} x1={9} x2={9} y1='8.5' y2='5.5' />
                     </g>
                   </svg>
-                  Thêm vào giỏ hàng
+                  Add To Cart
                 </button>
 
                 <button
                   // onClick={buyNow}
                   className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-[#FF424E] px-5 capitalize text-white shadow-sm outline-none hover:bg-[#FF424E]/90'
                 >
-                  Mua ngay
+                  Buy Now
                 </button>
               </div>
             </div>

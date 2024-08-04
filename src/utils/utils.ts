@@ -3,7 +3,7 @@ import config from 'src/constants/config'
 import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ErrorResponse } from 'src/types/utils.type'
 import { format } from 'date-fns'
-import { ProductVariantsResponse } from 'src/types/product.type'
+import { Product, ProductVariantsResponse } from 'src/types/product.type'
 import { ErrorServerRes } from 'src/types/utils.type'
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   // eslint-disable-next-line import/no-named-as-default-member
@@ -119,4 +119,52 @@ export const calculateFromToPrice = (productVariants: ProductVariantsResponse[])
 
 export const calculateTotalStockQuantity = (productVariants: ProductVariantsResponse[]): number => {
   return productVariants.reduce((total, variant) => total + variant.stockQuantity, 0)
+}
+
+export const handlePriceProduct = (product: Product, productVariantId: string): number => {
+  if ((productVariantId && product.price == null) || product.price == 0) {
+    const productVariant: ProductVariantsResponse = product.productVariants.find(
+      (pv) => pv.id == productVariantId
+    ) as ProductVariantsResponse
+
+    if (productVariant) {
+      return productVariant.price
+    } else {
+      return 0
+    }
+  } else {
+    return product.price
+  }
+}
+
+export const handleStockQuantityProduct = (product: Product, productVariantId: string): number => {
+  if ((productVariantId && product.stockQuantity == null) || product.stockQuantity == 0) {
+    const productVariant: ProductVariantsResponse = product.productVariants.find(
+      (pv) => pv.id == productVariantId
+    ) as ProductVariantsResponse
+
+    if (productVariant) {
+      return productVariant.stockQuantity
+    } else {
+      return 0
+    }
+  } else {
+    return product.stockQuantity
+  }
+}
+
+export const handleImageProduct = (product: Product, productVariantId: string): string => {
+  if (productVariantId) {
+    const productVariant: ProductVariantsResponse = product.productVariants.find(
+      (pv) => pv.id == productVariantId
+    ) as ProductVariantsResponse
+
+    if (productVariant && productVariant.variant1.imageUrl) {
+      return productVariant.variant1.imageUrl
+    } else {
+      return product.productImages.find((img) => img.isPrimary == true)?.imageUrl ?? ''
+    }
+  } else {
+    return product.productImages.find((img) => img.isPrimary == true)?.imageUrl ?? ''
+  }
 }
