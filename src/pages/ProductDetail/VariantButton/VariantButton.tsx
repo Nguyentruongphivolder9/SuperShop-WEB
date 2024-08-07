@@ -51,7 +51,7 @@ export default function VariantButton({
               }
             }
           }}
-          className={`relative border ${isSelectedVariants(selectedVariants, variantData.id) ? 'border-[#ee4d2d]' : 'border-[#00000017]'} hover:border-[#ee4d2d] text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm min-h-10 min-w-20 outline-0 justify-center`}
+          className={`relative bg-white  border ${isSelectedVariants(selectedVariants, variantData.id) ? 'border-[#ee4d2d]' : 'border-[#00000017]'} hover:border-[#ee4d2d] text-sm pl-10 p-2 mt-2 mr-2 flex items-center rounded-sm min-h-10 min-w-20 outline-0 justify-center`}
         >
           {variantData.name}
           <img
@@ -87,7 +87,7 @@ export default function VariantButton({
               }
             }
           }}
-          className={`relative border ${isSelectedVariants(selectedVariants, variantData.id) ? 'border-[#ee4d2d]' : 'border-[#00000017]'} hover:border-[#ee4d2d] text-sm p-2 mt-2 mr-2 flex items-center rounded-sm min-h-10 min-w-20 outline-0 justify-center`}
+          className={`relative bg-white border ${isSelectedVariants(selectedVariants, variantData.id) ? 'border-[#ee4d2d]' : 'border-[#00000017]'} hover:border-[#ee4d2d] text-sm p-2 mt-2 mr-2 flex items-center rounded-sm min-h-10 min-w-20 outline-0 justify-center`}
         >
           {variantData.name}
           {isSelectedVariants(selectedVariants, variantData.id) && (

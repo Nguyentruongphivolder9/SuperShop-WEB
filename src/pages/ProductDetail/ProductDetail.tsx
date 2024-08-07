@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import {
   calculateFromToPrice,
   calculateTotalStockQuantity,
@@ -16,8 +16,11 @@ import ProductRating from './ProductRating'
 import ProductsSlider from 'src/components/ProductsSlider'
 import VariantButton from './VariantButton'
 import productApi from 'src/apis/product.api'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import config from 'src/constants/config'
+import cartApi from 'src/apis/cart.api'
+import { CartItemRequest } from 'src/types/cart.type'
+import { AppContext } from 'src/contexts/app.context'
 
 export default function ProductDetail() {
   // const { t } = useTranslation('product')
@@ -32,13 +35,20 @@ export default function ProductDetail() {
     queryFn: () => productApi.getProductById(proInfo.id, proInfo.shopId)
   })
 
+  const addToCartMutation = useMutation({
+    mutationFn: cartApi.addToCart
+  })
+
+  const { setChildrenModal, setIsModal } = useContext(AppContext)
   const [activeImage, setActiveImage] = useState<string>('')
   const [variantsGroup, setVariantsGroup] = useState<VariantsGroupResponse[]>([])
   const [selectedVariants, setSelectedVariants] = useState<string[]>(['', ''])
   const [productPrice, setProductPrice] = useState<string>('')
+  const [selectedProductVariantId, setSelectedProductVariantId] = useState<string>('')
   const [productStockQuantity, setProductStockQuantity] = useState<number | null>(null)
   const product = ProductDetailData?.data.body
   const imageRef = useRef<HTMLImageElement>(null)
+  const [errorSubmitted, setErrorSubmitted] = useState<string>('')
 
   // const queryConfig: ProductListConfig = { limit: '15', page: '1', category: product?.category._id }
   // const { data: productsData } = useQuery({
@@ -48,10 +58,6 @@ export default function ProductDetail() {
   //   },
   //   staleTime: 3 * 60 * 1000,
   //   enabled: Boolean(product)
-  // })
-
-  // const addToCartMutation = useMutation({
-  //   mutationFn: (body: { buy_count: number; product_id: string }) => purchaseApi.addToCart(body)
   // })
 
   useEffect(() => {
@@ -103,8 +109,11 @@ export default function ProductDetail() {
 
         const currentProductVariant = getProductVariant()
         if (currentProductVariant) {
+          setSelectedProductVariantId(currentProductVariant.id)
           currentProductPrice = '₫' + formatCurrency(currentProductVariant.price ?? 0)
           currentProductStockQuantity = currentProductVariant.stockQuantity ?? 0
+        } else {
+          setSelectedProductVariantId('')
         }
       }
 
@@ -143,17 +152,56 @@ export default function ProductDetail() {
     setBuyCount(value)
   }
 
-  // const addToCart = () => {
-  //   addToCartMutation.mutate(
-  //     { buy_count: buyCount, product_id: product?._id as string },
-  //     {
-  //       onSuccess: (data) => {
-  //         queryClient.invalidateQueries({ queryKey: ['purchases', { status: purchasesStatus.inCart }] })
-  //         toast.success(data.data.message, { autoClose: 2000 })
-  //       }
-  //     }
-  //   )
-  // }
+  const addToCart = async () => {
+    if (product?.isVariant && selectedProductVariantId == '') {
+      setErrorSubmitted('Please select product variation first')
+      return
+    }
+
+    const cartItemBody: CartItemRequest = {
+      productId: product?.id as string,
+      shopId: product?.shopId as string,
+      productVariantId: selectedProductVariantId,
+      quantity: buyCount
+    }
+
+    const response = await addToCartMutation.mutateAsync(cartItemBody)
+    if (response.data.statusCode === 201) {
+      setErrorSubmitted('')
+      setIsModal(true)
+      setChildrenModal(
+        <div className='w-[400px] bg-white rounded-md shadow h-auto'>
+          <div
+            onClick={() => {
+              setIsModal(false)
+              setChildrenModal(null)
+            }}
+            className='fixed w-full h-full top-0 left-0'
+          ></div>
+          <div className='flex flex-col px-4 py-8 items-center'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='currentColor'
+              className='size-20 text-[#30b566]'
+            >
+              <path
+                fillRule='evenodd'
+                d='M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z'
+                clipRule='evenodd'
+              />
+            </svg>
+            <div className='text-md text-[#333333] font-bold mt-4'>Item has been added to your shopping cart</div>
+          </div>
+        </div>
+      )
+
+      setTimeout(() => {
+        setIsModal(false)
+        setChildrenModal(null)
+      }, 2000)
+    }
+  }
 
   // const buyNow = async () => {
   //   const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
@@ -256,49 +304,58 @@ export default function ProductDetail() {
               </div>
 
               {/* variations */}
-              <div className='mt-4 flex flex-col px-5 pb-4'>
-                {variantsGroup &&
-                  variantsGroup.map((groupItem, iGroup) => (
-                    <div key={iGroup} className='w-full'>
-                      <div className='mb-4 grid grid-cols-10'>
-                        <div className='col-span-2 h-10 flex items-center mt-2'>
-                          <div className='text-[#757575] text-sm w-full'>{groupItem.name}</div>
-                        </div>
-                        <div className='col-span-8 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
-                          {groupItem.variants &&
-                            groupItem.variants.map((variant, iVariant) => (
-                              <VariantButton
-                                key={iVariant}
-                                variantData={variant}
-                                activeImage={activeImage}
-                                indexGroupVariant={iGroup + 1}
-                                setActiveImage={setActiveImage}
-                                selectedVariants={selectedVariants}
-                                setSelectedVariants={setSelectedVariants}
-                              />
-                            ))}
+              <div className={`mt-4 ${errorSubmitted && 'bg-[#fff5f5]'} pb-[15px] pt-[10px] pl-[20px] pr-[35px]`}>
+                <div className='flex flex-col'>
+                  {variantsGroup &&
+                    variantsGroup.map((groupItem, iGroup) => (
+                      <div key={iGroup} className='w-full'>
+                        <div className='mb-4 grid grid-cols-10'>
+                          <div className='col-span-2 h-10 flex items-center mt-2'>
+                            <div className='text-[#757575] text-sm w-full'>{groupItem.name}</div>
+                          </div>
+                          <div className='col-span-8 flex flex-wrap overflow-y-auto max-h-56 text-[#000000cc] h-auto'>
+                            {groupItem.variants &&
+                              groupItem.variants.map((variant, iVariant) => (
+                                <VariantButton
+                                  key={iVariant}
+                                  variantData={variant}
+                                  activeImage={activeImage}
+                                  indexGroupVariant={iGroup + 1}
+                                  setActiveImage={setActiveImage}
+                                  selectedVariants={selectedVariants}
+                                  setSelectedVariants={setSelectedVariants}
+                                />
+                              ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-              </div>
+                    ))}
+                </div>
 
-              <div className='flex items-center'>
-                <div className='capitalize text-gray-500'>Số lượng</div>
-                <QuantityController
-                  value={buyCount}
-                  onDecrease={handleByCount}
-                  onIncrease={handleByCount}
-                  onType={handleByCount}
-                  max={productStockQuantity ?? 0}
-                />
-                <div className='ml-6 text-gray-500 text-sm'>{productStockQuantity} pieces available</div>
+                <div className='grid grid-cols-10 mt-4'>
+                  <div className='col-span-2 h-10 flex items-center capitalize text-[#757575] text-sm'>Quantity</div>
+                  <div className='col-span-8 flex items-center justify-start'>
+                    <QuantityController
+                      value={buyCount}
+                      onDecrease={handleByCount}
+                      onIncrease={handleByCount}
+                      onType={handleByCount}
+                      max={productStockQuantity ?? 0}
+                      classNameWrapper='ml-0'
+                    />
+                    <div className='ml-6 text-[#757575] text-sm'>{productStockQuantity} pieces available</div>
+                  </div>
+                </div>
+
+                {errorSubmitted && (
+                  <div className='ml-[130px] mt-1 text-[#ff424f] text-sm'>Please select product variation first</div>
+                )}
               </div>
 
               <div className='mt-8 flex items-center'>
                 <button
                   className='flex h-12 items-center justify-center rounded-sm border border-blue text-blue bg-blue/10 px-5 capitalize shadow-sm hover:bg-blue/5'
-                  // onClick={addToCart}
+                  onClick={addToCart}
                 >
                   <svg
                     enableBackground='new 0 0 15 15'
@@ -323,14 +380,14 @@ export default function ProductDetail() {
                       <line fill='none' strokeLinecap='round' strokeMiterlimit={10} x1={9} x2={9} y1='8.5' y2='5.5' />
                     </g>
                   </svg>
-                  Thêm vào giỏ hàng
+                  Add To Cart
                 </button>
 
                 <button
                   // onClick={buyNow}
                   className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-[#FF424E] px-5 capitalize text-white shadow-sm outline-none hover:bg-[#FF424E]/90'
                 >
-                  Mua ngay
+                  Buy Now
                 </button>
               </div>
             </div>

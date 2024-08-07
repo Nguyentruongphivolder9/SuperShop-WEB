@@ -56,16 +56,14 @@ export default function VoucherAdd() {
   const {
     control,
     register,
-    unregister,
     handleSubmit,
     setValue,
-    trigger,
     getValues,
     clearErrors,
     formState: { errors },
     watch
   } = useForm<FormData>({
-    mode: 'onBlur',
+    mode: 'onChange',
     resolver: yupResolver(voucherUpdateSchema)
   })
 
@@ -116,6 +114,7 @@ export default function VoucherAdd() {
         id: idUpdate as string,
         body: {
           ...formData,
+          code: `${profile?.userName.slice(0, 5)}${data.code}`.toUpperCase(),
           startDate: GMTToLocalStingTime(data.startDate),
           endDate: GMTToLocalStingTime(data.endDate)
         }
@@ -124,9 +123,6 @@ export default function VoucherAdd() {
       console.log(error)
     }
   })
-
-  console.log('watch', watch())
-  console.log('error', errors)
 
   return (
     <div className='w-full'>
@@ -223,7 +219,7 @@ export default function VoucherAdd() {
                           !isUpComing
                             ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
                             : 'bg-white hover:border-gray-400'
-                        } border text-sm rounded`,
+                        } border text-sm rounded has-[:focus]:border-gray-400`,
                         {
                           'border-gray-200': !errors.code?.message,
                           'border-red-300': errors.code?.message
@@ -296,7 +292,6 @@ export default function VoucherAdd() {
                               }
                               onChange={(event) => {
                                 field.onChange(event)
-                                trigger('endDate')
                               }}
                               onBlur={field.onBlur}
                               selected={field.value}
@@ -669,7 +664,7 @@ export default function VoucherAdd() {
                           !isUpComing
                             ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
                             : 'bg-white hover:border-gray-400'
-                        } border text-sm rounded`,
+                        } border text-sm rounded has-[:focus]:border-gray-400`,
                         {
                           'border-gray-200': !errors.code?.message,
                           'border-red-300': errors.code?.message
@@ -736,7 +731,7 @@ export default function VoucherAdd() {
                           !isUpComing
                             ? 'bg-[#e8eaec] cursor-not-allowed text-gray-500 border-gray-200 hover:border-gray-200'
                             : 'bg-white hover:border-gray-400'
-                        } border text-sm rounded`,
+                        } border text-sm rounded has-[:focus]:border-gray-400`,
                         {
                           'border-gray-200': !errors.code?.message,
                           'border-red-300': errors.code?.message

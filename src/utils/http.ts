@@ -66,7 +66,9 @@ export class Http {
       },
       async (error: AxiosError) => {
         if (
-          ![HttpStatusCode.UnprocessableEntity, HttpStatusCode.Unauthorized].includes(error.response?.status as number)
+          ![HttpStatusCode.UnprocessableEntity, HttpStatusCode.Unauthorized, HttpStatusCode.NotFound].includes(
+            error.response?.status as number
+          )
         ) {
           const data: any | undefined = error.response?.data
           const message = data?.message || error.message

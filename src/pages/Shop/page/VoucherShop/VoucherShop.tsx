@@ -9,27 +9,44 @@ import Table from './components/Table'
 import { VoucherResponse } from 'src/types/voucher.type'
 import voucherApi from 'src/apis/voucher.api'
 import { useQuery } from '@tanstack/react-query'
-import { useContext, useMemo } from 'react'
-import { columnDef } from './components/Table/CoreTable/column'
-import { FormProvider, useForm } from 'react-hook-form'
-import { VoucherUpdateShema } from 'src/utils/validations/voucherValidation'
-import { VoucherContext } from 'src/contexts/voucher.context'
+import { useCallback, useContext, useMemo, useState } from 'react'
+import { StatusVoucher } from './enums/voucherInfo.enum'
+import UnderlineTabs from 'src/components/UnderlineTabs'
 
 const voucherTimeTabs = [
-  { status: 'all', name: 'All' },
-  { status: 'ongoing', name: 'Ongoing' },
-  { status: 'upgoing', name: 'Upgoing' },
-  { status: 'expired', name: 'Expired' }
+  { status: 'all', label: 'all' },
+  { status: 'ongoing', label: 'ongoing' },
+  { status: 'upgoing', label: 'upgoing' },
+  { status: 'expire', label: 'expire' }
 ]
 
 export default function VoucherShop() {
+  const [selectedTab, setSelectedTab] = useState(voucherTimeTabs[0].label)
   const queryParams: { status?: string } = useQueryParams()
   const status: string = queryParams.status || 'all'
   const { data } = useQuery({
     queryKey: ['vouchers'],
     queryFn: () => voucherApi.getVouchers()
   })
-  const vouchers: VoucherResponse[] = useMemo(() => data?.data.body?.content ?? [], [data?.data.body?.content])
+  // const vouchers: VoucherResponse[] = useMemo(() => data?.data.body?.content ?? [], [data?.data.body?.content])
+  const filterVouchers = (allVouchers: VoucherResponse[], selectedTab: string) => {
+    switch (selectedTab) {
+      case 'ongoing':
+        return allVouchers.filter((voucher) => voucher.status === StatusVoucher.ONGOING)
+      case 'upcoming':
+        return allVouchers.filter((voucher) => voucher.status === StatusVoucher.UPCOMING)
+      case 'expire':
+        return allVouchers.filter((voucher) => voucher.status === StatusVoucher.EXPIRE)
+      case 'All':
+      default:
+        return allVouchers
+    }
+  }
+
+  const vouchers = useMemo(() => {
+    const allVouchers = data?.data.body?.content ?? []
+    return filterVouchers(allVouchers, selectedTab)
+  }, [data?.data.body?.content, selectedTab])
   return (
     <>
       <div className='bg-white p-5 mb-5'>
@@ -179,28 +196,14 @@ export default function VoucherShop() {
           </div>
         </div>
 
-        <div className='p-5'>
+        <div className='p-5 mb-10'>
           <h2 className='text-[18px] leading-[24px] text-[#333333] mb-4'>Voucher List</h2>
           <div className='flex border-b border-b-gray-300'>
-            {voucherTimeTabs.map((tab) => {
-              return (
-                <Link
-                  key={tab.status}
-                  to={{
-                    pathname: path.voucherShop,
-                    search: createSearchParams({
-                      status: String(tab.status)
-                    }).toString()
-                  }}
-                  className={classNames('flex items-center justify-center h-14 px-4 text-sm text-center', {
-                    'border-b-2 border-b-blue text-blue': status === tab.status,
-                    'border-b-black/10 text-gray-900': status !== tab.status
-                  })}
-                >
-                  {tab.name}
-                </Link>
-              )
-            })}
+            <UnderlineTabs
+              tabs={voucherTimeTabs.map((ele) => ele.label)}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
           </div>
           <div className='mt-6'>
             <div className='flex items-center'>
@@ -208,7 +211,7 @@ export default function VoucherShop() {
               <div className='h-[1.875rem] mr-6 rounded-sm'>
                 <select
                   name=''
-                  className='h-full w-[140px] px-3 text-sm border hover:border-gray-500 focus:outline-none'
+                  className='h-full w-[140px] px-3 text-sm border hover:border-gray-500 focus:outline-none focus:border-gray-400'
                 >
                   <option value='name'>Voucher Name</option>
                   <option value='code'>Voucher Code</option>
@@ -216,7 +219,7 @@ export default function VoucherShop() {
                 <input
                   type='text'
                   placeholder='Input'
-                  className='h-full px-3 text-sm border border-l-gray-300 hover:border-gray-500 focus:outline-none focus:ring-0'
+                  className='h-full px-3 text-sm border border-l-gray-300 hover:border-gray-500 focus:outline-none focus:border-gray-400'
                 />
               </div>
               <Button className='border border-blue text-blue hover:bg-[#f4fbff] text-sm py-1 px-4 min-w-[76px] min-h-[32px] rounded-[4px]'>

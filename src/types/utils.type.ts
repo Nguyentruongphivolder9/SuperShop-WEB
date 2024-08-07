@@ -18,6 +18,11 @@ export interface ErrorServerResponse {
     }
   }
 }
+export interface ErrorServerRes {
+  error: string
+  message: string
+  statusCode: number
+}
 
 export type NoUndefinedField<T> = {
   [P in keyof T]-?: NoUndefinedField<NonNullable<T[P]>>
@@ -26,7 +31,15 @@ export type NoUndefinedField<T> = {
 export type Pagination<Data> = {
   content: Data
   pageable: Pageable
-  metadata: Metadata
+  last: boolean
+  totalPages: number
+  totalElements: number
+  size: number
+  number: number
+  sort: Sort
+  first: boolean
+  numberOfElements: number
+  empty: boolean
 }
 
 interface Pageable {
@@ -41,16 +54,4 @@ interface Sort {
   empty: boolean
   sorted: boolean
   unsorted: boolean
-}
-
-interface Metadata {
-  last: boolean
-  totalPages: number
-  totalElements: number
-  size: number
-  number: number
-  sort: Sort
-  first: boolean
-  numberOfElements: number
-  empty: boolean
 }
