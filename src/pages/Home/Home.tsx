@@ -8,14 +8,19 @@ import ChipTabs from 'src/components/ChipTabs/ChipTabs'
 import Product from 'src/components/Product'
 import ProductsSlider from 'src/components/ProductsSlider'
 import path from 'src/constants/path'
+import useDeviceInfo from 'src/hooks/useDeviceInfo'
 import useQueryConfig from 'src/hooks/useQueryConfig'
 import { ProductListConfig } from 'src/types/product.type'
 
 export default function Home() {
+  const deviceInfo = useDeviceInfo();
+  console.log(deviceInfo);
   const { data: productsData } = useQuery({
     queryKey: ['dailyDiscoverProduct'],
     queryFn: () => productApi.getProducts()
   })
+
+
 
   return (
     <div className='bg-[#efefef]'>
@@ -24,7 +29,7 @@ export default function Home() {
       </div>
       <div className='bg-transparent container pt-5'>
         <div className='flex flex-col bg-white'>
-          <div className='px-4 flex items-center text-[#333333] h-14 border-b-[1px] flex justify-between'>
+          <div className='px-4 flex items-center text-[#333333] h-14 border-b-[1px] justify-between'>
             <p>DAILY FEEDs</p>
             <Link to={'#'} className='text-sm font-medium text-blue mr-4'>
               View all

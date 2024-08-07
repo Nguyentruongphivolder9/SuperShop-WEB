@@ -9,10 +9,12 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   classNameInputError?: string;
   register?: UseFormRegister<any>;
   rules?: RegisterOptions;
-  rightClearButton?: boolean
+  rightClearButton?: boolean;
+  handleSetBirthDateValue?: React.Dispatch<React.SetStateAction<Date | null>>;
 }
 
 export default function Input({
+  handleSetBirthDateValue,
   rightClearButton,
   errorMessage,
   className,
@@ -30,7 +32,6 @@ export default function Input({
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
   const [dateError, setDateError] = useState('');
-  const [inputValue, setInputValue] = useState('');
   const registerResult = register && name ? register(name, rules) : null;
 
   const toggleEye = () => {
@@ -66,20 +67,28 @@ export default function Input({
 
   useEffect(() => {
     if (day && month && year) {
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const parsedYear = parseInt(year);
+      const parsedMonth = parseInt(month) - 1; // Tháng bắt đầu từ 0
+      const parsedDay = parseInt(day);
+
+      const date = new Date(parsedYear, parsedMonth, parsedDay);
+
       if (
-        date.getFullYear() !== parseInt(year) ||
-        date.getMonth() !== parseInt(month) - 1 ||
-        date.getDate() !== parseInt(day)
+        date.getFullYear() !== parsedYear ||
+        date.getMonth() !== parsedMonth ||
+        date.getDate() !== parsedDay
       ) {
         setDateError('Ngày không hợp lệ');
       } else {
         setDateError('');
+        const dateObject = new Date(parsedYear, parsedMonth, parsedDay);
         if (registerResult) {
-          const dateObject = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0);
+          if (typeof handleSetBirthDateValue !== 'undefined') {
+            handleSetBirthDateValue(dateObject);
+          }
           registerResult.onChange({
             target: {
-              value: dateObject,
+              value: dateObject.toISOString(),
             }
           });
         }
@@ -88,7 +97,9 @@ export default function Input({
   }, [day, month, year, registerResult]);
 
   const handleClear = () => {
-    setInputValue('');
+    setDay('');
+    setMonth('');
+    setYear('');
     if (registerResult) {
       registerResult.onChange({
         target: {
@@ -97,9 +108,10 @@ export default function Input({
       });
     }
   };
+
   return (
     <div className={'relative ' + className}>
-      {rightClearButton && rest.type !== 'datetime-local' && (
+      {rightClearButton && rest.type !== 'date' && (
         <button
           type="button"
           onClick={handleClear}
@@ -111,7 +123,7 @@ export default function Input({
         </button>
       )}
 
-      {rest.type !== 'datetime-local' && (
+      {rest.type !== 'date' && (
         <input
           className={`${classNameInput} ${errorMessage ? classNameInputError : ''}`}
           {...registerResult}
@@ -119,8 +131,8 @@ export default function Input({
           type={handleType()}
         />
       )}
-      
-      {rest.type === 'datetime-local' && (
+
+      {rest.type === 'date' && (
         <div className="flex space-x-2">
           <select
             className={`${classNameInput} ${day ? '' : 'text-gray-400'}`}
@@ -161,7 +173,7 @@ export default function Input({
               </option>
             ))}
           </select>
-          <span>{registerResult?.name}</span>
+          { }
         </div>
       )}
       {dateError && <div className={classNameError}>{dateError}</div>}

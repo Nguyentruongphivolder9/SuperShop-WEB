@@ -6,6 +6,7 @@ const path = {
   historyPurchase: '/user/purchase',
   voucher: '/user/voucher-wallet',
   login: '/login',
+  loginMutaion: '/login/:token/:refreshToken/:hasPassword',
   register: '/register',
   logout: '/logout',
   product: '/products',
@@ -27,11 +28,10 @@ const path = {
   voucherShopEdit: '/shopchannel/portal/marketing/vouchers/edit',
   //Email verification.
   emailVerify: '/emailVerify',
-
   advertiseManagement: '/shopchannel/portal/advertise',
   advertiseAdd: '/shopchannel/portal/advertise/new',
 
-  // admin
+  // adminoooooooooooooooooooooo
   adminSuperShop: '/admin-super-shop',
   adminCategories: '/admin-super-shop/categories'
 } as const

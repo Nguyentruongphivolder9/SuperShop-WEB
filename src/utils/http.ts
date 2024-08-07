@@ -12,7 +12,7 @@ import {
   setRefreshTokenToLS
 } from './auth'
 import config from 'src/constants/config'
-import { URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN, URl_REGISTER } from 'src/apis/auth.api'
+import { URL_GOOGLE_LOGIN_WITHOUT_PASSWORDDD, URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN, URl_REGISTER } from 'src/apis/auth.api'
 import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from './utils'
 import { ErrorResponse } from 'src/types/utils.type'
 
@@ -50,7 +50,7 @@ export class Http {
     this.instance.interceptors.response.use(
       (response) => {
         const { url } = response.config
-        if (url === URL_LOGIN || url === URl_REGISTER) {
+        if (url === URL_LOGIN || url === URl_REGISTER || url === URL_GOOGLE_LOGIN_WITHOUT_PASSWORDDD) {
           const data = response.data as AuthResponse
           this.accessToken = data.body.accessToken
           this.refreshToken = data.body.refreshToken
@@ -70,7 +70,7 @@ export class Http {
         ) {
           const data: any | undefined = error.response?.data
           const message = data?.message || error.message
-          toast.error(message)
+          toast.error(message) //=> Khi demo thì xoá đi
         }
 
         if (isAxiosUnauthorizedError<ErrorResponse<{ name: string; message: string }>>(error)) {

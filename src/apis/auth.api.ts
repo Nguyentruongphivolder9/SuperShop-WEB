@@ -1,4 +1,10 @@
-import { AuthResponse, google_Success_Request_Url_Authorization, TypingEmailResponse, WaitingForEmailResponse } from 'src/types/auth.type'
+import {
+  AuthResponse,
+  google_Success_Request_Url_Authorization,
+  RefreshTokenResponse,
+  TypingEmailResponse,
+  WaitingForEmailResponse
+} from 'src/types/auth.type'
 import http from 'src/utils/http'
 import { FormDataRegister, FormWaitingForEmailVerify } from 'src/components/RegisterForms/Registers'
 import { toast } from 'react-toastify'
@@ -6,10 +12,11 @@ import { toast } from 'react-toastify'
 export const URL_LOGIN = 'auth/login'
 export const URl_REGISTER = 'auth/register'
 export const URL_LOGOUT = 'account/account-logout'
-export const URL_REFRESH_TOKEN = 'refresh-access-token'
+export const URL_REFRESH_TOKEN = 'auth/refresh-access-token'
 export const URL_EMAIL_VERIFICATION = 'auth/send-email'
 export const URL_WAITING_FOR_EMAIL_RESPONSE = 'auth/waiting-for-email-response'
 export const URL_GOOGLE_AUTHORIZATION_URL_REQUEST = 'oauth/oauth-2-user/url'
+export const URL_GOOGLE_LOGIN_WITHOUT_PASSWORDDD = 'auth/google-login-without-password'
 export type FinalRegisterForm = {
   email?: string | undefined
   password: string
@@ -17,7 +24,7 @@ export type FinalRegisterForm = {
   full_name: string
   gender: string
   address?: string | undefined
-  phone_number:string
+  phone_number: string
   birth_day: string
 }
 type LogoutRequest = {
@@ -25,8 +32,11 @@ type LogoutRequest = {
 }
 
 const authApi = {
-   requestGoogleAuthorizationUrl() {
-    return http.get<google_Success_Request_Url_Authorization>(`${URL_GOOGLE_AUTHORIZATION_URL_REQUEST}`);
+  googleLoginWithoutPassword(body: { email: string }) {
+    return http.post<AuthResponse>(`${URL_GOOGLE_LOGIN_WITHOUT_PASSWORDDD}`, body)
+  },
+  requestGoogleAuthorizationUrl() {
+    return http.get<google_Success_Request_Url_Authorization>(`${URL_GOOGLE_AUTHORIZATION_URL_REQUEST}`)
   },
   waitingForEmailResponse(body: FormWaitingForEmailVerify) {
     return http.post<WaitingForEmailResponse>(`${URL_WAITING_FOR_EMAIL_RESPONSE}`, body)
@@ -51,7 +61,7 @@ const authApi = {
         Authorization: `Bearer ${token}`
       }
     })
-  }
+  },
 }
 
 export default authApi

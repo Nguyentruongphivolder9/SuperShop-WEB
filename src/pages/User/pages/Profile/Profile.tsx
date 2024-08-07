@@ -1,5 +1,5 @@
-import ModalChanger from 'src/components/AvatarChanger/ModelChanger'
-import { useContext, useState } from 'react';
+import ModalChanger from 'src/components/AvatarChanger/ModelChanger';
+import { useContext, useEffect, useState } from 'react';
 import { AppContext } from 'src/contexts/app.context';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Input from 'src/components/Input';
@@ -13,7 +13,8 @@ const updateUserSchema = userSchema.pick(["user_name", "full_name", "birth_day",
 export default function Profile() {
   const { isAuthenticated, setIsAuthenticated, profile, setProfile } = useContext(AppContext);
   const [closeModal, setCloseModal] = useState<boolean>(true);
-  //Che thông tin Email
+  const [birthDateValue, setBirthDayValue] = useState<Date | null>(new Date());
+
   const handleCutUpEmail = (email?: string): string => {
     if (typeof email === 'string') {
       let result: string = "";
@@ -33,9 +34,8 @@ export default function Profile() {
     } else {
       return "";
     }
-  }
+  };
 
-  //Che thông tin phonenumber
   const handleCutUpPhoneNumber = (phoneNum?: string): string => {
     if (typeof phoneNum === "string") {
       if (phoneNum.length <= 4) {
@@ -47,35 +47,51 @@ export default function Profile() {
     } else {
       return "";
     }
-  }
-
-  //Lấy tuổi của user
-  // const getUserYearsOld = (dateTime: Date): number => {
-
-  // }
+  };
 
   const [userUpdate, setUserUpdate] = useState<FormUserInfoUpdate>({
-    user_name: profile?.userName ? profile.userName : "",
-    full_name: profile?.fullName ? profile.fullName : "",
+    user_name: profile?.userName || "",
+    full_name: profile?.fullName || "",
     gender: profile?.gender === "male" ? "Nam" : "Nữ",
     phone: profile?.phoneNumber ? handleCutUpPhoneNumber(profile.phoneNumber) : "",
     email: profile?.email ? handleCutUpEmail(profile.email) : "",
-    birth_day: new Date(profile?.birthDay ? profile.birthDay : ""),
-  })
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors }
-  } = useForm<FormUserInfoUpdate>({
+    birth_day: profile?.birthDay ? new Date(profile.birthDay) : new Date(),
+  });
+
+  const { register, handleSubmit, watch, setError, formState: { errors } } = useForm<FormUserInfoUpdate>({
     resolver: yupResolver(updateUserSchema),
     defaultValues: userUpdate
   });
 
+  const selectedBirthDay = watch('birth_day');
 
   const updateuserInfo = useMutation({
+    // Định nghĩa hàm cập nhật thông tin người dùng ở đây
+  });
 
-  })
+  const getFormattedDateAndAge = (dateString: string) => {
+    const birthDate = new Date(dateString);
+    if (!isNaN(birthDate.getTime()) && (birthDate.getFullYear() - new Date().getFullYear()) > 0) {
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      return `${birthDate.toLocaleDateString()} (${age})`;
+    }
+    return "_______";
+  };
+
+  const onSubmit = handleSubmit((data) => {
+    console.log(data);
+    // Thực hiện hành động cập nhật thông tin người dùng ở đây
+  });
+
+  useEffect(() => {
+    if (birthDateValue !== null && !isNaN(new Date(birthDateValue).getTime())) {
+      setUserUpdate(prev => ({
+        ...prev,
+        birth_day: birthDateValue
+      }));
+    }
+  }, [birthDateValue]);
 
   return (
     <div className="rounded-lg shadow-md bg-white px-6 py-8 md:px-8 md:py-10">
@@ -85,16 +101,10 @@ export default function Profile() {
       </div>
       <div className="flex flex-col space-y-6 md:flex-row md:space-y-0 md:space-x-6">
         <div className="flex-1 space-y-4">
-          <form className='space-y-4'>
+          <form className='space-y-4' onSubmit={onSubmit}>
             <div>
               <b>Tên đầy đủ</b>
-              <p className='text-sm font-extralight text-red-400'>{
-                profile?.fullNameChanges === 1 ? (
-                  "Số lần thay đổi còn 1"
-                ) : (profile?.fullNameChanges === 2 ? ("Số lần thay đổi tối đa là 2") : (
-                  "Hết lượt thây đổi"
-                ))
-              }</p>
+              <p className='text-sm font-extralight text-red-400'>{profile?.fullNameChanges === 1 ? "Số lần thay đổi còn 1" : (profile?.fullNameChanges === 2 ? "Số lần thay đổi tối đa là 2" : "Hết lượt thay đổi")}</p>
               <Input
                 rightClearButton
                 placeholder="Họ tên đầy đủ của bạn"
@@ -102,12 +112,7 @@ export default function Profile() {
                 register={register}
                 rules={{ required: 'Họ tên đầy đủ là bắt buộc' }}
                 errorMessage={errors.full_name?.message}
-                onChange={(event) => {
-                  setUserUpdate((prev) => ({
-                    ...prev,
-                    full_name: event.target.value,
-                  }));
-                }}
+                onChange={(event) => setUserUpdate(prev => ({ ...prev, full_name: event.target.value }))}
               />
             </div>
             <div>
@@ -120,14 +125,8 @@ export default function Profile() {
                 register={register}
                 rules={{ required: 'Tên tài khoản là bắt buộc' }}
                 errorMessage={errors.user_name?.message}
-                onChange={(event) => {
-                  setUserUpdate((prev) => ({
-                    ...prev,
-                    user_name: event.target.value,
-                  }));
-                }}
+                onChange={(event) => setUserUpdate(prev => ({ ...prev, user_name: event.target.value }))}
               />
-
             </div>
             <div>
               <b>Địa chỉ Email</b>
@@ -138,14 +137,8 @@ export default function Profile() {
                 register={register}
                 rules={{ required: 'Email là bắt buộc' }}
                 errorMessage={errors.email?.message}
-                onChange={(event) => {
-                  setUserUpdate((prev) => ({
-                    ...prev,
-                    email: event.target.value,
-                  }));
-                }}
+                onChange={(event) => setUserUpdate(prev => ({ ...prev, email: event.target.value }))}
               />
-
             </div>
             <div>
               <b>Số điện thoại</b>
@@ -157,12 +150,7 @@ export default function Profile() {
                 register={register}
                 rules={{ required: 'Số điện thoại là bắt buộc' }}
                 errorMessage={errors.phone?.message}
-                onChange={(event) => {
-                  setUserUpdate((prev) => ({
-                    ...prev,
-                    phone: event.target.value,
-                  }));
-                }}
+                onChange={(event) => setUserUpdate(prev => ({ ...prev, phone: event.target.value }))}
               />
             </div>
             <div>
@@ -180,12 +168,21 @@ export default function Profile() {
             <div>
               <b>Ngày sinh</b>
               <Input
-                type='datetime-local'
+                handleSetBirthDateValue={setBirthDayValue}
+                name="birth_day"
+                type='date'
                 register={register}
                 rules={{ required: 'Ngày sinh là bắt buộc' }}
                 errorMessage={errors.birth_day?.message}
               />
+              {selectedBirthDay && new Date(selectedBirthDay).toLocaleDateString()}
             </div>
+            <button
+              className="border-2 border-green-700 py-2 hover:bg-green-200 px-6 text-slate-800 transition-colors duration-200 bg-green-400"
+              type='submit'
+            >
+              Cập nhật thông tin cá nhân
+            </button>
           </form>
         </div>
         <div className="flex-shrink-0 flex items-center">
@@ -220,7 +217,9 @@ export default function Profile() {
                   </div>
                   <div className="flex justify-between items-center">
                     <b className="whitespace-nowrap text-lg">Ngày sinh:</b>
-                    <span className="whitespace-nowrap text-lg">{userUpdate?.birth_day ? new Date(userUpdate.birth_day).toLocaleDateString() + ` (${2024 - new Date(userUpdate.birth_day).getFullYear()})` : "_______"}</span>
+                    <span className="whitespace-nowrap text-lg">
+                      {userUpdate?.birth_day ? getFormattedDateAndAge(userUpdate.birth_day.toLocaleDateString()) : "_______"}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <b className="whitespace-nowrap text-lg">Giới tính:</b>
@@ -229,15 +228,7 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-
-            <button
-              className="border-2 border-black py-2 px-6 rounded-full text-slate-800 transition-colors duration-200 absolute bg-slate-300 bottom-5 left-1/2 transform -translate-x-1/2"
-              type='submit'
-            >
-              Cập nhật
-            </button>
           </div>
-
         </div>
       </div>
       <ModalChanger closeModal={closeModal} handleCloseModal={setCloseModal} />

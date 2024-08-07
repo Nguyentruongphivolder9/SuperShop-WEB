@@ -65,6 +65,16 @@ const ClientRoutes = [
         )
       },
       {
+        path: path.loginMutaion,
+        element: (
+          <RegisterLayout>
+            <Suspense>
+              <Login></Login>
+            </Suspense>
+          </RegisterLayout>
+        )
+      },
+      {
         path: path.register,
         element: (
           <RegisterLayout>
