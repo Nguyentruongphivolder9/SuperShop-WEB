@@ -36,6 +36,7 @@ import VoucherEdit from 'src/pages/Shop/page/VoucherShop/pages/VoucherEdit'
 import { VoucherProvider } from 'src/contexts/voucher.context'
 import ProductEdit from 'src/pages/Shop/page/ProductManagement/ProductEdit'
 import { ProductEditProvider } from 'src/contexts/productEdit.context'
+import Chat from 'src/pages/Chat'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext) //
@@ -233,6 +234,37 @@ const ClientRoutes = [
       <MainLayout>
         <Suspense>
           <Home></Home>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+
+  {
+    path: path.chat,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
+    path: path.conversations,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
+        </Suspense>
+      </MainLayout>
+    )
+  },
+  {
+    path: path.conversationDetail,
+    element: (
+      <MainLayout>
+        <Suspense>
+          <Chat></Chat>
         </Suspense>
       </MainLayout>
     )

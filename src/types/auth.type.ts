@@ -1,15 +1,18 @@
 import { User } from './user.type'
 
 export type AuthResponse = {
-  statusCode: number
-  message: string
   body: {
     accessToken: string
     refreshToken: string
     expireRefreshToken: number
     expires: number
+    secretKey: string
     user: User
   }
+  timeStamp: string
+  message: string
+  statusCode: number
+  status: number
 }
 export type WaitingForEmailResponse = {
   timeStamp: string
@@ -17,7 +20,12 @@ export type WaitingForEmailResponse = {
   message: string
   status: number
 }
-
+export type TypingEmailResponse = {
+  timeStamp: string
+  body: string
+  message: string
+  status: number
+}
 export type RefreshTokenResponse = {
   statusCode: number
   message: string
@@ -28,4 +36,12 @@ export type RefreshTokenResponse = {
     expires: number
     user: User
   }
+}
+export type google_Success_Request_Url_Authorization = {
+  body: {
+    Url: string
+  }
+  status: number
+  statusCode: string
+  timeStamp: string
 }
