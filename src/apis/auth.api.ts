@@ -1,4 +1,9 @@
-import { AuthResponse, google_Success_Request_Url_Authorization, TypingEmailResponse, WaitingForEmailResponse } from 'src/types/auth.type'
+import {
+  AuthResponse,
+  google_Success_Request_Url_Authorization,
+  TypingEmailResponse,
+  WaitingForEmailResponse
+} from 'src/types/auth.type'
 import http from 'src/utils/http'
 import { FormDataRegister, FormWaitingForEmailVerify } from 'src/components/RegisterForms/Registers'
 import { toast } from 'react-toastify'
@@ -9,30 +14,16 @@ export const URL_LOGOUT = 'account/account-logout'
 export const URL_REFRESH_TOKEN = 'refresh-access-token'
 export const URL_EMAIL_VERIFICATION = 'auth/send-email'
 export const URL_WAITING_FOR_EMAIL_RESPONSE = 'auth/waiting-for-email-response'
-export const URL_GOOGLE_AUTHORIZATION_URL_REQUEST = 'oauth/oauth-2-user/url'
-export type FinalRegisterForm = {
-  email?: string | undefined
-  password: string
-  user_name: string
-  full_name: string
-  phone: string
-  gender: string
-  address?: string | undefined
-  birth_day: string
-}
 type LogoutRequest = {
   email: string
 }
 
 const authApi = {
-   requestGoogleAuthorizationUrl() {
-    return http.get<google_Success_Request_Url_Authorization>(`${URL_GOOGLE_AUTHORIZATION_URL_REQUEST}`);
-  },
-  waitingForEmailResponse(body: FormWaitingForEmailVerify) {
+  waitingForEmailResponse(body: { email: string }) {
     return http.post<WaitingForEmailResponse>(`${URL_WAITING_FOR_EMAIL_RESPONSE}`, body)
   },
   verifyEmail(body: { email: string }) {
-    return http.post<TypingEmailResponse>(`${URL_EMAIL_VERIFICATION}`, body)
+    return http.post<AuthResponse>(`${URL_EMAIL_VERIFICATION}`, body)
   },
   registerAccount(body: FinalRegisterForm) {
     return http.post<AuthResponse>(`${URl_REGISTER}`, body)
@@ -48,7 +39,7 @@ const authApi = {
     }
     return http.post<AuthResponse>(`${URL_LOGOUT}`, body, {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       }
     })
   }
