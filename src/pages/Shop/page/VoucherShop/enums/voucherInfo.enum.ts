@@ -7,7 +7,7 @@ enum StatusVoucher {
 enum VoucherType {
   GLOBAL = 'global',
   SHOP = 'shop',
-  SHIPPING = 'shopping'
+  SHIPPING = 'shipping'
 }
 
 enum DiscountType {

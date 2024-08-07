@@ -7,6 +7,9 @@ import { useQuery } from '@tanstack/react-query'
 import { CategoryResponse } from 'src/types/category.type'
 import config from 'src/constants/config'
 import ContainerModal from 'src/components/ContainerModal'
+import { CartItemResponse } from 'src/types/cart.type'
+import cartApi from 'src/apis/cart.api'
+import { Pagination } from 'src/types/utils.type'
 
 interface AppContextInterface {
   isAuthenticated: boolean
@@ -20,6 +23,8 @@ interface AppContextInterface {
   reset: () => void
   setIsModal: React.Dispatch<React.SetStateAction<boolean | false>>
   setChildrenModal: React.Dispatch<React.SetStateAction<React.ReactNode | null>>
+  cartItems: Pagination<CartItemResponse[]> | null
+  setCartItems: React.Dispatch<React.SetStateAction<Pagination<CartItemResponse[]> | null>>
 }
 
 // interface ChildrenProp {
@@ -37,7 +42,9 @@ const initialAppContext: AppContextInterface = {
   setExtendedPurchase: () => null,
   reset: () => null,
   setChildrenModal: () => null,
-  setIsModal: () => null
+  setIsModal: () => null,
+  cartItems: null,
+  setCartItems: () => null
 }
 
 export const AppContext = createContext<AppContextInterface>(initialAppContext)
@@ -48,6 +55,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [categories, setCategories] = useState<CategoryResponse[] | null>(initialAppContext.categories)
   const [isModal, setIsModal] = useState<boolean>(false)
   const [childrenModal, setChildrenModal] = useState<React.ReactNode>(null)
+  const [cartItems, setCartItems] = useState<Pagination<CartItemResponse[]> | null>(initialAppContext.cartItems)
 
   const reset = () => {
     setIsAuthenticated(false)
@@ -61,9 +69,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     enabled: isAuthenticated
   })
 
+  const { data: listCartData } = useQuery({
+    queryKey: [config.GET_LIST_CART_QUERY_KEY],
+    queryFn: () => cartApi.getListCart(),
+    enabled: isAuthenticated
+  })
+
   useEffect(() => {
     setCategories(categoriesData?.data.body as CategoryResponse[])
-  }, [categoriesData])
+    setCartItems(listCartData?.data.body as Pagination<CartItemResponse[]>)
+  }, [categoriesData, listCartData])
 
   return (
     <AppContext.Provider
@@ -78,7 +93,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setExtendedPurchase,
         reset,
         setChildrenModal,
-        setIsModal
+        setIsModal,
+        cartItems,
+        setCartItems
       }}
     >
       {isModal && <ContainerModal>{childrenModal}</ContainerModal>}

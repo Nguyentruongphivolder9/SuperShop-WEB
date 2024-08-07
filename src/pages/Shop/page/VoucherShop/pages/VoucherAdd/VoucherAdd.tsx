@@ -1,6 +1,6 @@
 /* eslint-disable import/namespace */
 import { useContext, useEffect, useState } from 'react'
-import { format, addHours, addMinutes, getTime, getYear, getMonth } from 'date-fns'
+import { format, addHours, addMinutes, getTime, getYear, getMonth, getHours, getMinutes } from 'date-fns'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 /* eslint-disable jsx-a11y/label-has-associated-control */
@@ -53,7 +53,6 @@ export default function VoucherAdd() {
   const [startDate, setStartDate] = useState(addMinutes(new Date(), 10))
   const [endDate, setEndDate] = useState(addHours(addMinutes(new Date(), 10), 1))
   const queryParams: { voucherType?: string; edit?: string } = useQueryParams()
-  const { edit: idUpdate } = queryParams
   const {
     control,
     register,
@@ -74,7 +73,7 @@ export default function VoucherAdd() {
       startDate: startDate,
       endDate: endDate
     },
-    mode: 'onBlur',
+    mode: 'onChange',
     resolver: yupResolver(voucherShema)
   })
 
@@ -89,6 +88,7 @@ export default function VoucherAdd() {
     try {
       const res = await createVoucherMutaion.mutateAsync({
         ...data,
+        code: `${profile?.userName.slice(0, 5)}${data.code}`.toUpperCase(),
         startDate: GMTToLocalStingTime(data.startDate),
         endDate: GMTToLocalStingTime(data.endDate)
       })
@@ -97,9 +97,6 @@ export default function VoucherAdd() {
       console.log(error)
     }
   })
-
-  console.log('watch', watch())
-  console.log('error', errors)
 
   return (
     <div className='w-full'>
@@ -158,7 +155,7 @@ export default function VoucherAdd() {
                         className=' flex-grow flex-1 h-[30px] outline-none'
                         maxLength={100}
                       />
-                      <div className='pl-2 text-gray-400'>{getValues('name').length}/100</div>
+                      <div className='pl-2 text-gray-400'>{watch('name').length}/100</div>
                     </div>
                     <p className='text-red-500 text-xs'>{errors.name?.message}</p>
                     <p className='text-gray-400 text-xs'>Voucher name is not visible to buyers</p>
@@ -201,7 +198,7 @@ export default function VoucherAdd() {
                       <p>
                         Your complete voucher code is:{' '}
                         <span className='uppercase'>{profile?.userName.slice(0, 4)}</span>
-                        {getValues('code').toUpperCase()}
+                        {watch('code').toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -235,7 +232,6 @@ export default function VoucherAdd() {
                               }
                               onChange={(event) => {
                                 field.onChange(event)
-                                trigger('endDate')
                               }}
                               onBlur={field.onBlur}
                               selected={field.value ?? startDate}
@@ -258,6 +254,7 @@ export default function VoucherAdd() {
                               }) => (
                                 <div className='m-[10px] flex gap-2 justify-center'>
                                   <button
+                                    type='button'
                                     className='text-lg'
                                     onClick={decreaseMonth}
                                     disabled={prevMonthButtonDisabled}
@@ -289,6 +286,7 @@ export default function VoucherAdd() {
                                   </select>
 
                                   <button
+                                    type='button'
                                     className='text-lg'
                                     onClick={increaseMonth}
                                     disabled={nextMonthButtonDisabled}
@@ -349,6 +347,7 @@ export default function VoucherAdd() {
                               }) => (
                                 <div className='m-[10px] flex gap-2 justify-center'>
                                   <button
+                                    type='button'
                                     className='text-lg'
                                     onClick={decreaseMonth}
                                     disabled={prevMonthButtonDisabled}
@@ -380,6 +379,7 @@ export default function VoucherAdd() {
                                   </select>
 
                                   <button
+                                    type='button'
                                     className='text-lg'
                                     onClick={increaseMonth}
                                     disabled={nextMonthButtonDisabled}
@@ -442,10 +442,13 @@ export default function VoucherAdd() {
                       {getValues('discountType') === 'fixed' ? (
                         <div className='h-full w-full'>
                           <div
-                            className={classNames('relative flex items-center h-full w-full px-3 border ', {
-                              ' boder-gray-200 hover:border-gray-400': !errors.fixedAmount?.message,
-                              'border-red-300': errors.fixedAmount?.message
-                            })}
+                            className={classNames(
+                              'relative flex items-center h-full w-full px-3 border has-[:focus]:border-gray-400',
+                              {
+                                ' boder-gray-200 hover:border-gray-400': !errors.fixedAmount?.message,
+                                'border-red-300': errors.fixedAmount?.message
+                              }
+                            )}
                           >
                             <div className='text-sm text-gray-300'>₫</div>
                             <div className='h-4 w-[1px] mx-2 bg-gray-300'></div>
@@ -460,10 +463,13 @@ export default function VoucherAdd() {
                       ) : (
                         <div className='h-full w-full'>
                           <div
-                            className={classNames('relative flex items-center h-full w-full px-3 border ', {
-                              'boder-gray-200 hover:border-gray-400': !errors.percentageAmount?.message,
-                              'border-red-300': errors.percentageAmount?.message
-                            })}
+                            className={classNames(
+                              'relative flex items-center h-full w-full px-3 border has-[:focus]:border-gray-400',
+                              {
+                                'boder-gray-200 hover:border-gray-400': !errors.percentageAmount?.message,
+                                'border-red-300': errors.percentageAmount?.message
+                              }
+                            )}
                           >
                             <input
                               type='text'
@@ -534,7 +540,7 @@ export default function VoucherAdd() {
                         <div>
                           <div
                             className={classNames(
-                              'flex items-center px-3 mt-2 bg-white border text-sm rounded transition-colors',
+                              'flex items-center px-3 mt-2 bg-white border text-sm rounded transition-colors has-[:focus]:border-gray-400',
                               {
                                 'boder-gray-200 hover:border-gray-400': !errors.maximumDiscount?.message,
                                 'border-red-300': errors.maximumDiscount?.message
@@ -565,10 +571,13 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'boder-gray-200 hover:border-gray-400': !errors.minimumTotalOrder?.message,
-                        'border-red-300': errors.minimumTotalOrder?.message
-                      })}
+                      className={classNames(
+                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        {
+                          'boder-gray-200 hover:border-gray-400': !errors.minimumTotalOrder?.message,
+                          'border-red-300': errors.minimumTotalOrder?.message
+                        }
+                      )}
                     >
                       <div className='pr-2 text-sm uppercase text-gray-400'>₫</div>
                       <div className='h-4 w-[1px] bg-gray-300'></div>
@@ -591,16 +600,15 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
-                        'border-red-300': errors.quantity?.message
-                      })}
+                      className={classNames(
+                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        {
+                          'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
+                          'border-red-300': errors.quantity?.message
+                        }
+                      )}
                     >
-                      <input
-                        type='number'
-                        {...register('quantity')}
-                        className=' flex-grow flex-1 h-[30px] outline-none '
-                      />
+                      <input type='text' {...register('quantity')} className='flex-grow flex-1 h-[30px] outline-none' />
                     </div>
                     <div className='text-sm text-gray-400'>
                       <p className='text-red-500 text-xs'>{errors.quantity?.message}</p>
@@ -616,10 +624,13 @@ export default function VoucherAdd() {
                   </div>
                   <div className='col-span-9'>
                     <div
-                      className={classNames('flex items-center px-3 bg-white border text-sm rounded', {
-                        'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
-                        'border-red-300': errors.quantity?.message
-                      })}
+                      className={classNames(
+                        'flex items-center px-3 bg-white border text-sm rounded has-[:focus]:border-gray-400',
+                        {
+                          'boder-gray-200 hover:border-gray-400': !errors.quantity?.message,
+                          'border-red-300': errors.quantity?.message
+                        }
+                      )}
                     >
                       <input
                         type='text'
