@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import BoxData from 'src/pages/Shop/components/BoxData'
-import 'react-datepicker/dist/react-datepicker.css'
+import ChartBar from '../../components/ChartBar'
 
 export default function AdvertiseManagement() {
   return (
@@ -26,36 +26,64 @@ export default function AdvertiseManagement() {
           </div>
         </div>
       </div>
+      <div className='flex p-2'>
+        <div></div>
+        <button
+          type='button'
+          className=' py-2.5 px-3 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-inheritance rounded-lg border border-black hover:bg-green-400 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700'
+        >
+          Export Data
+        </button>
+      </div>
       <div className='flex justify-between'>
-        <h2 className='text-xl font-bold tracking-tight text-black p-2  '> All Ads Performance : </h2>
-        <div className='flex p-2'>
-          <div></div>
-          <button
-            type='button'
-            className='py-2.5 px-3 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-inheritance rounded-lg border border-black hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700'
-          >
-            Export Data
-          </button>
-        </div>
+        <h2 className='text-xl font-bold tracking-tight text-black p-2  '> Actual statistics: : </h2>
       </div>
       <div className='flex justify-between py-4 sm:py-4'>
         <div>
           {' '}
-          <BoxData title={'Impressions '} number={23} />
+          <BoxData title={'Clicks '} number={23} />
         </div>
         <div>
           {' '}
-          <BoxData title={'Clicks'} number={23} />
+          <BoxData title={'New Follower'} number={23} />
         </div>
         <div>
           {' '}
-          <BoxData title={'CTR'} number={23} />
+          <BoxData title={'Revenue'} number={23} />
         </div>
         <div>
           {' '}
-          <BoxData title={'Expense '} number={23} />
+          <BoxData title={'Cost ADS'} number={23} />
+        </div>
+        <div>
+          {' '}
+          <BoxData title={'Search'} number={23} />
         </div>
       </div>
+      <h2 className='text-xl font-bold tracking-tight text-black p-2  '> Estimated statistics: </h2>
+      <div className='flex justify-between py-4 sm:py-4'>
+        <div>
+          {' '}
+          <BoxData title={'Clicks '} number={23} />
+        </div>
+        <div>
+          {' '}
+          <BoxData title={'New Follower'} number={23} />
+        </div>
+        <div>
+          {' '}
+          <BoxData title={'Revenue'} number={23} />
+        </div>
+        <div>
+          {' '}
+          <BoxData title={'Cost ADS'} number={23} />
+        </div>
+        <div>
+          {' '}
+          <BoxData title={'Search'} number={23} />
+        </div>
+      </div>
+      <ChartBar />
       <h2 className='text-xl font-bold tracking-tight text-black p-2 px-5 '> All Ads List : </h2>
       <div className=' p-4 px-5 mb-3 '>
         <form>
