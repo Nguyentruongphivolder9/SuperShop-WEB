@@ -37,6 +37,12 @@ import { VoucherProvider } from 'src/contexts/voucher.context'
 import ProductEdit from 'src/pages/Shop/page/ProductManagement/ProductEdit'
 import { ProductEditProvider } from 'src/contexts/productEdit.context'
 import Chat from 'src/pages/Chat'
+import ChatLayout from 'src/layouts/ChatLayout'
+import UsersLayout from 'src/pages/Chat/layouts/UsersLayout'
+import Users from 'src/pages/Chat/pages/Users'
+import ConversationsLayout from 'src/pages/Chat/layouts/ConversationsLayout/ConversationsLayout'
+import Conversations from 'src/pages/Chat/pages/Conversations'
+import ConversationDetail from 'src/pages/Chat/pages/ConversationDetail'
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext) //
@@ -83,6 +89,48 @@ const ClientRoutes = [
     element: <ProtectedRoute />,
     children: [
       cartRouter,
+      {
+        path: path.chat,
+        element: (
+          <ChatLayout>
+            <UsersLayout>
+              <Suspense>
+                <Users></Users>
+              </Suspense>
+            </UsersLayout>
+          </ChatLayout>
+        ),
+        children: [
+          {
+            path: path.conversations,
+            element: (
+              <ChatLayout>
+                <UsersLayout>
+                  <ConversationsLayout>
+                    <Suspense>
+                      <Conversations></Conversations>
+                    </Suspense>
+                  </ConversationsLayout>
+                </UsersLayout>
+              </ChatLayout>
+            )
+          },
+          {
+            path: path.conversationDetail,
+            element: (
+              <ChatLayout>
+                <UsersLayout>
+                  <ConversationsLayout>
+                    <Suspense>
+                      <ConversationDetail></ConversationDetail>
+                    </Suspense>
+                  </ConversationsLayout>
+                </UsersLayout>
+              </ChatLayout>
+            )
+          }
+        ]
+      },
       {
         path: path.user, // localhoas//user
         element: (
@@ -242,31 +290,31 @@ const ClientRoutes = [
   {
     path: path.chat,
     element: (
-      <MainLayout>
+      <ChatLayout>
         <Suspense>
           <Chat></Chat>
         </Suspense>
-      </MainLayout>
+      </ChatLayout>
     )
   },
   {
     path: path.conversations,
     element: (
-      <MainLayout>
+      <ChatLayout>
         <Suspense>
           <Chat></Chat>
         </Suspense>
-      </MainLayout>
+      </ChatLayout>
     )
   },
   {
     path: path.conversationDetail,
     element: (
-      <MainLayout>
+      <ChatLayout>
         <Suspense>
           <Chat></Chat>
         </Suspense>
-      </MainLayout>
+      </ChatLayout>
     )
   },
   {
