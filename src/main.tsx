@@ -27,17 +27,17 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <ErrorBoundary>
-          <MantineProvider theme={theme}>
-            <App />
-          </MantineProvider>
-        </ErrorBoundary>
-      </AppProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  </BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <ErrorBoundary>
+            <MantineProvider theme={theme}>
+              <App />
+            </MantineProvider>
+          </ErrorBoundary>
+        </AppProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </BrowserRouter>
   // </React.StrictMode>
 )
